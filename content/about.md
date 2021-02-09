@@ -1,7 +1,7 @@
-+++
-title = "about"
-+++
-
+---
+title: "about"
+url: "/about/"
+---
 
 Howdy, you can call me Chris!
 
