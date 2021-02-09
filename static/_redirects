@@ -1,5 +1,6 @@
 # Redirects file
 
+/blog/        /archive/             301
 /contact      /about/               301
 /category/*   /categories/:splat    301
 /tags/        /archive/             301
@@ -9,6 +10,5 @@
 /projects     /archive/             301
 /projects/*   /archive/             301
 /*            /blog/:splat          301
-/blog/        /archive/             301
 
 
