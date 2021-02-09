@@ -20,10 +20,10 @@ menu:
           name: news
           url: /news/
           weight: 10
-        - identifier: blog
-          name: blog
-          url: /blog/
-          weight: 15          
+        # - identifier: blog
+        #   name: blog
+        #   url: /blog/
+        #   weight: 15          
           
           
 params: 
