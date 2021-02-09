@@ -1,0 +1,131 @@
+---
+title: R script for the CausalImpact package
+author: Christopher Yee
+date: '2020-05-19'
+slug: r-script-for-the-causalimpact-package
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Google has an amazing <a href="https://twitter.com/search?q=%23rstats">#rstats</a> package called <a href="https://google.github.io/CausalImpact/CausalImpact.html">CausalImpact</a> to predict the counterfactual: what would have happened if an intervention did <strong>not</strong> occur.</p>
+<p>This is a quick technical post to get someone up and running rather than a review of its literature, usage, or idiosyncrasies</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(CausalImpact)</code></pre>
+</div>
+<div id="download-dummy-data" class="section level2">
+<h2>Download (dummy) data</h2>
+<pre class="r"><code>df &lt;- read_csv(&quot;https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/cimpact_sample_data.csv&quot;)
+
+df %&gt;% sample_n(5)</code></pre>
+<pre><code>## # A tibble: 5 x 3
+##   date       experiment_type revenue
+##   &lt;date&gt;     &lt;chr&gt;             &lt;dbl&gt;
+## 1 2020-04-02 control           309. 
+## 2 2020-05-05 experiment        257. 
+## 3 2020-02-29 control           928. 
+## 4 2020-03-13 control           467. 
+## 5 2020-03-02 experiment         35.0</code></pre>
+</div>
+<div id="shape-data" class="section level2">
+<h2>Shape data</h2>
+<p>Before we can run our analysis, the CausalImpact package requires three columns:</p>
+<ul>
+<li>Date (YYYY-MM-DD)</li>
+<li>Response/Treatment</li>
+<li>Control</li>
+</ul>
+<p>If your data is already structured in the above format then feel free to skip to the next section.</p>
+<p>Otherwise, we need to massage our (dummy) data frame from a long to wide format.</p>
+<pre class="r"><code>df_clean &lt;- df %&gt;%
+  dplyr::select(date, experiment_type, revenue) %&gt;%
+  pivot_wider(names_from = &quot;experiment_type&quot;,
+              values_from = &quot;revenue&quot;) %&gt;%
+  dplyr::select(date, experiment, control)</code></pre>
+<p>And a quick spot check:</p>
+<pre class="r"><code>df_clean %&gt;% 
+  arrange(date) %&gt;% 
+  head()</code></pre>
+<pre><code>## # A tibble: 6 x 3
+##   date       experiment control
+##   &lt;date&gt;          &lt;dbl&gt;   &lt;dbl&gt;
+## 1 2020-02-27       21.3    235.
+## 2 2020-02-28        0      407.
+## 3 2020-02-29        0      928.
+## 4 2020-03-01       32.7    535.
+## 5 2020-03-02       35.0    664.
+## 6 2020-03-03       17.5    581.</code></pre>
+</div>
+<div id="set-parameters" class="section level2">
+<h2>Set parameters</h2>
+<p>The code below will:</p>
+<ul>
+<li>Set the intervention start date</li>
+<li>How many days forward/backward to compare from start date (I suggest full 7-day weeks)</li>
+<li>Construct appropriate date variables</li>
+</ul>
+<pre class="r"><code>test_date &lt;- as.Date(&quot;2020-04-23&quot;)
+
+test_length &lt;- 21
+
+pre &lt;- c(test_date-(test_length+1), test_date-1)
+post &lt;- c(test_date, (test_date+test_length))</code></pre>
+<p>Let’s also make sure our date differences are correct:</p>
+<pre class="r"><code>pre[2]-pre[1]</code></pre>
+<pre><code>## Time difference of 21 days</code></pre>
+<p>And the post period?</p>
+<pre class="r"><code>post[2]-post[1]</code></pre>
+<pre><code>## Time difference of 21 days</code></pre>
+<p>Good to go!</p>
+</div>
+<div id="run-causal-impact-analysis" class="section level2">
+<h2>Run causal impact analysis</h2>
+<pre class="r"><code>df_impact &lt;- CausalImpact(df_clean, pre, post)</code></pre>
+</div>
+<div id="plot-results" class="section level2">
+<h2>Plot results</h2>
+<pre class="r"><code>plot(df_impact)</code></pre>
+<p><img src="/blog/2020-05-19-r-script-for-the-causalimpact-package_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+</div>
+<div id="analysis-summary" class="section level2">
+<h2>Analysis summary</h2>
+<pre class="r"><code>summary(df_impact)</code></pre>
+<pre><code>## Posterior inference {CausalImpact}
+## 
+##                          Average        Cumulative  
+## Actual                   62             1371        
+## Prediction (s.d.)        13 (5.8)       288 (127.3) 
+## 95% CI                   [1.7, 24]      [37.0, 537] 
+##                                                     
+## Absolute effect (s.d.)   49 (5.8)       1083 (127.3)
+## 95% CI                   [38, 61]       [834, 1334] 
+##                                                     
+## Relative effect (s.d.)   376% (44%)     376% (44%)  
+## 95% CI                   [289%, 463%]   [289%, 463%]
+## 
+## Posterior tail-area probability p:   0.00101
+## Posterior prob. of a causal effect:  99.89909%
+## 
+## For more details, type: summary(impact, &quot;report&quot;)</code></pre>
+</div>
+<div id="detailed-analysis" class="section level2">
+<h2>Detailed analysis</h2>
+<pre class="r"><code>summary(df_impact, &quot;report&quot;)</code></pre>
+<pre><code>## Analysis report {CausalImpact}
+## 
+## 
+## During the post-intervention period, the response variable had an average value of approx. 62.33. By contrast, in the absence of an intervention, we would have expected an average response of 13.10. The 95% interval of this counterfactual prediction is [1.68, 24.43]. Subtracting this prediction from the observed response yields an estimate of the causal effect the intervention had on the response variable. This effect is 49.24 with a 95% interval of [37.90, 60.65]. For a discussion of the significance of this effect, see below.
+## 
+## Summing up the individual data points during the post-intervention period (which can only sometimes be meaningfully interpreted), the response variable had an overall value of 1.37K. By contrast, had the intervention not taken place, we would have expected a sum of 0.29K. The 95% interval of this prediction is [0.04K, 0.54K].
+## 
+## The above results are given in terms of absolute numbers. In relative terms, the response variable showed an increase of +376%. The 95% interval of this percentage is [+289%, +463%].
+## 
+## This means that the positive effect observed during the intervention period is statistically significant and unlikely to be due to random fluctuations. It should be noted, however, that the question of whether this increase also bears substantive significance can only be answered by comparing the absolute effect (49.24) to the original goal of the underlying intervention.
+## 
+## The probability of obtaining this effect by chance is very small (Bayesian one-sided tail-area probability p = 0.001). This means the causal effect can be considered statistically significant.</code></pre>
+</div>

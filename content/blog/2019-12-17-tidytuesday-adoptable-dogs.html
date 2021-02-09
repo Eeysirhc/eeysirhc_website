@@ -1,0 +1,92 @@
+---
+title: 'TidyTuesday: Adoptable Dogs'
+author: Christopher Yee
+date: '2019-12-17'
+slug: tidytuesday-adoptable-dogs
+categories:
+  - TidyTuesday
+---
+
+
+
+<p>Data from <a href="https://twitter.com/search?q=%23tidytuesday">#tidytuesday</a> week of 2019-12-17 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-12-17">source</a>)</p>
+<p>Quick post to showcase the amazing <a href="https://rstudio.github.io/reticulate/">{reticulate}</a> package which has made my life so much easier! Who said you had to choose between R vs Python?</p>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<pre class="r"><code>library(tidyverse)
+library(reticulate)</code></pre>
+</div>
+<div id="r-then-python" class="section level1">
+<h1>R then Python</h1>
+<div id="grab-and-parse-data" class="section level2">
+<h2>Grab and parse data</h2>
+<pre class="r"><code>df_rdata &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-17/dog_moves.csv&quot;)
+
+df_rdata &lt;- df_rdata %&gt;% 
+  filter(inUS == &#39;TRUE&#39;) %&gt;%
+  select(location, total)
+
+df_rdata %&gt;% head()</code></pre>
+<pre><code>## # A tibble: 6 x 2
+##   location       total
+##   &lt;chr&gt;          &lt;dbl&gt;
+## 1 Texas            566
+## 2 Alabama         1428
+## 3 North Carolina  2627
+## 4 South Carolina  1618
+## 5 Georgia         3479
+## 6 California      1664</code></pre>
+</div>
+<div id="plot-data" class="section level2">
+<h2>Plot data</h2>
+<pre class="python"><code>import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# note the r. before the df_rdata value
+fig = sns.barplot(x=&quot;total&quot;, y=&quot;location&quot;, data=r.df_rdata, orient=&quot;h&quot;)
+
+plt.xlabel(&quot;Adoptable Dogs Available&quot;)
+plt.ylabel(&quot;&quot;)
+plt.figtext(0.9, 0.03, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.01, &quot;source: The Pudding&quot;, horizontalalignment=&quot;right&quot;)
+plt.show(fig)</code></pre>
+<p><img src="/blog/2019-12-17-tidytuesday-adoptable-dogs_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+</div>
+<div id="python-then-r" class="section level1">
+<h1>Python then R</h1>
+<div id="grab-and-parse-data-1" class="section level2">
+<h2>Grab and parse data</h2>
+<pre class="python"><code>import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+df_pydata = pd.read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-12-17/dog_moves.csv&quot;, sep=&#39;,&#39;, error_bad_lines=False, index_col=False, dtype=&#39;unicode&#39;)
+
+df_pydata = df_pydata[df_pydata[&#39;inUS&#39;]==&#39;TRUE&#39;]
+df_pydata = df_pydata[[&#39;location&#39;, &#39;total&#39;]]
+df_pydata.total = pd.to_numeric(df_pydata.total)
+
+df_pydata.head()</code></pre>
+<pre><code>##          location  total
+## 0           Texas    566
+## 1         Alabama   1428
+## 2  North Carolina   2627
+## 3  South Carolina   1618
+## 4         Georgia   3479</code></pre>
+</div>
+<div id="plot-data-1" class="section level2">
+<h2>Plot data</h2>
+<pre class="r"><code># note the py$ before the df_pydata
+py$df_pydata %&gt;% 
+  ggplot(aes(location, total, fill = location)) +
+  geom_col() +
+  coord_flip() +
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs(x = NULL, y = &quot;Adoptable Dogs Available&quot;, caption = &quot;by: @eeysirhc\nsource: The Pudding&quot;) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2019-12-17-tidytuesday-adoptable-dogs_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+</div>

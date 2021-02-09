@@ -1,0 +1,146 @@
+---
+title: 'TidyTuesday: Cocktails pt.2'
+author: Christopher Yee
+date: '2020-05-28'
+slug: tidytuesday-cocktails-pt-2
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>This is part 2 of <a href="https://www.christopheryee.org/blog/tidytuesday-cocktails/">TidyTuesday: Cocktails</a>.</p>
+<p>Below shows how we can use <a href="https://twitter.com/hashtag/rstats">#rstats</a> to write a cocktail recommendation system that takes in a drink and returns a few other cocktails based on similarly mixed ingredients.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(recommenderlab)</code></pre>
+</div>
+<div id="download-and-parse-data" class="section level2">
+<h2>Download and parse data</h2>
+<blockquote>
+<p>Note: please check out part 1 for deatils on processing steps</p>
+</blockquote>
+<pre class="r"><code>bc_raw &lt;- read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv&#39;)
+
+bc &lt;- bc_raw %&gt;% 
+  mutate(ingredient = str_to_lower(ingredient)) %&gt;% 
+  distinct() %&gt;% 
+  select(name, ingredient)
+
+bc_tidy &lt;- bc %&gt;% 
+  filter(!str_detect(ingredient, &quot;,&quot;))
+
+bc_untidy &lt;- bc %&gt;% 
+  filter(str_detect(ingredient, &quot;,&quot;)) %&gt;% 
+  mutate(ingredient = str_split(ingredient, &quot;, &quot;)) %&gt;% 
+  unnest(ingredient)
+
+bc_clean &lt;- rbind(bc_tidy, bc_untidy) %&gt;% 
+  distinct()
+
+df &lt;- bc_clean %&gt;% 
+  mutate(ingredient = str_replace_all(ingredient, &quot;-&quot;, &quot;_&quot;),
+         ingredient = str_replace_all(ingredient, &quot; &quot;, &quot;_&quot;),
+         ingredient = str_replace_all(ingredient, &quot;old_mr._boston_&quot;, &quot;&quot;),
+         ingredient = str_replace_all(ingredient, &quot;old_thompson_&quot;, &quot;&quot;)) 
+
+df_processed &lt;- df %&gt;% 
+  mutate(value = 1) %&gt;% 
+  pivot_wider(names_from = name) %&gt;% 
+  replace(is.na(.), 0)</code></pre>
+</div>
+<div id="recommendation-algorithm" class="section level2">
+<h2>Recommendation algorithm</h2>
+<div id="transform-data-to-binary-rating-matrix" class="section level3">
+<h3>Transform data to binary rating matrix</h3>
+<pre class="r"><code>cocktails_matrix &lt;- df_processed %&gt;% 
+  select(-ingredient) %&gt;% 
+  as.matrix() %&gt;% 
+  as(&quot;binaryRatingMatrix&quot;)</code></pre>
+</div>
+<div id="create-evaluation-scheme" class="section level3">
+<h3>Create evaluation scheme</h3>
+<pre class="r"><code>scheme &lt;- cocktails_matrix %&gt;% 
+  evaluationScheme(method = &quot;cross&quot;, k = 5, train = 0.8, given = -1)</code></pre>
+</div>
+<div id="input-customer-cocktail-preference" class="section level3">
+<h3>Input customer cocktail preference</h3>
+<p>Let’s check the ingredients for a very simple cocktail:</p>
+<pre class="r"><code>df %&gt;% filter(name == &#39;Screwdriver&#39;)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   name        ingredient  
+##   &lt;chr&gt;       &lt;chr&gt;       
+## 1 Screwdriver vodka       
+## 2 Screwdriver orange_juice</code></pre>
+<p>Perfect. We can now use our recommendation model and predict what cocktail the customer might like based on similarly mixed ingredients.</p>
+<pre class="r"><code>favorite_cocktail &lt;- &quot;Screwdriver&quot;
+
+recco_matrix &lt;- df %&gt;% 
+  select(name) %&gt;% 
+  unique() %&gt;% 
+  mutate(value = as.numeric(name %in% favorite_cocktail)) %&gt;%
+  pivot_wider(names_from = name) %&gt;% 
+  replace(is.na(.), 0) %&gt;% 
+  as.matrix() %&gt;% 
+  as(&quot;binaryRatingMatrix&quot;)
+
+recco &lt;- Recommender(getData(scheme, &#39;train&#39;), 
+                      method = &quot;IBCF&quot;,  
+                      param = list(k = 5))
+
+cocktails_predict &lt;- predict(recco, newdata = recco_matrix, n = 5)</code></pre>
+</div>
+<div id="cocktail-recommendation-output" class="section level3">
+<h3>Cocktail recommendation output</h3>
+<pre class="r"><code>cocktails_results &lt;- as(cocktails_predict, &#39;list&#39;) %&gt;% as_tibble()
+
+cocktails_results</code></pre>
+<pre><code>## # A tibble: 5 x 1
+##   `1`               
+##   &lt;chr&gt;             
+## 1 Handball Cooler   
+## 2 Top Banana        
+## 3 Madras            
+## 4 Creamy Screwdriver
+## 5 Petit Zinc</code></pre>
+<p>Finally, let’s make sure our results have at least <em>vodka</em> or <em>orange juice</em> as their ingredients for the recommended cocktails:</p>
+<pre class="r"><code>df %&gt;% 
+  filter(name %in% cocktails_results$`1`) </code></pre>
+<pre><code>## # A tibble: 16 x 2
+##    name               ingredient     
+##    &lt;chr&gt;              &lt;chr&gt;          
+##  1 Top Banana         vodka          
+##  2 Top Banana         creme_de_banana
+##  3 Top Banana         orange_juice   
+##  4 Creamy Screwdriver vodka          
+##  5 Creamy Screwdriver egg_yolk       
+##  6 Creamy Screwdriver orange_juice   
+##  7 Creamy Screwdriver sugar          
+##  8 Petit Zinc         vodka          
+##  9 Petit Zinc         triple_sec     
+## 10 Petit Zinc         sweet_vermouth 
+## 11 Petit Zinc         orange_juice   
+## 12 Madras             vodka          
+## 13 Madras             cranberry_juice
+## 14 Madras             orange_juice   
+## 15 Handball Cooler    vodka          
+## 16 Handball Cooler    orange_juice</code></pre>
+<p>Not bad at all!</p>
+</div>
+</div>
+<div id="out-of-scope" class="section level2">
+<h2>Out of scope</h2>
+<ul>
+<li>Model evaluaiton</li>
+<li>Dynamic web app built in Shiny</li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><a href="https://towardsdatascience.com/market-basket-analysis-with-recommenderlab-5e8bdc0de236">Market basket analysis with recommenderlab</a></li>
+</ul>
+</div>

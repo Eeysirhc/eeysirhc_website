@@ -1,0 +1,138 @@
+---
+title: Connect R to Amazon Redshift Database
+author: Christopher Yee
+date: '2019-10-24'
+slug: connect-r-to-amazon-redshift-database
+categories:
+  - Data Engineering
+---
+
+This is a quick technical post for anyone who needs full [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) capabilities to retrieve their data from a Redshift table, manipulate data in [#rstats](https://twitter.com/search?q=%23rstats) and sending it all back up again.
+
+
+## Dependencies
+
+### Load libraries
+```{r eval=FALSE}
+library(tidyverse)
+
+library(RPostgreSQL) # INTERACT WITH REDSHIFT DATABASE
+library(glue) # FORMAT AND INTERPOLATE STRINGS
+```
+
+
+### Amazon S3
+For this data pipeline to work you'll also need the [AWS command line interface](https://aws.amazon.com/cli/) installed.
+
+```{r eval=FALSE}
+# RUN THESE COMMANDS INSIDE TERMINAL
+brew install awscli
+aws configure
+
+# ANSWER QUESTIONS
+access / secret / zone
+```
+
+
+## Read data
+
+### Set connection
+
+You'll need to replace with your own database credentials below:
+```{r eval=FALSE}
+conn <- dbConnect(dbDriver("PostgreSQL"),
+                  dbname = "your_dbname",
+                  host = "your_host",
+                  port = 12345
+                  user = "your_username",
+                  password = "your_password")
+```
+
+
+### Pull data
+
+This section is where you run your SQL queries and drop the results into the tidyverse [tibble](https://tibble.tidyverse.org) format:
+```{r eval=FALSE}
+df <- as_tibble(
+  dbGetQuery(
+    conn, 
+    
+    "SELECT * FROM table WHERE id = 12345"
+    
+    ))
+```
+
+
+
+## Perform magic
+
+Do your data science stuff.
+
+
+## Optional: create table
+
+For a brand new table you can run the following command and I like to take a sample for faster processing:
+```{r eval=FALSE}
+df_sample <- df %>% 
+  head()
+
+dbWriteTable(conn, name = c("schema", "table_name"),
+             value = df_sample,
+             row.names = FALSE,
+             append = TRUE)
+```
+
+You might get an error message but validate it by checking your database... the table should be there.
+
+
+## Upload data
+
+It's all downhill from here.
+
+### Write data to CSV
+```{r eval=FALSE}
+df %>% 
+  write_csv("df_results.csv")
+```
+
+
+### Migrate CSV file to S3 bucket
+
+
+```{r eval=FALSE}
+system("aws s3 cp df_results.csv s3://file_path/df_results.csv")
+```
+
+Fun fact: the _system_ command tells R to access your terminal functions.
+
+### Copy from S3 to Redshift database
+
+```{r eval=FALSE}
+load_s3_redshift <- glue_sql("COPY schema.table_name
+                             FROM 's3://file_path/df_results.csv'
+                             access_key_id 'ABCDEFGH'
+                             secret_access_key '12345' csv IGNOREHEADER 1")
+
+dbSendStatement(conn, load_s3_redsfhit)
+```
+
+
+## Optional: delete data
+
+```{r eval=FALSE}
+dbSendStatement(conn, 
+                "DELETE FROM schema.table_name WHERE id = 12345")
+```
+
+
+
+## Cut connection
+
+Don't forget!
+```{r eval=FALSE}
+dbDisconnect(conn)
+```
+
+
+
+

@@ -1,0 +1,86 @@
+---
+author: Christopher Yee
+date: 2012-08-23 20:46:32+00:00
+layout: post
+slug: how-friendly-seo-twitter
+title: How Friendly is that SEO on Twitter?
+categories:
+- Social Media
+---
+
+I occasionally browse my [Twitter feed](http://twitter.com/eeysirhc) to stay in touch with SEO news and random internet shindigs.  One thing I've noticed is some SEO's only interact with a certain group whereas others are more open to "outsiders."
+
+This social phenomenon shouldn't be too surprising since it's easily observable in high school where you have the popular kids, jocks, math geeks, environmentalists, goths and so forth hanging out with their own [clique](http://www.shoemoney.com/2012/05/31/the-mob-mentality-of-seos).  In fact, we can sum it up with one timeless quote...
+
+
+<blockquote>Birds of a feather flock together.</blockquote>
+
+
+With my growing [interest in programming](http://www.christopheryee.org/learning-program-code-seo/) I thought it'd be fun to see who the friendliest (and not-so-friendly) SEO's are on Twitter.
+
+
+
+To answer this question I first want to define someone who is "friendly on twitter" as _an individual who socializes with others on Twitter but doesn't limit their interactions to a select few.  _A very rough definition but sufficient enough for this study.
+
+With that out of the way, I gathered my data by writing a Ruby script which pinged the Twitter API.  On August 1st, 2012 at 9PM PST I extracted the last 2,000 status updates from 50 high-visibility SEO's (based off of those I follow and their friends) for a total of 100k statuses.
+
+I subsequently parsed each of their following/follower count, total mentions (how often do they talk to others?), unique mentions (how many different people do they talk to?) and calculated a weighted score out of 100.
+
+You'll find my results below from the friendliest to the not-so-friendly SEO's on Twitter!
+
+[table align="center"]
+Rank^Twitter^Following^Followers^Score
+1^skitzzo^520^3,527^62.92
+2^juliejoyce^663^5,563^60.10
+3^samuelcrocker^416^4,082^58.83
+4^justinrbriggs^346^5,905^55.72
+5^sugarrae^156^14,661^55.15
+6^aaronwall^268^66,441^54.67
+7^robkerry^806^4,756^53.70
+8^anniecushing^786^4,606^52.20
+9^graywolf^212^20,669^51.56
+10^audette^157^5,111^50.96
+11^gregboser^612^10,586^50.84
+12^katemorris^663^10,369^47.50
+13^tomcritchlow^798^9,504^47.46
+14^rishil^552^8,550^46.72
+15^willcritchlow^1,039^10,511^46.42
+16^paddymoogan^704^3,771^46.40
+17^seosmarty^3,057^25,622^45.79
+18^lauralippay^666^5,279^45.25
+19^oligardner^73^3,329^45.16
+20^jillwhalen^738^18,409^45.14
+21^mattmcgee^500^15,804^45.03
+22^portentint^4,974^12,751^44.46
+23^rosshudgens^340^6,090^43.86
+24^vanessafox^299^29,498^43.40
+25^joehall^260^6,634^43.21
+26^rhea^683^10,040^42.94
+27^yoast^950^38,224^42.56
+28^bruceclayinc^4,834^10,048^41.55
+29^jennita^640^7,512^41.40
+30^lisabarone^471^25,312^41.23
+31^stonetemple^224^3,818^40.61
+32^dohertyjf^303^4,150^40.37
+33^richardbaxter^112^7,637^39.27
+34^dannydover^652^7,032^39.24
+35^searchmartin^82^4,390^38.16
+36^cyrusshepard^73^3,040^37.78
+37^wilreynolds^349^11,180^36.83
+38^ericward^79^6,726^34.62
+39^aimclear^367^8,236^33.30
+40^gsterling^380^10,091^32.44
+41^ajkohn^1,071^3,661^31.45
+42^copyblogger^336^114,880^30.74
+43^rustybrick^1,045^27,007^29.92
+44^mattcutts^318^278,565^25.11
+45^duaneforrester^243^4,146^24.81
+46^chriswinfield^324^12,051^24.29
+47^garrettfrench^101^3,791^23.98
+48^ipullrank^419^6,320^23.35
+49^dannysullivan^2,656^25,4230^22.32
+50^randfish^66^64,668^18.51
+[/table]
+This study obviously cannot account for a wide range of unknown variables.  For example, they might be too busy or maybe their Twitter account is a marketing tool or perhaps they just don't want to dilute their "social authority."
+
+What do you think?  Interesting?  Surprising?  Let me know!

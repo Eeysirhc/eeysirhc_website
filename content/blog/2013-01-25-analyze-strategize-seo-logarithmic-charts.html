@@ -1,0 +1,61 @@
+---
+author: Christopher Yee
+date: 2013-01-25 16:13:51+00:00
+layout: post
+slug: analyze-strategize-seo-logarithmic-charts
+title: Analyze & Strategize SEO using Logarithmic Charts
+categories:
+- Web Analytics
+---
+
+
+
+<p>Just like the natural world SEO traffic adheres to a <a href="http://en.wikipedia.org/wiki/Power_law">Power Law</a>, more commonly known as the long-tail or the 80-20 rule for you MBAs.  Applying this to search, it means approximately 80% of your organic traffic is attributed to the top 20% of your keywords.</p>
+<p>When you <a href="http://www.christopheryee.org/category/data-visualization/">visualize</a> this type of data though an inherent problem occurs…</p>
+<p><img src="/images/plaw-distribution-annual.png" /></p>
+<p>…the number of visits for the head terms far exceed that of the torso and tail keywords, thus rendering the graph useless.  And if you wanted a YoY comparison of your SEO performance?</p>
+<p><img src="/images/plaw-distribution-yoy.png" /></p>
+<p>No actionable insight - a fallacy of linear graphs.</p>
+<div id="introducing-logarithmic-charts" class="section level2">
+<h2>Introducing Logarithmic Charts</h2>
+<p>The solution to this problem is plotting the data on a logarithmic scale where it observes <a href="http://en.wikipedia.org/wiki/Zipf&#39;s_law">Zipf’s Law</a>.  This mathematical concept states that…</p>
+<blockquote>
+…given some corpus of natural language utterances, the frequency of any word is inversely proportional to its rank in the frequency table.
+</blockquote>
+<p>In other words, your highest traffic driving keyword will occur twice as often as the second term, three times as often as the third highest traffic one and so forth.</p>
+<p>Putting our newfound knowledge to use we can graph the YoY traffic data on a log-log plot.</p>
+<p><img src="/images/zipf-compare.png" /></p>
+<p>We now have a clear picture of this website’s organic search performance for the last two years where there is a noticeable jump for head term traffic in 2012 (red line) when compared to 2011 (blue line) as it surpasses the theory of Zipf’s Law (green dotted line).  The long-tail traffic (Rank 5-9) for the site is holding up fairly well so my subsequent SEO strategy would focus around bolstering their torso keyword portfolio (Rank 2-4).</p>
+<p>Overall though the graph indicates a strong year of <a href="http://www.christopheryee.org/example-successful-seo-campaign/">SEO success</a> if I dare say so myself!</p>
+</div>
+<div id="logarithmic-charting-in-ms-excel" class="section level2">
+<h2>Logarithmic Charting in MS Excel</h2>
+<p>Now it’s your turn to give it a shot!</p>
+<p><strong>1)</strong> Extract organic visits and keyword data from your web analytics package of choice (you may want to exclude not provided).</p>
+<p><strong>2)</strong> Insert three additional columns for <em>Rank</em>, <em>Log(Rank)</em> and <em>Log(Visits)</em>.</p>
+<p><img src="/images/zipf-setup1.png" /></p>
+<p><strong>3)</strong> Assuming your keyword <em>Visits</em> are in descending order, fill the first cell in the <em>Rank</em> column with the number 1, second cell with number 2 and so on.</p>
+<p><img src="/images/zipf-setup2.png" /></p>
+<p><strong>4)</strong> In the <em>Log(Rank)</em> column, use the <em>=LN</em> function for the corresponding <em>Rank</em> cell.</p>
+<p><img src="/images/zipf-setup3.png" /></p>
+<p><strong>5)</strong> Similarly, use the <em>=LN</em> function on the <em>Log(Visits)</em> column as well for the respective keyword <em>Visits</em> data.</p>
+<p><img src="/images/zipf-setup4.png" /></p>
+<p><strong>6)</strong> Plot the two logarithmic columns on a “<em>Smooth Marked Scatter</em>” plot.</p>
+<p><img src="/images/zipf-setup5.png" /></p>
+<p><strong>7)</strong> Add a trendline to represent Zipf’s Law.</p>
+<p><img src="/images/zipf-setup6.png" /></p>
+<p><strong>8)</strong> Make the graph sexy.</p>
+<p><strong>9)</strong> Analyze.</p>
+<p><strong>10)</strong> Win.</p>
+</div>
+<div id="caveats" class="section level2">
+<h2>Caveats</h2>
+<p>There are a couple things to keep in mind here. The first is this usually works best for medium to high traffic websites so incidentally the graph will look “better” with more data. The other is you are optimizing for “known keywords” so anything beyond page 2 is virtually invisible.</p>
+</div>
+<div id="going-deeper-into-the-rabbit-hole" class="section level2">
+<h2>Going Deeper into the Rabbit Hole</h2>
+<p>Your analysis doesn’t have to and shouldn’t stop at the top-level because any SEO worth their salt knows you need to bucket your data to extrapolate any real insight. For example, you can plot your organic traffic by product type keywords and formulate your strategy there.</p>
+<p><img src="/images/zipf-product.png" /></p>
+<p>What can you take away from the graph above? Which product type would you recommend this site to optimize?  If optimization is required, which keyword category (head, torso or tail) would you suggest?</p>
+<p>Have at it and let me know what you think.  Any and all types of feedback is welcomed in the comments below!</p>
+</div>

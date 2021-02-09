@@ -1,0 +1,192 @@
+---
+title: 'TidyTuesday: Cocktails'
+author: Christopher Yee
+date: '2020-05-26'
+slug: tidytuesday-cocktails
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Data from <a href="https://twitter.com/hashtag/tidytuesday">#tidytuesday</a> week of 2020-05-26 (<a href="https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-05-26/readme.md">source</a>)</p>
+<blockquote>
+<p>If you are looking for the R script then you can <a href="https://github.com/Eeysirhc/tidytuesday/blob/master/20200526-cocktails/cocktails.R">find it here</a></p>
+</blockquote>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(ggrepel)
+library(FactoMineR)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<pre class="r"><code>bc_raw &lt;- read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv&#39;) </code></pre>
+</div>
+<div id="data-processing" class="section level2">
+<h2>Data processing</h2>
+<div id="standardize-cases" class="section level3">
+<h3>Standardize cases</h3>
+<pre class="r"><code>bc_raw %&gt;% 
+  count(ingredient, sort = TRUE) %&gt;% 
+  filter(str_detect(ingredient, &quot;red pepper sauce&quot;))</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   ingredient               n
+##   &lt;chr&gt;                &lt;int&gt;
+## 1 Hot red pepper sauce     4
+## 2 hot red pepper sauce     1</code></pre>
+<p>Let’s fix that by making all ingredient values to lower case:</p>
+<pre class="r"><code>bc &lt;- bc_raw %&gt;% 
+  mutate(ingredient = str_to_lower(ingredient)) %&gt;% 
+  distinct() %&gt;% 
+  select(name, ingredient)</code></pre>
+<p>And to make sure it works…</p>
+<pre class="r"><code>bc %&gt;% 
+  count(ingredient, sort = TRUE) %&gt;% 
+  filter(str_detect(ingredient, &quot;red pepper sauce&quot;))</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   ingredient               n
+##   &lt;chr&gt;                &lt;int&gt;
+## 1 hot red pepper sauce     5</code></pre>
+</div>
+<div id="fix-untidy-data" class="section level3">
+<h3>Fix untidy data</h3>
+<p>To follow “tidy” principles, we need one row per observation.</p>
+<pre class="r"><code>bc %&gt;% 
+  filter(str_detect(ingredient, &quot;,&quot;)) </code></pre>
+<pre><code>## # A tibble: 85 x 2
+##    name                  ingredient                                             
+##    &lt;chr&gt;                 &lt;chr&gt;                                                  
+##  1 John Collins          orange and lemon wheels, maraschino cherry             
+##  2 Irish Shillelagh      fresh raspberries and strawberries, 2 peach slices, ma…
+##  3 Underneath The Mango… lime wedge, sweet chili powder                         
+##  4 Emperor Norton&#39;s Mis… fresh strawberries, cut in halves                      
+##  5 Toasted Drop          lemon wedge, cinnamon sugar                            
+##  6 Stockholm 75          lemon wedge, superfine sugar                           
+##  7 Salty Dog             lemon wedge, coarse salt                               
+##  8 Rouxby Red            for glass lemon wedge, coarse salt                     
+##  9 Redhead Martini       strawberries, cut into halves                          
+## 10 Canadian Breeze       pineapple wedge, maraschino cherry                     
+## # … with 75 more rows</code></pre>
+<p>We can reformat this by separating the commas then adding a new row for each cocktail per ingredient.</p>
+<pre class="r"><code># CLEAN DATAFRAME
+bc_tidy &lt;- bc %&gt;% 
+  filter(!str_detect(ingredient, &quot;,&quot;))
+
+# EXTRACT UNTIDY DATA THEN CLEAN
+bc_untidy &lt;- bc %&gt;% 
+  filter(str_detect(ingredient, &quot;,&quot;)) %&gt;% 
+  mutate(ingredient = str_split(ingredient, &quot;, &quot;)) %&gt;% 
+  unnest(ingredient)
+
+# COMBINE BOTH DATAFRAMES
+bc_clean &lt;- rbind(bc_tidy, bc_untidy) %&gt;% 
+  distinct()
+
+bc_untidy</code></pre>
+<pre><code>## # A tibble: 193 x 2
+##    name                      ingredient                        
+##    &lt;chr&gt;                     &lt;chr&gt;                             
+##  1 John Collins              orange and lemon wheels           
+##  2 John Collins              maraschino cherry                 
+##  3 Irish Shillelagh          fresh raspberries and strawberries
+##  4 Irish Shillelagh          2 peach slices                    
+##  5 Irish Shillelagh          maraschino cherry                 
+##  6 Underneath The Mango Tree lime wedge                        
+##  7 Underneath The Mango Tree sweet chili powder                
+##  8 Emperor Norton&#39;s Mistress fresh strawberries                
+##  9 Emperor Norton&#39;s Mistress cut in halves                     
+## 10 Toasted Drop              lemon wedge                       
+## # … with 183 more rows</code></pre>
+</div>
+<div id="reduce-cardinality" class="section level3">
+<h3>Reduce cardinality</h3>
+<p>Our dataset has more than 550 unique ingredients so let’s trim that down to the ingredients that are used in ten or more cocktails.</p>
+<pre class="r"><code>bc_clean %&gt;% 
+  distinct(ingredient) %&gt;% 
+  count()</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##       n
+##   &lt;int&gt;
+## 1   553</code></pre>
+<pre class="r"><code>n_ingredients &lt;- bc_clean %&gt;% 
+  count(ingredient, sort = TRUE) %&gt;% 
+  filter(n &gt; 10)</code></pre>
+</div>
+<div id="normalize-ingredients" class="section level3">
+<h3>Normalize ingredients</h3>
+<p>Similar to our case statement section above, let’s make sure our ingredients are consolidated to the same format.</p>
+<pre class="r"><code>df &lt;- bc_clean %&gt;% 
+  inner_join(n_ingredients) %&gt;% 
+  select(-n) %&gt;% 
+  mutate(ingredient = str_replace_all(ingredient, &quot;-&quot;, &quot;_&quot;),
+         ingredient = str_replace_all(ingredient, &quot; &quot;, &quot;_&quot;),
+         ingredient = str_replace_all(ingredient, &quot;old_mr._boston_&quot;, &quot;&quot;),
+         ingredient = str_replace_all(ingredient, &quot;old_thompson_&quot;, &quot;&quot;)) </code></pre>
+</div>
+</div>
+<div id="multiple-correspondence-analysis-mca" class="section level2">
+<h2>Multiple Correspondence Analysis (MCA)</h2>
+<p>Our dataset is mostly categorical so <a href="https://en.wikipedia.org/wiki/Multiple_correspondence_analysis">MCA</a> can help identify and highlight any underlying structures.</p>
+<div id="format-data-for-mca" class="section level3">
+<h3>Format data for MCA</h3>
+<pre class="r"><code>df_mca_processed &lt;- df %&gt;% 
+  mutate(value = 1) %&gt;%
+  pivot_wider(names_from = ingredient) %&gt;% 
+  replace(is.na(.), 0) %&gt;% 
+  select(-name) %&gt;%
+  mutate_if(is.double, as.factor)
+
+mca_results &lt;- MCA(df_mca_processed, graph = FALSE)</code></pre>
+</div>
+<div id="shape-data-to-tidy-structure" class="section level3">
+<h3>Shape data to tidy structure</h3>
+<pre class="r"><code>mca_df &lt;- data.frame(mca_results$var$coord)
+
+mca_final &lt;- rownames_to_column(mca_df, var = &quot;rowname&quot;) %&gt;% 
+  as_tibble() %&gt;% 
+  filter(str_detect(rowname, &quot;_1&quot;)) %&gt;% 
+  mutate(variable = str_replace_all(rowname, &quot;_1&quot;, &quot;&quot;)) %&gt;% 
+  select(variable, everything(), -rowname) %&gt;% 
+  mutate(highlight = case_when(str_detect(variable, &quot;gin&quot;) ~ &quot;gin&quot;,
+                               str_detect(variable, &quot;rum&quot;) ~ &quot;rum&quot;,
+                               str_detect(variable, &quot;vodka&quot;) ~ &quot;vodka&quot;,
+                               str_detect(variable, &quot;whiskey&quot;) ~ &quot;whiskey&quot;,
+                               str_detect(variable, &quot;brandy&quot;) ~ &quot;brandy&quot;,
+                               str_detect(variable, &quot;bourbon&quot;) ~ &quot;bourbon&quot;,
+                               str_detect(variable, &quot;tequila&quot;) ~ &quot;tequila&quot;))</code></pre>
+</div>
+<div id="final-plot" class="section level3">
+<h3>Final plot</h3>
+<pre class="r"><code>mca_final %&gt;% 
+  ggplot(aes(x = Dim.1, y = Dim.2, label = variable, color = highlight)) +
+  geom_density2d(color = &quot;gray90&quot;) +
+  geom_point(show.legend = FALSE) +
+  geom_text_repel(show.legend = FALSE) +
+  labs(x = &quot;D1&quot;, y = &quot;D2&quot;, 
+       title = &quot;Multiple correspondence analysis (MCA) on the most common cocktail ingredients&quot;,
+       subtitle = &quot;Closer points suggest they are typically mixed together&quot;,
+       caption  = &quot;by: @eeysirhc\nsource: Mr. Boston Bartender&#39;s Guide&quot;) +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) </code></pre>
+<p><img src="/blog/2020-05-26-tidytuesday-cocktails_files/figure-html/unnamed-chunk-12-1.png" width="1920" /></p>
+</div>
+</div>
+<div id="future-work" class="section level2">
+<h2>Future work</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/tidytuesday-cocktails-pt-2/">Part 2</a>: cocktail recommendation system based on the input of favorite drink</li>
+<li>Calculate and use dissimilarity to recommend a drink to someone based on what they dislike</li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><a href="https://rpubs.com/gaston/MCA">Multiple correspondence analysis in R</a></li>
+</ul>
+</div>

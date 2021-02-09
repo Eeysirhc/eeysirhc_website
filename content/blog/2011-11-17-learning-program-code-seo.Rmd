@@ -1,0 +1,31 @@
+---
+author: Christopher Yee
+date: 2011-11-17 01:31:49+00:00
+layout: post
+slug: learning-program-code-seo
+title: Learning to Program & Code for SEO
+categories:
+- Miscellaneous
+---
+
+In the past few months I've taken a new interest in learning how to program and code as it applies to SEO.  This came out as a need to research and evaluate SEO campaigns in a scalable manner where popular [SEO tools](http://www.christopheryee.org/category/seo-tools/) didn't work for my situation or I had no engineering resources available.  It was like I had both hands tied behind my back.
+
+For example, I found myself asking certain questions and performing [SEO fixes](http://www.christopheryee.org/top-5-important-seo-fixes/) that were very labor intensive.  What is the redirect destination for a list of 200+ URLs?  How many links are pointing to the new location?  And to take it further, how many times were those pages crawled by Google in the last month?
+
+
+
+To find the redirect destination it would've been an extreme waste of time if I had to insert all 200+ URLs into my web browser and then copy the new one down.  Visiting each page, checking the SEOmoz toolbar and then manually reporting the total number of links isn't very efficient either.  I could also extract server logs into Excel to determine the number of Googlebot visits but after 50MB it starts to crap out on itself - useless when each day brings in numerous gigabytes of data.
+
+Thus my desire to learn how to program and code for search engine optimization was born.  I currently have the basic UNIX command lines down and especially love working with cURL and grep.  With grep, I have learned to extract data for specific arguments in a log file in mere seconds - it originally would have taken me 5-10 minutes in Excel for the same task.  The next step for me is to learn a language so I can utilize the numerous APIs out there and I just can't wait to get my hands on them!
+
+My [career](http://www.christopheryee.org/let-my-seo-journey-begin/) has taken on a new turn as I begin to specialize more in the technical aspects of search optimization.  I believe every [SEO analyst](http://www.christopheryee.org/one-month-anniversary-as-an-seo-analyst/) and consultant should have some knowledge in programming.  Not only does it offer a perspective to the tech world (as programmers see it) but gives a competitive advantage in the job market too.  As [Avinash Kaushik](http://www.kaushik.net/avinash/) said in this [post](http://www.seomoz.org/blog/interviews-in-search-avinash-kaushik-14178)...
+
+
+<blockquote>Our ability to use APIs, scrapers, [and] multiple tools is going to be super critical.</blockquote>
+
+
+Would you agree or disagree?  Don't hesitate to leave me a response in the comments below!
+
+==========
+
+_EDIT: In case you were wondering, I used the [Bulk URL Checker](http://www.searchcommander.com/seo-tools/bulk-url-checker/) by Search Commander (surprised no SEO-focused SaaS companies have created this yet) to find the redirect location, BusinessHut's [SEOmoz Excel spreadsheet](http://www.businesshut.com/seo/using-seomoz-free-api-excel/) for the number of links per page and the UNIX command line to count the number of Googlebot visits._

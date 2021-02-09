@@ -1,0 +1,112 @@
+---
+title: Code Answers to SQL Murder Mystery
+author: Christopher Yee
+date: '2019-12-21'
+slug: code-answers-to-sql-murder-mystery
+categories:
+  - Miscellaneous
+---
+
+
+
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Pretty fun murder mystery from <a href="https://twitter.com/knightlab?ref_src=twsrc%5Etfw"><span class="citation">@knightlab</span></a> - can you find the killer using <a href="https://twitter.com/hashtag/SQL?src=hash&amp;ref_src=twsrc%5Etfw">#SQL</a>?<a href="https://t.co/vXcMtY2b1c">https://t.co/vXcMtY2b1c</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1208109443159691264?ref_src=twsrc%5Etfw">December 20, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<div id="clue-1" class="section level3">
+<h3>CLUE #1</h3>
+<p>There is a <strong>murder</strong> in <strong>SQL City</strong> on <strong>2018-01-15</strong>.</p>
+<pre class="sql"><code>select *
+from crime_scene_report
+where type = &#39;murder&#39;
+and city = &#39;SQL City&#39; 
+and date = &#39;20180115&#39;</code></pre>
+</div>
+<div id="clue-2" class="section level3">
+<h3>CLUE #2</h3>
+<p>Witness 1 lives in the last house on <strong>Northwestern Dr</strong>. Witness 2 is named <strong>Annabel</strong> and lives somehwere on <strong>Franklin Ave</strong>.</p>
+<pre class="sql"><code>select p.id, 
+       p.name, 
+       p.address_number, 
+       p.address_street_name, 
+       i.transcript
+from person p
+
+inner join (select person_id, transcript 
+            from interview) i on p.id = i.person_id
+
+where p.address_street_name = &#39;Northwestern Dr&#39;
+or (p.address_street_name = &#39;Franklin Ave&#39; and name like &#39;Annabel%&#39;)
+order by address_number desc</code></pre>
+</div>
+<div id="clue-3" class="section level3">
+<h3>CLUE #3</h3>
+<p>We now know the killer is a <strong>man</strong>, spotted at the local gym on <strong>2018-01-09</strong> with membership ID number starting <strong>48Z</strong> and car license plate includes <strong>H42W</strong>.</p>
+<pre class="sql"><code>
+select gfm.id, 
+       gfm.person_id, 
+       gfm.name, 
+       gfm.membership_status, 
+       p.license_id, 
+       dl.plate_number
+from get_fit_now_member gfm
+
+inner join (select membership_id, check_in_date
+            from get_fit_now_check_in
+            where check_in_date = &#39;20180109&#39;
+            and membership_id like &#39;48Z%&#39;) gfc on gfm.id = gfc.membership_id
+
+inner join (select id, name, license_id
+            from person) p on gfm.person_id = p.id
+            and gfm.name = p.name
+
+inner join (select id, plate_number
+            from drivers_license
+            where gender = &#39;male&#39;
+            and plate_number like &#39;%H42W%&#39;) dl on p.license_id = dl.id
+
+where gfm.membership_status = &#39;gold&#39;</code></pre>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Apparently there is more to this than meets the eye…. <a href="https://t.co/bfAfmF1oLK">pic.twitter.com/bfAfmF1oLK</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1208111156772003840?ref_src=twsrc%5Etfw">December 20, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+<div id="clue-4" class="section level3">
+<h3>CLUE #4</h3>
+<p>Lets find our next clue to see what Jeremy Bowers had to say:</p>
+<pre class="sql"><code>select * from interview where person_id = &#39;67318&#39;</code></pre>
+</div>
+<div id="clue-5" class="section level3">
+<h3>CLUE #5</h3>
+<p>So the mastermind behind this murder is a <strong>woman</strong>, height of <strong>65 to 67</strong> inches, has <strong>red hair</strong>, drives a <strong>Tesla Model S</strong> and attended the <strong>SQL Symphony Concert</strong> at least <strong>3x in December 2017</strong>.</p>
+<pre class="sql"><code>select dl.id, 
+       p.name
+from drivers_license dl
+
+inner join (select id, name, license_id 
+         from person) p on dl.id = p.license_id
+
+inner join (select person_id, count(*) as total
+          from facebook_event_checkin
+          where event_name = &#39;SQL Symphony Concert&#39;
+          and date between &#39;20171201&#39; and &#39;20171231&#39;
+          group by 1
+          having count(*) &gt;= 3) fb on p.id = fb.person_id
+
+where dl.height in (65, 66, 67) 
+and dl.gender = &#39;female&#39; 
+and dl.car_make = &#39;Tesla&#39;</code></pre>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+<em>slowly sips his whiskey in a dark, cigar smoke filled office with the blinds closed</em> <a href="https://t.co/SyjkcPbOvp">pic.twitter.com/SyjkcPbOvp</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1208132543909748736?ref_src=twsrc%5Etfw">December 20, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>

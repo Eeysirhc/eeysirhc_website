@@ -1,0 +1,51 @@
+---
+author: Christopher Yee
+date: 2010-07-20 17:48:46+00:00
+layout: post
+slug: free-seo-website-analysis-wayfare-tavern
+title: SEO Website Analysis - Wayfare Tavern
+categories:
+- Search Engine Optimization
+---
+
+Today, **SEO Christopher Yee** begins a new initiative - _FREE SEO Website Analysis _!  I will be combing the world wide web every few days to offer FREE [search engine optimization](http://www.christopheryee.org/category/search-engine-optimization/) website reviews.  The goal of this?  To put my new-found knowledge to the test while offering pro bono SEO services to website owners.  What have they got to lose, right?  It's a win-win situation for everyone!
+
+Our first lucky winner for this free site review is [Wayfare Tavern](http://www.wayfaretavern.com/main.html)!  Located in the heart of San Francisco's Financial District, Wayfare Tavern is owned and operated by [Chef Tyler Florence](http://www.tylerflorence.com/).  The restaurant features authentic American cuisine inspired by dishes from the 20th century.  Anyways, on with the website review!
+
+
+==========
+
+
+### Title Tags
+
+_Recommendation:_ For best optimization practices, it's very important to have unique title tags for every single page.  For instance, the reservations page should be 
+```<title>Reservations | Wayfare Tavern</title>``` and the about us page should be ```<title>About Wayfare Tavern | Wayfare Tavern</title>```.
+
+
+### Meta Tags
+
+![Wayfare Tavern Meta Tags](/images/wayfare-tavern-meta-tags.jpg)
+
+_Recommendation:_ There is a ton of clutter here and unnecessary ```<meta>``` tags within the first 30 lines of code.  For instance, Googlebot ignores the "revisit-after" tag because they will crawl your site anyways.  It's whether or not your site is unique and useful that it will revisit more often.  As of this writing, the last time Googlebot crawled Wayfare Tavern's site was July 18th, 2010 which makes the tag pointless.  It's best to scrap 90% of these and make better use of the space by pushing up the ```<body>``` code and content.
+
+
+### CSS Coding
+
+
+![Wayfare Tavern CSS](/images/wayfare-tavern-css.jpg)
+
+_Recommendation:_ If you already have a cascading style sheet it's good web design practice to put the "background-color" in it as well.  I'm surprised their web designer didn't do anything about this earlier.
+
+
+### XHTML Coding
+
+
+![Wayfare Tavern HTML Code](/images/wayfare-tavern-html-code1.jpg)
+
+_Recommendation:_ XHTML standards are very strict and requires a specific format in the code....in this case, capitalization.  For a website to adhere within the guidelines of XHTML, all code must be in lower case.  For example, ```<HEAD>``` to ```<head>```, ```<BODY LEFTMARGIN>``` to ```<body leftmargin>``` and even ```<TR>/<TD>``` to ```<tr>/<td>```.
+
+==========
+
+And that completes [Christopher Yee's](http://www.christopheryee.org) first ever _FREE SEO Website Analysis_!
+
+I am still working on a more formal way of analyzing and auditing a website but this will do for now.  What are your thoughts on this?  Do you have any tips for myself and what I should have done instead?  Please do not hesitate to let me know in the comments below!

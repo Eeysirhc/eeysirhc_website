@@ -1,0 +1,122 @@
+---
+title: 'California Wildfires: cumulative acres burned over time'
+author: Christopher Yee
+date: '2020-09-16'
+slug: california-wildfires-cumulative-acres-burned-over-time
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Wildfires are raging across California (again).</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Always knew I would end up in hell but I imagined it was more of a spontaneous combustion type of event rather than a gradual descent into the infernal <a href="https://twitter.com/hashtag/everythingisfine?src=hash&amp;ref_src=twsrc%5Etfw">#everythingisfine</a> <a href="https://t.co/gl6otozX6f">pic.twitter.com/gl6otozX6f</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1303415344065699840?ref_src=twsrc%5Etfw">September 8, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>What I noticed over the years of “doom watching” is how the news only report on tabulated data. They lacked any sort of visualization to underscore the impact of these fires.</p>
+<p>Curiosity got the best of me so I searched around the <a href="https://www.fire.ca.gov/">CAL FIRE website</a> and found a JSON endpoint for their incident data. The following code reveals how I created a graph in <a href="https://twitter.com/search?q=%23rstats">#rstats</a> and used it as my first submission to the <a href="https://www.reddit.com/r/dataisbeautiful/comments/is2tjg/oc_california_wildfires_cumulative_acres_burned/">r/dataisbeautiful</a> subreddit.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(lubridate)
+library(scales)
+library(jsonlite)
+library(gghighlight)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<pre class="r"><code>wildfires_raw &lt;- fromJSON(&quot;https://www.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=true&quot;, 
+                  flatten = TRUE) %&gt;% as_tibble()</code></pre>
+</div>
+<div id="parse-data" class="section level2">
+<h2>Parse data</h2>
+<pre class="r"><code>wildfires &lt;- wildfires_raw %&gt;% 
+  select(Name, County, Location, AcresBurned, IsActive, 
+         StartedDateOnly, ExtinguishedDateOnly) %&gt;% 
+  
+  # REMOVE INCORRECT DATA
+  filter(AcresBurned &lt;= 100e6,
+         StartedDateOnly &gt;= &#39;2000-01-01&#39;) %&gt;% 
+  
+  # CONVERT VARIABLES TO DATE FORMAT
+  mutate(StartedDateOnly = date(StartedDateOnly),
+         ExtinguishedDateOnly = case_when(ExtinguishedDateOnly == &quot;&quot; ~ as.character(StartedDateOnly),
+                                          TRUE ~ as.character(ExtinguishedDateOnly)),
+         ExtinguishedDateOnly = date(ExtinguishedDateOnly))
+
+# COMPUTE CUMULATIVE TOTAL
+wildfires_parsed &lt;- wildfires %&gt;% 
+  mutate(year = year(StartedDateOnly),
+         day_index = yday(StartedDateOnly)) %&gt;% 
+  arrange(year, day_index) %&gt;%
+  group_by(year) %&gt;% 
+  mutate(cumulative_acresburned = cumsum(AcresBurned)) %&gt;% 
+  ungroup() 
+
+# DIFFERENCE CALCULATION FOR GRAPH
+calc &lt;- wildfires_parsed %&gt;% filter(day_index == 256, 
+                                    year == 2020 | year == 2018) %&gt;% 
+  select(cumulative_acresburned)
+burned_calc &lt;- round(100 * (calc[2,] / calc[1,] - 1),2) %&gt;% pull()</code></pre>
+</div>
+<div id="plot-chart" class="section level2">
+<h2>Plot chart</h2>
+<pre class="r"><code>wildfires_parsed %&gt;% 
+  ggplot(aes(day_index, cumulative_acresburned, color = factor(year))) +
+  geom_point() +
+  geom_line() +
+  gghighlight(year &gt;= 2016) +
+  expand_limits(y = 0) +
+  scale_y_continuous(labels = comma_format(),
+                     limits = c(0, 3e6)) +
+  scale_color_brewer(palette = &#39;Set1&#39;, direction = -1) +
+  labs(x = &quot;Day of Year&quot;, y = &quot;Cumulative Acres Burned&quot;, color = NULL,
+       title = &quot;California Wildfires: cumulative acres burned since 2003&quot;,
+       subtitle = paste0(&quot;+&quot;, burned_calc, &quot;% increase compared to the next highest year on the same day&quot;), 
+       caption = &quot;by: @eeysirhc\nsource: CAL FIRE&quot;) +
+  theme_minimal() </code></pre>
+<p><img src="/blog/2020-09-14-california-wildfires-cumulative-acres-burned-over-time_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>
+<div id="top-20-california-wildfires" class="section level2">
+<h2>Top 20 California wildfires</h2>
+<p>I did not submit the one below but including it here to highlight how 2020 now accounts for 25% of California’s most devastating fires in the last two decades.</p>
+<pre class="r"><code>wildfires %&gt;% 
+  arrange(desc(AcresBurned)) %&gt;% 
+  top_n(20, AcresBurned) %&gt;% 
+  mutate(year = year(StartedDateOnly)) %&gt;% 
+  select(Name, year, AcresBurned) %&gt;% 
+  mutate(Name = reorder(Name, AcresBurned)) %&gt;% 
+  ggplot(aes(Name, AcresBurned, fill = factor(year))) +
+  geom_col() +
+  gghighlight(year &gt;= 2016) +
+  coord_flip() +
+  labs(fill = NULL, x = NULL, y = &quot;Total Acres Burned&quot;,
+       caption = &quot;by: @eeysirhc\nsource: CAL FIRE&quot;) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 45)) +
+  scale_y_continuous(labels = comma_format()) +
+  scale_fill_brewer(palette = &#39;Set1&#39;, direction = -1) +
+  theme_minimal()</code></pre>
+<p><img src="/blog/2020-09-14-california-wildfires-cumulative-acres-burned-over-time_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+</div>
+<div id="future-work" class="section level2">
+<h2>Future work</h2>
+<ul>
+<li>Use the <a href="https://github.com/thomasp85/gganimate">{gganimate}</a> package to rank the top 20 fires over time with a <a href="http://127.0.0.1:4321/blog/tidytuesday-beer-production/">racing bar chart</a></li>
+<li>Build an <a href="https://shiny.rstudio.com/">interactive Shiny app</a> which features a map, incident status, and other information</li>
+<li>Determine if wildfires are taking longer to extinguish than before by using survival analysis</li>
+</ul>
+<p>For the last bullet point I contacted CAL FIRE over Twitter and email - waiting for some data corrections before I complete the survival regression.</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+correction: n(data_issues) most likely greater than 27<br><br>below is sample of fires burning 200+ days but less than 50 acres (n=99)<br><br>anyways, more than happy to help collate, sanitize, etc. the public dataset <a href="https://t.co/hw9b2DyEyF">pic.twitter.com/hw9b2DyEyF</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1304524157573570561?ref_src=twsrc%5Etfw">September 11, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>

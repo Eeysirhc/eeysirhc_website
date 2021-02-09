@@ -1,0 +1,23 @@
+---
+author: Christopher Yee
+date: 2014-01-02 07:24:03+00:00
+layout: post
+slug: a-year-of-webkit2png
+title: A Year of Webkit2png
+categories:
+- SEO Tools
+---
+
+When I joined SEOgadget last year, my first blog post was about [using webkit2png for site audits, stalking and more](http://seogadget.com/using-webkit2png-audits-stalking-more/).  What I didn't mention was my 2013 new years resolution - to track the home page of three websites for the entire year with webkit2png.
+
+The following videos come from the home pages of Macy's, Yahoo and Amazon with a years worth of images compiled together.  It's nothing too crazy but feel free to turn on your favorite jam, sit back, relax and view them for your pleasure.
+
+Enjoy and have an amazing 2014!  =]
+
+
+
+
+
+
+
+

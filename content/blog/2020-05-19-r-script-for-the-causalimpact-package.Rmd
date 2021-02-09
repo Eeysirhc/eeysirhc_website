@@ -1,0 +1,109 @@
+---
+title: R script for the CausalImpact package
+author: Christopher Yee
+date: '2020-05-19'
+slug: r-script-for-the-causalimpact-package
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+Google has an amazing [#rstats](https://twitter.com/search?q=%23rstats) package called [CausalImpact](https://google.github.io/CausalImpact/CausalImpact.html) to predict the counterfactual: what would have happened if an intervention did __not__ occur.
+
+This is a quick technical post to get someone up and running rather than a review of its literature, usage, or idiosyncrasies
+
+## Load libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(CausalImpact)
+```
+
+## Download (dummy) data
+```{r message=FALSE, warning=FALSE}
+df <- read_csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/cimpact_sample_data.csv")
+
+df %>% sample_n(5)
+```
+
+## Shape data
+
+Before we can run our analysis, the CausalImpact package requires three columns:
+
+* Date (YYYY-MM-DD)
+* Response/Treatment
+* Control
+
+If your data is already structured in the above format then feel free to skip to the next section.
+
+Otherwise, we need to massage our (dummy) data frame from a long to wide format.
+
+```{r message=FALSE, warning=FALSE}
+df_clean <- df %>%
+  dplyr::select(date, experiment_type, revenue) %>%
+  pivot_wider(names_from = "experiment_type",
+              values_from = "revenue") %>%
+  dplyr::select(date, experiment, control)
+```
+
+And a quick spot check:
+
+```{r message=FALSE, warning=FALSE}
+df_clean %>% 
+  arrange(date) %>% 
+  head()
+```
+
+## Set parameters
+
+The code below will:
+
+* Set the intervention start date
+* How many days forward/backward to compare from start date (I suggest full 7-day weeks)
+* Construct appropriate date variables
+
+```{r}
+test_date <- as.Date("2020-04-23")
+
+test_length <- 21
+
+pre <- c(test_date-(test_length+1), test_date-1)
+post <- c(test_date, (test_date+test_length))
+```
+
+Let's also make sure our date differences are correct:
+
+```{r message=FALSE, warning=FALSE}
+pre[2]-pre[1]
+```
+
+And the post period?
+```{r message=FALSE, warning=FALSE}
+post[2]-post[1]
+```
+
+Good to go!
+
+## Run causal impact analysis
+```{r message=FALSE, warning=FALSE}
+df_impact <- CausalImpact(df_clean, pre, post)
+```
+
+## Plot results
+```{r message=FALSE, warning=FALSE}
+plot(df_impact)
+```
+
+## Analysis summary
+```{r message=FALSE, warning=FALSE} 
+summary(df_impact)
+```
+
+
+## Detailed analysis
+```{r message=FALSE, warning=FALSE}
+summary(df_impact, "report")
+```
+
+
+

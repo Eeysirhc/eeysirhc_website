@@ -1,0 +1,160 @@
+---
+title: Visualizing Netflix viewing activity
+author: Christopher Yee
+date: '2019-07-02'
+slug: visualizing-netflix-viewing-activity
+categories:
+  - Data Visualization
+---
+
+If you are like me then it's very likely you share your Netflix account with multiple users.
+
+If you are also like me then it's very likely you would be curious about how your Netflix viewing activity coompares and contrasts to all the parasites on your account!
+
+In this post we'll leverage [#rstats](https://twitter.com/search?q=%23rstats&src=typd) to visualize what that will look like.
+
+## Load packages
+Let's fire up our favorite packages.
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(influenceR)
+```
+
+## Download data
+With the exception of my own viewing activity (I'm not ashamed!), I have provided anonymized Netflix viewing data from a few family and friends for you to follow along.
+```{r results='hide', message=FALSE, warning=FALSE}
+netflix_views_raw <- read_csv("https://raw.githubusercontent.com/Eeysirhc/netflix_views/master/netflix_views.csv")
+
+netflix_views <- netflix_views_raw
+```
+
+## Peek at our raw dataset
+We can draw a random sample from our dataset to see what we are working with.
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  sample_n(10)
+```
+
+A couple data processing steps immediately spring to mind:
+
+* _Title_ is going to be messy if we do not canonicalize to the base name
+* For the _User_ column we can replace the dummy values so it's easier to interpret later
+
+## Transform the data
+
+### Title - extract only the name of the show or movie
+As always, we'll take a quick look at the data.
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  select(Title) %>% 
+  tail() # ONLY LOOK AT THE LAST FEW ROWS OF DATA
+```
+
+We can then clean up our _Title_ variable with the **separate** function.
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  select(Title) %>% 
+  tail() %>% 
+  separate(Title, c("title"), sep = ":", extra ='drop') 
+```
+
+What we did with the above was drop everything after the first colon to remove season number along with its corresponding episode name.
+
+### User - replace fake values with.....fake names
+How do we know what we need to change? We can do a quick **count** on the _User_ column.
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  count(user, sort = TRUE)
+```
+
+The above result informs us we need to change four of those dummy values so we'll use a combination of **mutate** and **case_when** to achieve that.
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  sample_n(10) %>% 
+  select(user) %>% 
+  mutate(user = case_when(user == 'A_sibling' ~ "Apple",
+                          user == 'B_sibling' ~ "Banana",
+                          user == 'C_sibling' ~ "Cherry",
+                          user == 'D_sibling' ~ "Dragon Fruit",
+                          TRUE ~ user)) # THIS SAYS: IF NOTHING ELSE THEN USE THE ORIGINAL VALUE
+```
+
+Did it do what we wanted ?
+
+```{r message=FALSE, warning=FALSE}
+netflix_views %>% 
+  #sample_n(10) %>% COMMENT THIS PORTION OUT SO WE DON'T TAKE A SAMPLE
+  select(user) %>% 
+  mutate(user = case_when(user == 'A_sibling' ~ "Apple",
+                          user == 'B_sibling' ~ "Banana",
+                          user == 'C_sibling' ~ "Cherry",
+                          user == 'D_sibling' ~ "Dragon Fruit",
+                          TRUE ~ user)) %>% 
+  count(user, sort = TRUE)
+```
+
+
+### Putting it all together - [#tidyverse](https://twitter.com/search?q=%23tidyverse&src=typd) style
+
+```{r message=FALSE, warning=FALSE}
+netflix_clean <- netflix_views %>% 
+  select(Date, user, Title) %>% # REARRANGE COLJUMNS
+  separate(Title, c("title"), sep = ":", extra ='drop') %>% 
+  mutate(user = case_when(user == 'A_sibling' ~ "Apple",
+                          user == 'B_sibling' ~ "Banana",
+                          user == 'C_sibling' ~ "Cherry",
+                          user == 'D_sibling' ~ "Dragon Fruit",
+                          TRUE ~ user)) %>% 
+  mutate(Date = mdy(Date)) %>% 
+  filter(Date >= Sys.Date() - 730)  # FILTER WITHIN THE PAST TWO YEARS
+```
+
+And let's validate our work:
+```{r message=FALSE, warning=FALSE}
+netflix_clean
+```
+
+Now that we are done cleaning our data we can finally build our network graph.
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">In Data Science, 80% of time spent prepare data, 20% of time spent complain about need for prepare data.</p>&mdash; Big Data Borat (@BigDataBorat) <a href="https://twitter.com/BigDataBorat/status/306596352991830016?ref_src=twsrc%5Etfw">February 27, 2013</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+## Build network graph
+```{r message=FALSE, warning=FALSE}
+netflix_graph <- netflix_clean %>% 
+  count(user, title, sort = TRUE) %>% # COUNT THE NUMBER OF VIEWS PER USER BY TITLE
+  filter(n >= 10) %>% # FILTER OUT LOW VOLUME DATA
+  as_tbl_graph(directed = FALSE) %>% 
+  mutate(group = group_infomap(),
+         neighbors = centrality_degree(),
+         center = node_is_center(),
+         dist_to_center = node_distance_to(node_is_center()),
+         keyplayer = node_is_keyplayer(k = 5)) %>% 
+  activate(edges) %>% 
+  filter(!edge_is_multiple()) %>% 
+  mutate(centrality_e = centrality_edge_betweenness())
+```
+
+If you want more details on the above then I encourage you to check out this [amazing intro to the ggraph package](https://www.data-imaginist.com/2017/ggraph-introduction-edges/).
+
+## Visualize network graph
+```{r message=FALSE, warning=FALSE}
+ggraph(netflix_graph, layout = 'kk') + 
+  geom_edge_link(alpha = 0.5, color = 'grey54') +
+  geom_node_point(aes(color = factor(group)), size = 3, show.legend = FALSE) +
+  geom_node_text(aes(label = name), size = 3, repel = TRUE) +
+  scale_color_brewer(palette = "Set1") +
+  theme_void() +
+  labs(caption = "by: @eeysirhc")
+```
+
+## Wrapping up
+Now it's your turn - where do you lie in this network graph based on your own Netflix viewing activity? Do we watch similar TV shows or not really? How do you compare & contrast against your family and friends? What happens if you change the threshold from _10_ to _20_?
+
+Don't hesitate to share your results on [Twitter](https://twitter.com/Eeysirhc)!
+
+

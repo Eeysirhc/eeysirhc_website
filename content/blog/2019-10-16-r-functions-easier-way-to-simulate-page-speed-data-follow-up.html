@@ -1,0 +1,306 @@
+---
+title: 'R functions for simulation, sampling & visualization'
+author: Christopher Yee
+date: '2019-10-16'
+slug: r-functions-for-data-simulation-sampling-and-visualization
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>In my previous article about <a href="https://www.christopheryee.org/blog/exploring-page-speed-with-data-simulation/">simulating page speed data</a>, I broke one of the cardinal rules in programming: <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself">don’t repeat yourself</a>.</p>
+<p>There was a reason for this: I wanted to show what is going on under the hood and the theoretical concepts associated with them before using other functions in R.</p>
+<p>For this follow-up, I’ll highlight a few <a href="https://twitter.com/search?q=%23rstats">#rstats</a> shortcuts that will make your life easier when generating and exploring simulated data.</p>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<p>We’ll use the same dataset from last time with Best Buy and Home Depot as our initial test subjects.</p>
+<pre class="r"><code>library(tidyverse)
+
+df &lt;- read_csv(&quot;https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/page_speed_benchmark.csv&quot;) %&gt;% 
+  filter(page_type != &#39;Home&#39;)
+  
+df %&gt;% 
+  filter(website %in% c(&quot;BestBuy&quot;, &quot;Home Depot&quot;)) %&gt;% 
+  group_by(website) %&gt;% 
+  summarize(avg_time_interactive = mean(time_to_interactive),
+            sd_time_interactive = sd(time_to_interactive))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   website    avg_time_interactive sd_time_interactive
+## * &lt;chr&gt;                     &lt;dbl&gt;               &lt;dbl&gt;
+## 1 BestBuy                    31.2                2.60
+## 2 Home Depot                 25.2                1.41</code></pre>
+</div>
+<div id="simulating-data" class="section level1">
+<h1>Simulating data</h1>
+<p>The code from the previous article is prone to error in the long run when we have multiple datasets to manage.</p>
+<pre class="r"><code>bestbuy &lt;- rnorm(1e4, 31.2, 2.60) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(website = paste0(&quot;bestbuy&quot;))
+
+homedepot &lt;- rnorm(1e4, 25.2, 1.41) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(website = paste0(&quot;homedepot&quot;))</code></pre>
+<p>Instead we can simplify things by writing a custom function to do all of the above.</p>
+<pre class="r"><code># FUNCTION TO SIMULATE 10K
+sim_10k &lt;- function(mean, sd, website){
+  
+  values &lt;- rnorm(1e4, mean, sd) %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(website = paste0(website))
+}</code></pre>
+<p>Now with a single call we can simulate 10K data points for our normal distribution based on a set of parameters:</p>
+<ul>
+<li>Average mean</li>
+<li>Standard deviation</li>
+<li>Name of the website</li>
+</ul>
+<pre class="r"><code>bestbuy &lt;- sim_10k(31.2, 2.60, &quot;bestbuy&quot;)
+homedepot &lt;- sim_10k(25.2, 1.41, &quot;homedepot&quot;)
+
+# VALIDATE OUR DATA
+rbind(bestbuy, homedepot) %&gt;% 
+  group_by(website) %&gt;% 
+  summarize(mean = mean(value),
+            sd = sd(value)) </code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   website    mean    sd
+## * &lt;chr&gt;     &lt;dbl&gt; &lt;dbl&gt;
+## 1 bestbuy    31.2  2.64
+## 2 homedepot  25.2  1.42</code></pre>
+</div>
+<div id="plotting-simulated-data" class="section level1">
+<h1>Plotting simulated data</h1>
+<p>There may be cases where we need to juggle around numerous datasets and quickly visualize the distribution.</p>
+<p>Rather than writing (and rewriting) our data frames or plots we can create a custom function to do just that.</p>
+<pre class="r"><code># FUNCTION FOR HISTOGRAM
+hist_plot &lt;- function(df){
+  
+  multihist &lt;- ggplot(data = df, aes(value, fill = website)) +
+    geom_histogram(binwidth = 0.05, position = &#39;identity&#39;, alpha = 0.8) +
+    scale_fill_brewer(palette = &#39;Dark2&#39;) +
+    labs(x = &quot;Time to Interactive (seconds)&quot;) +
+    theme_light()
+  
+  return(multihist)
+}
+
+# PLOT BEST BUY AND HOME DEPOT DATA
+hist_plot(rbind(bestbuy, homedepot))</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Let’s add Walmart to the mix to illustrate how easy it can be to visualize new datasets.</p>
+<pre class="r"><code># WALMART SUMMARY STATISTICS
+df %&gt;% 
+  group_by(website) %&gt;% 
+  filter(website == &#39;Walmart&#39;) %&gt;% 
+  summarize(avg_time_interactive = mean(time_to_interactive),
+            sd_time_interactive = sd(time_to_interactive))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   website avg_time_interactive sd_time_interactive
+##   &lt;chr&gt;                  &lt;dbl&gt;               &lt;dbl&gt;
+## 1 Walmart                 16.6               0.830</code></pre>
+<p>And let’s plot everything together with our new functions:</p>
+<pre class="r"><code># SIMULATE WALMART DATA
+walmart &lt;- sim_10k(16.6, 0.830, &quot;walmart&quot;)
+
+# PLOT WALMART DATA
+hist_plot(rbind(bestbuy, homedepot, walmart))</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Or we can focus on a single group:</p>
+<pre class="r"><code>hist_plot(bestbuy)</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+<div id="just-give-me-the-answers" class="section level1">
+<h1>Just give me the answers!</h1>
+<p>Here’s a non-secret: based on their mathematical properties, we can skip the entire data simulation process and spit out the results.</p>
+<p>For the following section we’ll use Target as our example.</p>
+<pre class="r"><code># TARGET SUMMARY STATISTICS
+df %&gt;% 
+  filter(website == &#39;Target&#39;) %&gt;% 
+  group_by(website) %&gt;% 
+  summarize(mean_time_interactive = mean(time_to_interactive),
+            sd_time_interactive = sd(time_to_interactive))</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   website mean_time_interactive sd_time_interactive
+## * &lt;chr&gt;                   &lt;dbl&gt;               &lt;dbl&gt;
+## 1 Target                   21.4                2.02</code></pre>
+</div>
+<div id="calculating-probabilities" class="section level1">
+<h1>Calculating probabilities</h1>
+<div id="dnorm" class="section level2">
+<h2>dnorm</h2>
+<p>This function returns the probability density for a specific value given its shape.</p>
+<p>For Target, we can use it to answer the question: <em>what is the probability we will measure a time_to_interactive page speed score of exactly 20s?</em></p>
+<p>In this case it would be as simple as this single line of code:</p>
+<pre class="r"><code>dnorm(20, 21.4, 2.02) * 100</code></pre>
+<pre><code>## [1] 15.53292</code></pre>
+<p>And to validate that:</p>
+<pre class="r"><code># SIMULATE TARGET DATA
+target &lt;- sim_10k(21.4, 2.02, &quot;target&quot;)
+
+target %&gt;% 
+  ggplot(aes(value)) +
+  geom_density() +
+  geom_vline(xintercept = 20, lty = 2, color = &#39;salmon&#39;) +
+  geom_hline(yintercept = 0.1553292, lty = 2, color = &#39;salmon&#39;) +
+  geom_point(aes(x = 20, y = 0.1553292), size = 3, color = &#39;grey40&#39;) +  
+  labs(x = &quot;Time to Interative (seconds)&quot;, y = &quot;Probability Density&quot;) +
+  scale_y_continuous(labels = scales::percent_format(round(1))) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+</div>
+<div id="pnorm" class="section level2">
+<h2>pnorm</h2>
+<p>We can use this function if we want to know what the probability distribution is for certain values that fall <strong>below</strong> a certain threshold - we have already been doing this!</p>
+<p>For example: <em>what is the probability a random page on Target will be less than 20 seconds?</em></p>
+<pre class="r"><code>sum(target$value &lt; 20) / length(target$value) * 100</code></pre>
+<pre><code>## [1] 24.65</code></pre>
+<p>And if we use the pnorm function without generating any data:</p>
+<pre class="r"><code>pnorm(20, 21.4, 2.02) * 100</code></pre>
+<pre><code>## [1] 24.4133</code></pre>
+<p>Visualizing our data can also confirm this output.</p>
+<pre class="r"><code>target %&gt;% 
+  mutate(segment = ifelse(value &lt; 20, &quot;below&quot;, &quot;above&quot;)) %&gt;% 
+  ggplot(aes(value, fill = segment)) +
+  geom_histogram(binwidth = 0.05, alpha = 0.8) +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  labs(x = &quot;Time to Interactive (seconds)&quot;) +
+  theme_light()</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
+<p>This same function can also be used to find the probability distribution above a given threshold by adding a minor change with <em>lower.tail = FALSE</em> (we’ll use 25 seconds):</p>
+<pre class="r"><code>pnorm(25, 21.4, 2.02, lower.tail = FALSE) * 100</code></pre>
+<pre><code>## [1] 3.736009</code></pre>
+<p>Which is the same as:</p>
+<pre class="r"><code>sum(target$value &gt; 25) / length(target$value) * 100</code></pre>
+<pre><code>## [1] 3.66</code></pre>
+<blockquote>
+<p>Note: we are generating 10K random numbers from a given parameter space so the values will match 1:1 as our <em>n</em> gets closer to infinity. To test this, try increasing your simulation from 10K (1e4) to 100K (1e5) or even 1M (1e6).</p>
+</blockquote>
+</div>
+<div id="qnorm" class="section level2">
+<h2>qnorm</h2>
+<p>We can leverage this function, given a desired quantile, to ask a question like: <em><strong>above</strong> what time_to_interactive threshold is considered the slowest 10th percentile on Target?</em></p>
+<pre class="r"><code>qnorm(.90, 21.4, 2.02) </code></pre>
+<pre><code>## [1] 23.98873</code></pre>
+<p>This is essentially the inverse of our pnorm function:</p>
+<pre class="r"><code>pnorm(23.98873, 21.4, 2.02, lower.tail = FALSE) * 100</code></pre>
+<pre><code>## [1] 10.00004</code></pre>
+<p>Thus, everything above ~24 seconds is considered the slowest 10% for Target.</p>
+<pre class="r"><code>target %&gt;% 
+  mutate(percentile = ifelse(value &gt; 23.98873, &quot;10th&quot;, &quot;90th&quot;)) %&gt;% 
+  ggplot(aes(value, fill = percentile)) +
+  geom_histogram(binwidth = 0.05) +
+  scale_fill_brewer(palette = &#39;Greens&#39;, direction = -1) +
+  labs(x = &quot;Time to Interactive (seconds)&quot;) +
+  theme_light()</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>And to get our answer in the opposite direction for the fastest 2-percentile we make a slight adjustment again with <em>lower.tail = FALSE</em>:</p>
+<pre class="r"><code>qnorm(.98, 21.4, 2.02, lower.tail = FALSE)</code></pre>
+<pre><code>## [1] 17.25143</code></pre>
+<p>Now we know that ~17.25 seconds in time_to_interactive is considered the maximum value to be considered the fastest 2% on Target’s website.</p>
+<p>We can then validate our assumptions with the pnorm function:</p>
+<pre class="r"><code>pnorm(17.25143, 21.4, 2.02) * 100</code></pre>
+<pre><code>## [1] 2.000007</code></pre>
+<p>And visualize our results as needed:</p>
+<pre class="r"><code>target %&gt;% 
+  mutate(percentile = ifelse(value &lt; 17.25143, &quot;2nd&quot;, &quot;98th&quot;)) %&gt;% 
+  ggplot(aes(value, fill = percentile)) +
+  geom_histogram(binwidth = 0.05) +
+  scale_fill_brewer(palette = &#39;Blues&#39;) +
+  labs(x = &quot;Time to Interactive (seconds)&quot;) +
+  theme_light()</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+</div>
+</div>
+<div id="visualizing-probabilities" class="section level1">
+<h1>Visualizing probabilities</h1>
+<p>Since we don’t necessarily need to simulate our data we also don’t need it to plot our distributions!</p>
+<p>Taking our example from earlier, if we wanted to know Target’s probability density at exactly 20 seconds we can run this command:</p>
+<pre class="r"><code>dnorm(20, 21.4, 2.02) * 100</code></pre>
+<pre><code>## [1] 15.53292</code></pre>
+<p>Which can also be visualized with the <strong>stat_function</strong>:</p>
+<pre class="r"><code>ggplot(data.frame(x = c(0, 40)), aes(x)) +
+  stat_function(args = c(mean = 21.4, sd = 2.02),
+                color = &#39;grey30&#39;, 
+                fun = dnorm, 
+                n = 1e4) +
+  geom_vline(xintercept = 20, lty = 2, color = &#39;red&#39;) +
+  geom_hline(yintercept = 0.1553292, lty = 2, color = &#39;red&#39;) +
+  labs(x = &quot;Time to Interactive (seconds)&quot;, y = &quot;Probability Density&quot;) +
+  scale_y_continuous(labels = scales::percent_format(round(1))) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-24-1.png" width="672" /></p>
+<p>For the aforementioned pnorm function, we can calculate the probability a random Target page will be under 20 seconds with the following:</p>
+<pre class="r"><code>pnorm(20, 21.4, 2.02)</code></pre>
+<pre><code>## [1] 0.244133</code></pre>
+<p>But also visualize the probability distribution by changing the <strong>fun</strong> argument like so:</p>
+<pre class="r"><code>ggplot(data.frame(x = c(0, 40)), aes(x)) +
+  stat_function(args = c(mean = 21.4, sd = 2.02),
+                color = &#39;grey30&#39;, 
+                fun = pnorm, 
+                n = 1e4) +
+  geom_vline(xintercept = 20, lty = 2, color = &#39;red&#39;) +
+  geom_hline(yintercept = 0.244133, lty = 2, color = &#39;red&#39;) +
+  labs(x = &quot;Time to Interactive (seconds)&quot;, y = &quot;Probability Distribution&quot;) +
+  scale_y_continuous(labels = scales::percent_format(round(1))) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-26-1.png" width="672" /></p>
+<p>Last but not least, we can visualize our qnorm data as well to find the 90th percentfile cutoff point:</p>
+<pre class="r"><code>ggplot(data.frame(x = c(0, 1)), aes(x)) +
+  stat_function(args = c(mean = 21.4, sd = 2.02),
+                color = &#39;grey30&#39;, 
+                fun = qnorm,
+                n = 1e4) +
+  geom_vline(xintercept = 0.90, lty = 2, color = &#39;red&#39;) +
+  geom_hline(yintercept = 23.98873, lty = 2, color = &#39;red&#39;) +
+  labs(y = &quot;Time to Interactive (seconds)&quot;, x = &quot;Percent Quantile&quot;) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+<p>And to confirm everything we run the respective function:</p>
+<pre class="r"><code>qnorm(.90, 21.4, 2.02) </code></pre>
+<pre><code>## [1] 23.98873</code></pre>
+<div id="bonus" class="section level2">
+<h2>Bonus</h2>
+<p>Charting multiple page speed probability densities in one go:</p>
+<pre class="r"><code>ggplot(data.frame(x = c(0, 40)), aes(x)) +
+  
+  # HOME DEPOT
+    stat_function(args = c(mean = 25.2, sd = 1.41),
+                  aes(color = &#39;Home Depot&#39;),
+                  fun = dnorm, 
+                  n = 1e4,
+                  size = 1) +  
+  
+  # TARGET
+  stat_function(args = c(mean = 21.4, sd = 2.02),
+                aes(color = &#39;Target&#39;),
+                fun = dnorm, 
+                n = 1e4,
+                size = 1) +
+   
+  # WALMART
+    stat_function(args = c(mean = 16.6, sd = 0.830),
+                  aes(color = &#39;Walmart&#39;),
+                  fun = dnorm,
+                  n = 1e4,
+                  size = 1) +
+  
+  labs(x = &quot;Time to Interactive (seconds)&quot;, y = &quot;Probability Density&quot;, color = NULL) +
+  scale_color_manual(values = c(&quot;#D55E00&quot;, &quot;#009E73&quot;, &quot;#0072B2&quot;)) +
+  scale_y_continuous(labels = scales::percent_format(round(1))) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())</code></pre>
+<p><img src="/blog/2019-10-16-r-functions-easier-way-to-simulate-page-speed-data-follow-up_files/figure-html/unnamed-chunk-29-1.png" width="672" /></p>
+</div>
+</div>

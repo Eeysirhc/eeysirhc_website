@@ -1,0 +1,29 @@
+---
+author: Christopher Yee
+date: 2010-12-16 03:58:15+00:00
+layout: post
+slug: the-power-of-internal-link-building
+title: The Power of Internal Link Building
+categories:
+- Link Acquisition
+editor_options: 
+  chunk_output_type: console
+---
+
+[Link building](http://www.christopheryee.org/category/link-building/) is one of the most important aspect of any search engine optimization campaign.  Since my [SEO journey began](http://www.christopheryee.org/let-my-seo-journey-begin/) half a year ago, I have read countless articles titled "Link Building 101" or "Top XYZ Link Building Tactics."  What most of these authors overlook, or don't stress enough, is the power of internal link building.
+
+_IMAGE REMOVED_
+
+In early November my dentist asked me to [SEO](http://www.christopheryee.org/category/search-engine-optimization/) his website for him.  Being new to the field I offered him a [free trial](http://www.christopheryee.org/freelance-seo-important-for-beginners/) for one month so I could put my new SEO skill set to the test.  Let's be honest though, every marketer knows there is always a catch to trial periods.
+
+My "catch" was I would only perform on-page optimization.  This means I only focused on optimizing the title and h1 tags, content, site structure and internal linking.  There was multiple limitations to his website but the most detrimental factor was the duplicate content.  His website is hosted on a third party platform catering specifically to dentists.  The hosting company "designs" websites for them by uploading cookie cutter builds which has written content that could be tracked to over 1,200 other sites.  Good deal for $600/year!
+
+
+
+In any case, I was skeptical his website would even move up the SERPs at all given the duplicate content issue but I SEO'd it anyway.  All I did was anchor keywords to their appropriate internal destination URLs and voila!  The graph below illustrates the positioning results after a month and the keywords are variations of [keyword + location] or [location + keyword].
+
+_IMAGE REMOVED_
+
+I'll summarize for those who are not "self-explanatorily" inclined or have images turned off.  Prior to optimization, the keywords my dentist was trying to rank for either didn't exist (>#100) or was placed above the 50th position threshold.  I subsequently linked certain keywords from the home page to their respective URLs.  By the next crawl date our target keywords either ranked in the Google SERPs or skyrocketed to position #11.  A week later they all converged to fluctuate between #10 and #11.
+
+The lesson here is that internal link building is very powerful so it should not be brushed aside.  In fact, internal linking should be completed before you begin any off-site optimization.

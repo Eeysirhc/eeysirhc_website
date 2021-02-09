@@ -1,0 +1,129 @@
+---
+title: 'TidyTuesday: Cocktails pt.2'
+author: Christopher Yee
+date: '2020-05-28'
+slug: tidytuesday-cocktails-pt-2
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+This is part 2 of [TidyTuesday: Cocktails](https://www.christopheryee.org/blog/tidytuesday-cocktails/).
+
+Below shows how we can use [#rstats](https://twitter.com/hashtag/rstats) to write a cocktail recommendation system that takes in a drink and returns a few other cocktails based on similarly mixed ingredients.
+
+## Load libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(recommenderlab)
+```
+
+## Download and parse data
+
+> Note: please check out part 1 for deatils on processing steps
+
+```{r message=FALSE, warning=FALSE}
+bc_raw <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv')
+
+bc <- bc_raw %>% 
+  mutate(ingredient = str_to_lower(ingredient)) %>% 
+  distinct() %>% 
+  select(name, ingredient)
+
+bc_tidy <- bc %>% 
+  filter(!str_detect(ingredient, ","))
+
+bc_untidy <- bc %>% 
+  filter(str_detect(ingredient, ",")) %>% 
+  mutate(ingredient = str_split(ingredient, ", ")) %>% 
+  unnest(ingredient)
+
+bc_clean <- rbind(bc_tidy, bc_untidy) %>% 
+  distinct()
+
+df <- bc_clean %>% 
+  mutate(ingredient = str_replace_all(ingredient, "-", "_"),
+         ingredient = str_replace_all(ingredient, " ", "_"),
+         ingredient = str_replace_all(ingredient, "old_mr._boston_", ""),
+         ingredient = str_replace_all(ingredient, "old_thompson_", "")) 
+
+df_processed <- df %>% 
+  mutate(value = 1) %>% 
+  pivot_wider(names_from = name) %>% 
+  replace(is.na(.), 0)
+```
+
+## Recommendation algorithm
+
+### Transform data to binary rating matrix
+```{r message=FALSE, warning=FALSE}
+cocktails_matrix <- df_processed %>% 
+  select(-ingredient) %>% 
+  as.matrix() %>% 
+  as("binaryRatingMatrix")
+```
+
+### Create evaluation scheme
+```{r message=FALSE, warning=FALSE}
+scheme <- cocktails_matrix %>% 
+  evaluationScheme(method = "cross", k = 5, train = 0.8, given = -1)
+```
+
+
+### Input customer cocktail preference
+
+Let's check the ingredients for a very simple cocktail:
+```{r message=FALSE, warning=FALSE}
+df %>% filter(name == 'Screwdriver')
+```
+
+Perfect. We can now use our recommendation model and predict what cocktail the customer might like based on similarly mixed ingredients.
+
+```{r message=FALSE, warning=FALSE}
+favorite_cocktail <- "Screwdriver"
+
+recco_matrix <- df %>% 
+  select(name) %>% 
+  unique() %>% 
+  mutate(value = as.numeric(name %in% favorite_cocktail)) %>%
+  pivot_wider(names_from = name) %>% 
+  replace(is.na(.), 0) %>% 
+  as.matrix() %>% 
+  as("binaryRatingMatrix")
+
+recco <- Recommender(getData(scheme, 'train'), 
+                      method = "IBCF",  
+                      param = list(k = 5))
+
+cocktails_predict <- predict(recco, newdata = recco_matrix, n = 5)
+```
+
+### Cocktail recommendation output
+```{r message=FALSE, warning=FALSE}
+cocktails_results <- as(cocktails_predict, 'list') %>% as_tibble()
+
+cocktails_results
+```
+
+Finally, let's make sure our results have at least _vodka_ or _orange juice_ as their ingredients for the recommended cocktails:
+
+```{r message=FALSE, warning=FALSE}
+df %>% 
+  filter(name %in% cocktails_results$`1`) 
+```
+
+Not bad at all!
+
+## Out of scope
+
+* Model evaluaiton
+* Dynamic web app built in Shiny
+
+## References
+
+* [Market basket analysis with recommenderlab](https://towardsdatascience.com/market-basket-analysis-with-recommenderlab-5e8bdc0de236)
+
+
+
+

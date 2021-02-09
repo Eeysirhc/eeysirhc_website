@@ -1,0 +1,134 @@
+---
+title: Classifying keywords with the fuzzyjoin R package
+author: Christopher Yee
+date: '2019-07-19'
+slug: classifying-keywords-with-the-fuzzyjoin-r-package
+categories:
+  - Search Engine Optimization
+---
+
+A few months ago I tweeted a complex (and tedious) Excel formula on how to classify keywords:
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">*For the <a href="https://twitter.com/hashtag/seo?src=hash&amp;ref_src=twsrc%5Etfw">#seo</a> who insists on completing their keyword/intent research in excel*<br><br>Philosophy: keyword intent is not absolute so it won&#39;t fall neatly into an assigned bucket. For this reason a keyword can live under multiple conversion funnels since we can&#39;t be 100% certain. <a href="https://t.co/JcTl9P11mC">pic.twitter.com/JcTl9P11mC</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1121093402685100034?ref_src=twsrc%5Etfw">April 24, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+I then ended it with:
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Notes<br>1) This will probably crap out after 30k keywords (solve: copy+paste values only)<br>2) You can supplement with GSC CTR data or SEM conversion rates (separate workflow)<br>3) Consider ditching excel for R/Python in the future (<a href="https://t.co/GoiyfAiFYN">https://t.co/GoiyfAiFYN</a>)</p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1121093527218221056?ref_src=twsrc%5Etfw">April 24, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+In hindsight the third comment could be interpreted as "gud luk lulz!"
+
+For this walkthrough we'll use the \{fuzzyjoin\} [#rstats](https://twitter.com/search?q=%23rstats&src=tyah) package to replicate the aforementioned Excel method. In a future post we'll build a neural net instead to achieve this for 1M+ keywords.
+
+## Load packages
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+```
+
+
+## Download data
+```{r results='hide', message=FALSE, warning=FALSE}
+df <- read_csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/keywords_digital_marketing.csv")
+```
+
+## Inspect the data
+```{r message=FALSE, warning=FALSE}
+df
+```
+
+## Introducing {fuzzyjoin}
+[Fuzzyjoin](https://cran.r-project.org/web/packages/fuzzyjoin/README.html) is an amazing package _"that allows matching not just on values that match between columns, but on inexact matching."_
+
+This is exactly what we need to identify and match keyword strings together so let's first load the package.
+```{r results='hide', message=FALSE, warning=FALSE}
+# install.packages("fuzzyjoin") 
+library(fuzzyjoin)
+```
+
+To understand how this works we'll start small by building out the _consideration_ identifier segment.
+```{r results='hide', message=FALSE, warning=FALSE}
+consideration <- as_tibble(c("what is", "blog", "specialist", 
+                             "near me", "agency", "compan", 
+                             "service", "example")) %>% 
+  rename(consideration = value)
+```
+
+Then we (fuzzy) match the two dataframes with the __regex_left_join__ function to produce the following result:
+```{r message=FALSE, warning=FALSE}
+regex_left_join(df, consideration, by = c("Keyword" = "consideration")) %>% 
+  replace(., is.na(.), "-") # REPLACE NA VALUES
+```
+
+Not bad - we were able to assign each keyword to the respective _consideration_ segment while ignoring those that do not apply.
+
+Now let's combine everything for the other categories...
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# TRANSACTIONAL
+transactional <- as_tibble(c("agency", "compan", "consult", 
+                             "service")) %>%
+  rename(transactional = value)
+
+# EVALUATION
+evaluation <- as_tibble(c("blog", "consult", "agency", 
+                          "compan", "service", "example")) %>% 
+  rename(evaluation = value)
+
+# CONSIDERATION
+consideration <- as_tibble(c("what is", "blog", "specialist", 
+                             "near me", "agency", "compan", 
+                             "service", "example", "strategy")) %>% 
+  rename(consideration = value)
+
+# AWARENESS
+awareness <- as_tibble(c("what is", "tool", "definition", 
+                         "channel", "near me", "blog", 
+                         "course", "new", "trend", "tip",
+                         "strategy")) %>% 
+  rename(awareness = value)
+
+# OUT OF FUNNEL
+out_of_funnel <- as_tibble(c("degree", "institute", "course", 
+                             "certif", "skill", "for dummi", 
+                             "training", "quote", "job", 
+                             "salary", "intern", "manager", 
+                             "resume", "analyst", "strategist", 
+                             "director", "specialist")) %>% 
+  rename(out_of_funnel = value)
+```
+
+And finally match them with the keywords dataset...
+
+```{r message=FALSE, warning=FALSE}
+df_parsed <- regex_left_join(df, transactional, by = c("Keyword" = "transactional")) %>% 
+  regex_left_join(evaluation, by = c("Keyword" = "evaluation")) %>% 
+  regex_left_join(consideration, by = c("Keyword" = "consideration")) %>% 
+  regex_left_join(awareness, by = c("Keyword" = "awareness")) %>% 
+  regex_left_join(out_of_funnel, by = c("Keyword" = "out_of_funnel")) %>% 
+  replace(., is.na(.), "-") %>% # REPLACE NA VALUES
+  head(10) # FILTER ON FIRST 10
+```
+
+_Step 5)_ Win.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(kableExtra)
+
+kable(df_parsed) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T)
+```
+
+## Wrapping Up
+
+What I love about this is the reproducibility and speed.
+
+Although Excel did the job for me in the past when I needed it, the most frustrating thing was the cognitive load to get the lengthy array formula correct. It was (and still is) prone to error every time I had to 1) add new keyword identifiers or 2) wanted to expand the number of categories.
+
+Transitioning to R has saved me countless headaches where I can just write, reuse or edit a few lines of code.
+
+I hope this example using the \{fuzzyjoin\} package will help your keyword research workflow as much as it has helped mine!

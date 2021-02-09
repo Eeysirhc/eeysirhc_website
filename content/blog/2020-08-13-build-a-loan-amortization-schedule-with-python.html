@@ -1,0 +1,112 @@
+---
+title: Build a loan amortization schedule with Python
+author: Christopher Yee
+date: '2020-08-16'
+slug: build-a-loan-amortization-schedule-with-python
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>With <a href="https://www.valuepenguin.com/mortgages/historical-mortgage-rates">mortgage rates</a> at a <a href="https://www.housingwire.com/articles/uwm-announces-1-99-rate-for-30-year-fixed-mortgage/">historical low</a> there are <a href="https://www.redfin.com/us-housing-market">inklings</a> the US housing market is heating up again. Buying a home is a huge decision and in a perfect world everyone weighs their options and makes a (relatively) rational choice.</p>
+<p>One approach is to lay out all the mortgage offers and compare how much more we’re paying over the life of the loan. In this article I want to achieve a few things:</p>
+<ul>
+<li>Create a loan amortization table</li>
+<li>Visualize and compare the different scenarios</li>
+<li>Develop everything in python</li>
+</ul>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import numpy as np
+import numpy_financial as npf #DOWNLOAD: pip3 install numpy-financial
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style=&quot;darkgrid&quot;)</code></pre>
+</div>
+<div id="define-function" class="section level2">
+<h2>Define function</h2>
+<p>To build our amortization schedule we can write a python function to accept three arguments: interest rate, mortgage amount, and loan duration.</p>
+<pre class="python"><code>def amortization_schedule(input_intrate, mortgage, years):
+
+  ##### PARAMETERS #####
+  # CONVERT MORTGAGE AMOUNT TO NEGATIVE BECAUSE MONEY IS GOING OUT
+  mortgage_amount = -(mortgage) 
+  interest_rate = (input_intrate / 100) / 12
+  periods = years*12
+  # CREATE ARRAY
+  n_periods = np.arange(years * 12) + 1
+  
+  ##### BUILD AMORTIZATION SCHEDULE #####
+  # INTEREST PAYMENT
+  interest_monthly = npf.ipmt(interest_rate, n_periods, periods, mortgage_amount)
+  
+  # PRINCIPAL PAYMENT
+  principal_monthly = npf.ppmt(interest_rate, n_periods, periods, mortgage_amount)
+  
+  # JOIN DATA
+  df_initialize = list(zip(n_periods, interest_monthly, principal_monthly))
+  df = pd.DataFrame(df_initialize, columns=[&#39;period&#39;,&#39;interest&#39;,&#39;principal&#39;])
+  
+  # MONTHLY MORTGAGE PAYMENT
+  df[&#39;monthly_payment&#39;] = df[&#39;interest&#39;] + df[&#39;principal&#39;]
+  
+  # CALCULATE CUMULATIVE SUM OF MORTAGE PAYMENTS
+  df[&#39;outstanding_balance&#39;] = df[&#39;monthly_payment&#39;].cumsum()
+  
+  # REVERSE VALUES SINCE WE ARE PAYING DOWN THE BALANCE
+  df.outstanding_balance = df.outstanding_balance.values[::-1]
+  
+  return(df)</code></pre>
+</div>
+<div id="build-scenarios" class="section level2">
+<h2>Build scenarios</h2>
+<p>Let’s assume a $500k loan for a standard length of 30 years with a few varying interest rates.</p>
+<pre class="python"><code>input_loan = 5e5
+input_years = 30
+
+scenario1 = amortization_schedule(4.00, input_loan, input_years)
+scenario2 = amortization_schedule(3.00, input_loan, input_years)
+scenario3 = amortization_schedule(2.00, input_loan, input_years)</code></pre>
+</div>
+<div id="visualize" class="section level2">
+<h2>Visualize</h2>
+<pre class="python"><code>plt.figure(figsize=(15,10))
+
+sns.lineplot(x=&#39;period&#39;, y=&#39;outstanding_balance&#39;, data=scenario1, color=&#39;steelblue&#39;);
+sns.lineplot(x=&#39;period&#39;, y=&#39;outstanding_balance&#39;, data=scenario2, color=&#39;salmon&#39;);
+sns.lineplot(x=&#39;period&#39;, y=&#39;outstanding_balance&#39;, data=scenario3, color=&#39;seagreen&#39;);
+plt.axhline(y=5e5, linestyle=&#39;:&#39;, color=&#39;grey&#39;)
+
+plt.xlabel(&quot;Period&quot;)
+plt.ylabel(&quot;Outstanding Balance ($)&quot;)
+plt.subplots_adjust(top = 0.94)
+plt.suptitle(&quot;$500K mortgage over 30 years&quot;, x=0.12, horizontalalignment=&quot;left&quot;, fontsize=15)
+plt.figtext(0.9, 0.04, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.legend(labels=[&#39;4% Interest Rate&#39;, &#39;3% Interest Rate&#39;, &#39;2% Interest Rate&#39;])
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-08-13-build-a-loan-amortization-schedule-with-python_files/figure-html/unnamed-chunk-4-1.png" width="1440" /></p>
+<p>The great thing about this plot is how quickly we can identify the contrast between our different loan offers.</p>
+<p>Reviewing the first scenario with 4% interest rate reveals we are paying almost +72% over the life of the entire loan, or an extra $359K in interest.</p>
+<pre class="python"><code>scenario1[:1][&#39;outstanding_balance&#39;] - input_loan</code></pre>
+<pre><code>## 0    359347.531838
+## Name: outstanding_balance, dtype: float64</code></pre>
+<p>In fact, for this option the original loan amount doesn’t start paying down until ~13 years later:</p>
+<pre class="python"><code>scenario1[scenario1[&#39;outstanding_balance&#39;] &lt; input_loan][:1]</code></pre>
+<pre><code>##      period     interest   principal  monthly_payment  outstanding_balance
+## 151     152  1196.352798  1190.72368      2387.076477        498898.983761</code></pre>
+<p>For comparison the 2% interest rate scenario occurs by year ~8:</p>
+<pre class="python"><code>scenario3[scenario3[&#39;outstanding_balance&#39;] &lt; input_loan][:1]</code></pre>
+<pre><code>##     period    interest    principal  monthly_payment  outstanding_balance
+## 90      91  669.256966  1178.840398      1848.097363         498986.28813</code></pre>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>With a little help from the python programming language we were able to build our own amortization schedule, visualize the remaining balance during the life of the loan, and quickly compare &amp; contrast an assortment of mortgage options.</p>
+<p>If you found this useful or interesting then please do not hesitate to share with others on your favorite social media platform!</p>
+</div>

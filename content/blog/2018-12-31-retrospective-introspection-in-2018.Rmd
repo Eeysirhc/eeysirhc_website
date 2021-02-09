@@ -1,0 +1,129 @@
+---
+title: Retrospective Introspection in 2018
+author: Christopher Yee
+date: '2018-12-31'
+slug: retrospective-introspection-in-2018
+categories:
+  - Miscellaneous
+---
+
+With the year coming to a close and 2019 just around the corner, I thought I would try something new and reflect back on the defining moments of my 2018 - along with my $0.02.
+
+I do not compose enough of this (or my personal thoughts) in written format but I recently migrated my blog from WordPress to Hugo so this is a good a time as any.
+
+## Lucky to work with some of the smartest digital marketing folks in fintech
+It's rare to find the perfect team. I always thought it was a load of crock from techies who wrote on Medium and have everyone go on some wild goose chase.
+
+That notion was dissolved when I was fortunate enough to work with the A-team during my 2-year stint at Square. It's critical to note that you can't force it and it has to be 100% natural.  However, when you do find a team like this something magical happens: 
+
+* We respected each other
+* We kept our ego checked at the door
+* We were more giving of our time
+* We made it fun to go to work
+* We had each other's back
+
+Here's a few of those amazing people I worked with in no particular order: [Erin Renzas](https://www.linkedin.com/in/erinrenzas/), [Jackie Chu](https://www.linkedin.com/in/jackiec1/), [Brian Flores](https://www.linkedin.com/in/brianalexflores/), [Katie Bassett](https://www.linkedin.com/in/katherinebassett/), [Mallory Russell](https://www.linkedin.com/in/malloryrussell/), [Alise Bailey](https://www.linkedin.com/in/alisebailey/), [Thomas Cyr](https://www.linkedin.com/in/thomascyr/), [Amy Lee](https://www.linkedin.com/in/amy-n-lee-91802716/), [Nick Dimichino](https://www.linkedin.com/in/ndimichino/), [Tyler Bradley](https://www.linkedin.com/in/tylerfbradley/), [Fiona Lin](https://www.linkedin.com/in/linfiona/), [Jonathan Landy](https://www.linkedin.com/in/jonathan-landy-41098772/), [Deeksha Chugh](https://www.linkedin.com/in/deekshac/), [Alex Norcliffe](https://www.linkedin.com/in/alexnorcliffe/)
+
+If you ever find yourself blessed in this situation then stick with them for as long as you can. You'll not only forge close friendships along the way but feel empowered to tackle anything as a team.
+
+## Bounced from a highly toxic work environment
+I still get PTSD thinking about it but my final weeks at Square was the worst professional experience of my life.  A few high ranking officials including HR managed to:
+
+* _Install a complete joke (not a typo for "jerk") to lead the marketing team_
+     * The only value he brought to the table was forcing us to read and discuss a number of asinine "team building" books and create senseless busy work in Google Docs
+     
+* _Fire my boss for being a woman_
+     * 1000x more qualified than the aforementioned dope
+     
+* _Promote a psycopath to manage all advertising budget_
+     * She bullied everyone to do her bidding and anyone who dared question her would have their projects stonewalled
+
+* _Launch an internal witch hunt due to a highly critical Glassdoor review_
+     * Everyone thought it was me - it was not
+
+* _Completed the trifecta of incompetence by hiring a web strategist who was supposedly an expert in the following fields:_
+     * SEO, SEM, social media, content marketing, affiliate marketing, web analytics, DevOps, information security, information retrieval, biostatistics, astrophysics, quantum phsyics, etc.
+     
+     * Okay, maybe not the last few but this clown apparently knew how to do everything better than the experts
+     
+* _Voiced my concerns to the spineless CMO in which he replied, verbatim: "if you don't want to be here then just go, don't hang around."_
+     * I turned in my notice one week later
+     
+People who know me are aware I absolutely love Square and its mission.  However, life is too short to have to put up with all that bull$#!7.
+
+I know it's not financially practical for everyone but if you ever find yourself in a toxic, backstabbing-friendly work environment that encourages mediocrity: **GET. OUT**.
+
+It's not worth the psychological and physiological turmoil that comes with it.
+
+## Surprised by the impression I leave on others
+I am not always aware of how I come across but I was pleasantly surprised by the number of people with whom I never worked with (only in the same room) had reached out to me about my departure.
+
+They wished me well and commented on their perception of me - not something I think about often. It was an unexpected eye-opener and the positive reception made me realize people are always watching....they just don't say it.
+
+There was also a senior developer who fiercely advocated for me to stay and to think only two years earlier his sentiment about my open position at the time was:
+
+> Why are we even hiring an SEO? They are useless and it's a waste of money to pay someone for that job
+
+I am far from perfect but strongly believe everyone should hold themselves to a high standard, do a great job and strive to leave a place better than when we started.
+
+## Ventured into three new fields...simultaneously
+I left Square without a backup plan. I had a chat with a major travel website but that required moving to the east coast. I even toyed with an experimentation position for a well-known ride hailing service.
+
+It's not easy making a career change and the realization dawned on me that I was only good for one thing - SEO.
+
+I absolutely suck at networking but I think I am fairly decent at making an effort to keep in touch with past colleagues. In this case it was my former boss from CafePress, [Nicholas Gadacz](https://www.linkedin.com/in/nicholasgadacz/), who started a technology-focused SEM agency called [FT Optimize](https://www.ftoptimize.com/).
+
+We had infrequent chats over the years so it was easy to share my situation, goals and ambitions with Nick. One thing led to another and next thing you know I am plunged head first into the deep end working on:
+
+1. SEM/PPC advertising
+2. Data science
+3. Software engineering
+
+If there is a takeaway here it's that you should never go grocery shopping when you are hungry. Go out to coffee with someone just for the hell of it without any expectations. Who knows when that _cold_ lead could turn into a _hot_ one?
+
+## Unlocked technical knowledge I did not know I had
+Prior to joining FT Optimize, I had cursory knowledge in a number of programming languages: SQL, R, Bash, Ruby, Python, Git to name a few. It never really stuck though because I didn't apply it on a daily basis.
+
+Everything changed though with the new job when I was looking at code every single day.  This somehow unlocked all that knowledge I had squirreled away over the years but never really committed myself in their applicaiton.
+
+I went from 0-100mph really quick and started:
+
+* Pulling web scale data from [Redshift](https://aws.amazon.com/redshift/) via SQL like it was nobody's business
+* Analyzing said data and building statistical models in [R](https://www.r-project.org/)
+* Leveraging [AWS EC2](https://aws.amazon.com/ec2/) instances to execute those machine learning models in production
+* Checking in my code with [Git](https://git-scm.com/) for proper version control
+* Employ [Airflow](https://airflow.apache.org/) to build my data pipeline
+* Ultimately writing custom algorithms for our clients by stitching all these systems together
+
+My advice is to invest in yourself. Pay for that book. Enroll in that online course. The fruits of your labor won't be immediately apparent but it will pay off.
+
+# Looking forward to 2019
+Retrospects are great and all but I still need to face toward the future to ensure I make tangible progress.
+
+## Share and open source personal projects
+There is no doubt Python is becoming the de facto data science programming language but R (and the tidyverse principles) just speaks to me. I'll make an effort to open source my side projects but here's a teaser on what I have in the pipeline:
+
+* *Practical* machine learning for SEO
+* Super charging Google Search Console data with R
+* Keyword intent research & classification at scale
+* [A/B testing](https://twitter.com/Eeysirhc/status/1066850296813445121) with Bayesian statistics
+* Using expectation-maximization algorithms for SEO
+
+## Level up advanced R knowledge
+I've spent a considerable amount of time importing, manipulating, visualizing and communicating insights from a given dataset.  Despite this, it's a very one-sided relationship where I'm providing the end user with a static output.
+
+To increase my value add I will spend 2019 improving the interactivity of my final output in a few ways:
+
+* Learn functional programming with [purr](https://purrr.tidyverse.org/)
+* Build an [R Shiny app](https://shiny.rstudio.com/)
+* Release my own R package
+
+## Give back to the R community
+Unlike some online groups, the [#rstats](https://twitter.com/search?src=typd&q=%23rstats) community welcomes everyone with open arms. There is no sense of haughtiness or prerequisite for "the club" but everyone tries to help each other out.
+
+I'm naturally introverted but we all have to start somewhere if I want to better myself so here are a few ideas:
+
+* Continue to participate in weekly [#tidytuesday](https://github.com/rfordatascience/tidytuesday) datasets
+* Get involved in the SF bay area R community
+* Create, share and present tidyverse 101 in R Markdown slideshow format
+

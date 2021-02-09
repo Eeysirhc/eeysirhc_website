@@ -1,0 +1,88 @@
+---
+title: "TidyTuesday: Thanksgiving Dinner"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+author: Christopher Yee
+date: 2018-11-20
+layout: post
+slug: tidytuesday-thanksgiving-dinner
+categories:
+- TidyTuesday
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 11/20/2018 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-11-20">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+
+thanksgiving_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv&quot;)
+
+thanksgiving &lt;- 
+  thanksgiving_raw %&gt;%
+  filter(celebrate != &#39;No&#39;)</code></pre>
+<div id="what-are-the-most-popular-pies-for-thanksgiving" class="section level3">
+<h3>What are the most popular pies for Thanksgiving ?</h3>
+<pre class="r"><code>thanksgiving %&gt;%
+  select(pie1:pie13) %&gt;% 
+  pivot_longer(pie1:pie13, names_to = &quot;pie_type&quot;) %&gt;% 
+  filter(value != &#39;None&#39;) %&gt;% 
+  select(value) %&gt;% 
+  group_by(value) %&gt;% 
+  count() %&gt;% 
+  filter(n &gt; 10) %&gt;% 
+  ungroup() %&gt;% 
+  ggplot(aes(reorder(value, n), n, label = n)) +
+  geom_bar(aes(fill = value),
+           alpha = 0.9,
+           stat=&#39;identity&#39;) +
+  coord_flip() +
+  theme_classic() + 
+  theme(legend.position = &#39;none&#39;) +
+  labs(title = &quot;Most Popular Pies for Thanksgiving (n=980)&quot;,
+        subtitle = &quot;Question: Which type of pie is typically served at your Thanksgiving dinner? \n Please select all that apply&quot;,
+       x = &quot;&quot;,
+       y = &quot;&quot;)</code></pre>
+<p><img src="/blog/2018-11-20-thanksgiving_dinner_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="what-is-the-most-popular-thanksgiving-pie-by-us-region" class="section level3">
+<h3>What is the most popular Thanksgiving pie by US region?</h3>
+<pre class="r"><code>thanksgiving %&gt;%
+  select(pie1:pie13, us_region) %&gt;%
+  pivot_longer(pie1:pie13, names_to = &quot;pie_type&quot;) %&gt;% 
+  filter(!is.na(value), us_region != &#39;NA&#39;) %&gt;%
+  
+  # THIS IS PRETTY NASTY AND I SHOULD REFACTOR IN THE FUTURE
+  mutate(us_region = ifelse(us_region == &#39;South Atlantic&#39;, &#39;East&#39;, 
+                            ifelse(us_region == &#39;Middle Atlantic&#39;, &#39;North East&#39;, 
+                                   ifelse(us_region == &#39;East North Central&#39;, &#39;Midwest&#39;,
+                                          ifelse(us_region == &#39;East South Central&#39;, &#39;South&#39;,
+                                                 ifelse(us_region == &#39;West North Central&#39;, &#39;Midwest&#39;,
+                                                        ifelse(us_region == &#39;West South Central&#39;, &#39;South&#39;,
+                                                               ifelse(us_region == &#39;New England&#39;, &#39;North East&#39;,
+                                                                      ifelse(us_region == &#39;Pacific&#39;, &#39;West&#39;, 
+                                                                             ifelse(us_region == &#39;Mountain&#39;, &#39;Midwest&#39;,
+                                                               us_region)))))))))) %&gt;% 
+  group_by(us_region, value) %&gt;%
+  count(sort = TRUE) %&gt;% 
+  filter(n &gt; 10) %&gt;% 
+  ungroup()  %&gt;% 
+  ggplot(aes(us_region, fct_rev(value), fill = n)) + 
+  geom_tile() +
+  scale_fill_gradient2(
+    name = &#39;n&#39;,
+    low = &#39;#fee6ce&#39;,
+    mid = &#39;#fdae6b&#39;,
+    high = &#39;#e6550d&#39;,
+    midpoint = 100
+  ) +
+  theme_classic() + 
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Most Popular Pies for Thanksgiving by US Region&quot;)</code></pre>
+<p><img src="/blog/2018-11-20-thanksgiving_dinner_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>

@@ -1,0 +1,32 @@
+---
+author: Christopher Yee
+date: 2010-10-21 05:04:04+00:00
+layout: post
+slug: part-deuce-domain-change-and-duplicate-content
+title: 'Part Deuce: SERP Rankings and Changing Domains'
+categories:
+- Search Engine Optimization
+---
+
+To get yourself up to speed, I would recommend reading part uno of this two part series - [Domain Change and Duplicate Content](http://www.christopheryee.org/domain-change-and-duplicate-content/).
+
+But first, allow me to bask in my own glory as I provide an update on my current search engine rankings for this blog.
+**seo chris yee** - #2 on Google; #1 on Bing/Yahoo
+**seo christopher yee **- #2 on Google; #1 on Bing/Yahoo
+**christopher yee**- #38 on Google; >100 on Bing/Yahoo
+
+An interesting thing that I noticed is [my LinkedIn profile](http://www.linkedin.com/in/seochrisyee) is no longer #1 on Google but instead has been replaced by LinkedIn's directory for "Christopher Yee."  I've already optimized my LinkedIn for "seo christopher yee" but I guess Googlebot doesn't scour individual profiles frequently.
+
+
+
+Another SERP breakthrough is ranking #38 on Google for my name by itself, "[christopher yee](http://www.christopheryee.org/)."  I thought I'd never get up there since position #1 and #2 are domains that have around for 5+ years.  I have no clue what is going on with the Bing/Yahoo search engine though.
+
+Anyways, it has taken Google about a month to index my site since I changed domains from cyee428.wordpress to seochristopheryee.wordpress.  When I first started SEO Adventures, it took about 2 weeks to get it indexed.  So why did it take the latter domain so long?
+
+I originally thought it was a duplicate content issue because the search engines still had cyee428 indexed.  I mean, it was a pretty legitimate reason since I didn't see ANYTHING indexed for the longest time.  Then I realized my mistake - I forgot to submit my new blog to Google.
+
+_Lame._
+
+I can hear my mom nagging me now, "look before you leap!"  Even though my experiment was a failure due to absent-mindedness (noob), we can still learn something here - **your website doesn't exist unless you submit it to Google**.  Oh, and of course, plan ahead before you carry out an SEO test.
+
+I'm out and about!

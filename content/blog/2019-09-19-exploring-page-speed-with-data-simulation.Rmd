@@ -1,0 +1,339 @@
+---
+title: Simulating data to explore page speed performance
+author: Christopher Yee
+date: '2019-09-23'
+slug: exploring-page-speed-with-data-simulation
+categories:
+  - Data Science
+---
+
+We may be inundated with data but sometimes collecting it can be a challenge in and of itself. A few reasons off the top of my head:
+
+* Sparsity
+* Difficult to measure
+* Impractical to devote company resources to it
+* Lack of technical expertise to actually build or acquire it
+* Lazy (yours truly - [except for that one time](https://www.christopheryee.org/blog/moz-put-your-money-where-your-diversity-mouth-is/))
+
+Through simulation we can generate our own dataset with the added benefit of fully understanding what features we choose to put in our models (or leave out).
+
+In fact, a few of the machine learning models I wrote and put into production [at work](https://www.ftoptimize.com) are based on simulated data!
+
+This article will provide a quick walkthrough in getting you up and running using [#rstats](https://twitter.com/search?q=%23rstats).
+
+## Background
+
+I am in the market for a smart camera so while shopping online I also compiled some page speed data for a few eCommerce websites.  You can follow along with the data here:
+
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(scales)
+library(knitr)
+library(kableExtra)
+
+df <- read_csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/page_speed_benchmark.csv")
+
+# VIEW RANDOM SAMPLE
+df_sample <- df %>% 
+  sample_n(10) 
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+df_sample %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T) %>% 
+  row_spec(0, bold = T)
+```
+
+
+I used Google Chrome's built-in page audit ([Lighthouse](https://developers.google.com/web/tools/lighthouse)) to log the time for each website, page type and product category.
+
+There are other page speed metrics but for educational purposes we'll just focus on using _time_to_interactive_.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+### HIDDEN ###
+theme_set(theme_light())
+
+# COLOR PALETTES
+cbPalette <- c("#56B4E9", "#E69F00")
+
+cbPalette2 <- c("#D55E00", "#56B4E9")
+
+cbPalette3 <- c("#56B4E9", "#CC79A7")
+### HIDDEN ###
+```
+
+Lets pose the question: _which site is fastest in terms of time_to_interactive?_
+
+## Standard approach
+
+One way to answer that question is to create descriptive statistics by computing the averages, finding the percent difference from the fastest site and then calling it a day.
+
+```{r message=FALSE, warning=FALSE}
+df_standard <- df %>% 
+  filter(page_type != 'Home') %>% 
+  group_by(website) %>% 
+  summarize(time_interactive = mean(time_to_interactive)) %>% 
+  ungroup() %>% 
+  arrange(time_interactive) %>% 
+  mutate(slower_than_amazon = round((time_interactive / 7.59 - 1) * 100, 0),
+         slower_than_amazon = paste0(slower_than_amazon, "%")) 
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+df_standard %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T) %>% 
+  row_spec(0, bold = T)
+```
+
+However, there is a problem - sample size!
+
+```{r message=FALSE, warning=FALSE}
+df_size <- df %>% 
+  filter(page_type != 'Home') %>% 
+  group_by(website) %>% 
+  summarize(time_interactive = mean(time_to_interactive),
+            count = n()) %>% 
+  ungroup() %>% 
+  arrange(desc(count))
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+df_size %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T) %>% 
+  row_spec(0, bold = T)
+```
+
+eCommerce sites have hundreds of thousands of pages so how can we be so certain our summary captures actual page speed performance? Perhaps adding in a confidence interval?
+
+At a more granular level, IKEA and Smarthome have exactly the same average _time_to_interactive_ of 9.44 seconds but I recorded fewer samples with the former - which site is actually faster?
+
+```{r message=FALSE, warning=FALSE}
+df %>% 
+  filter(website %in% c('IKEA', 'Smarthome')) %>% 
+  ggplot(aes(website, time_to_interactive, color = website)) +
+  geom_point(show.legend = FALSE, size = 5, alpha = 0.5) +
+  geom_hline(yintercept = 9.44, lty = 2, color = 'red') +
+  scale_color_manual(values = cbPalette3) +
+  scale_y_continuous(limits = c(0, 15)) +
+  labs(x = NULL, y = "Time to Interactive (seconds)",
+       subtitle = "Dashed line represents average of 9.44s")
+```
+
+What if I don't know how to write a script to grab every URL and then feed it into Google Lighthouse? Or more realistically, what if I am not inclined to go and collect 11 more data points for IKEA?
+
+These questions can be answered with the help of simulation. By applying the [central limit theorem](https://en.wikipedia.org/wiki/Central_limit_theorem) and [law of large numbers](https://en.wikipedia.org/wiki/Law_of_large_numbers) we can directly address measurement uncertainty.
+
+## Simulating "big" data
+
+To get started we will need three values:
+
+* _n_ = number of observations
+* _mean_ = vector of means
+* _sd_ = vector of standard deviations
+
+```{r message=FALSE, warning=FALSE}
+df_summary <- df %>% 
+  filter(page_type != 'Home') %>% 
+  group_by(website) %>% 
+  summarize(time_interactive = mean(time_to_interactive),
+            sd = sd(time_to_interactive),
+            count = n()) %>% 
+  ungroup() %>% 
+  arrange(time_interactive)
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+df_summary %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T) %>% 
+  row_spec(0, bold = T)
+```
+
+Now that we have the minimum requirements we can simulate our data. Let's start with IKEA:
+
+```{r message=FALSE, warning=FALSE}
+ikea <- rnorm(1e4, 9.44, 0.688) %>% 
+  as_tibble() %>% 
+  mutate(website = paste0("ikea"))
+```
+
+There was a lot to unpack there so let's break it down:
+
+* **rnorm** is the R function to generate random numbers from a [Gaussian distribution](https://en.wikipedia.org/wiki/Normal_distribution)
+* 1e4 is scientific notation for 10,000 observations
+* 9.44 is the average mean for IKEA _time_to_interactive_
+* 0.688 is the standard deviation
+* We moved our data into the tidyverse with _as_tibble()_
+* Used the **mutate** function to add a _website_ column and identify IKEA for the set of results
+
+We can now plot our distribution of _time_to_interactive_ scores for IKEA where we generated 10K data points.
+
+```{r message=FALSE, warning=FALSE}
+ikea %>% 
+  ggplot(aes(value, fill = website)) +
+  geom_histogram(position = 'identity', binwidth = 0.05, alpha = 0.8,
+                 show.legend = FALSE) +
+  scale_fill_manual(values = cbPalette) +
+  scale_x_continuous(limits = c(0, 20)) +
+  labs(x = "Time to Interactive (seconds)", y = NULL)
+```
+
+What this illustrates is the potential frequency of page speed scores and the range of all possible values.
+
+In other words, if we take a random page on IKEA and measure its _time_to_interactive_ we know scores could be as low as 8s or as high as 11s. Additionally, there is a central tendency for scores to fall around 9s but it is not at all possible to have a score of 1s or more than 13s.
+
+This is an improvement from a single summary statistic but what if we wanted to ask more complicated questions? What if we wanted to know the likelihood a random IKEA page was greater than 11s? Or which site is faster: Amazon vs IKEA?
+
+The solution is to condition on our simulated dataset.
+
+## Conditioning on the imaginary
+
+Lets ask the question: _what is the probability IKEA will have a page speed greater than 11 seconds?_
+
+We can easily get that answer by sampling from our data:
+```{r message=FALSE, warning=FALSE}
+sum(ikea$value > 11) / length(ikea$value) * 100
+```
+
+And to drive that home with some data viz...
+```{r message=FALSE, warning=FALSE}
+ikea %>% 
+  mutate(greater_11s = ifelse(value > 11, 'yes', 'no')) %>% 
+  ggplot(aes(value, fill = greater_11s)) +
+  geom_histogram(binwidth = 0.05, alpha = 0.7) +
+  scale_fill_manual(values = cbPalette) +
+  scale_x_continuous(limits = c(0, 20)) +
+  labs(x = "Time to Interactive (seconds)", y = NULL)  
+```
+
+We can also head in the opposite direction: _what is the probability IKEA will have a page speed of less than 9 seconds?_
+```{r message=FALSE, warning=FALSE}
+sum(ikea$value < 9) /length(ikea$value) * 100
+```
+
+And to plot our results...
+```{r message=FALSE, warning=FALSE}
+ikea %>% 
+  mutate(less_than_9s = ifelse(value < 9, 'yes', 'no')) %>% 
+  ggplot(aes(value, fill = less_than_9s)) +
+  geom_histogram(binwidth = 0.05, alpha = 0.7) +
+  scale_fill_manual(values = cbPalette) +
+  scale_x_continuous(limits = c(0, 20)) +
+  labs(x = "Time to Interactive (seconds)", y = NULL)  
+```
+
+
+We can also ask more complicated quesitons such as: _what is the probability a random Amazon page will be faster than IKEA?_
+```{r message=FALSE, warning=FALSE}
+# SIMULATE AMAZON DATA
+amazon <- rnorm(1e4, 7.59, 1.91) %>%
+  as_tibble() %>% 
+  mutate(website = paste0("amazon"))
+
+mean(amazon$value < ikea$value) * 100
+```
+
+And...well...you get the idea....
+```{r message=FALSE, warning=FALSE}
+pagespeed <- rbind(ikea, amazon)
+
+pagespeed %>% 
+  ggplot(aes(value, fill = website)) +
+  geom_histogram(binwidth = 0.05, alpha = 0.7, position = 'identity') +
+  scale_fill_manual(values = cbPalette2) +
+  scale_x_continuous(limits = c(0, 20)) +
+  labs(x = "Time to Interactive (seconds)", y = NULL) 
+```
+
+### Side note
+From my personal experience working at large companies, business executives respond very well to probabilities. Thus, _"our site is 24% slower than Amazon"_ is not as impactful as stating _"if we were to take 10K random pages from each site, there is an 82% chance our site will be slower than Amazon."_
+
+## What about Amazon?
+
+In the past I wrote about [segmenting data](https://www.christopheryee.org/blog/for-the-love-of-data-segment/) to reveal deeper insights hidden beneath the aggregation.
+
+So, what is _really_ driving Amazon's page speed score higher? Lets simulate some data and for fun we'll increase our observations from 1e4 (10K) to 1e5 (100K). Quick reminder about Amazon page speed data:
+
+```{r message=FALSE, warning=FALSE}
+df_amazon <- df %>% 
+  filter(website == 'Amazon', page_type != 'Home') %>% 
+  group_by(product) %>% 
+  summarize(time_interactive = mean(time_to_interactive),
+            sd = sd(time_to_interactive)) %>% 
+  arrange(time_interactive)
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+df_amazon %>% 
+  kable() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T) %>% 
+  row_spec(0, bold = T)
+```
+
+And the code to generate our data with the subsequent plot:
+```{r message=FALSE, warning=FALSE}
+electrical <- rnorm(1e5, 5.75, 0.212) %>% as_tibble() %>% 
+  mutate(product = paste0("electrical"))
+
+security <- rnorm(1e5, 7.93, 2.46) %>% as_tibble() %>% 
+  mutate(product = paste0("security"))
+
+sensors <- rnorm(1e5, 8.07, 1.67) %>% as_tibble() %>% 
+  mutate(product = paste0("sensors"))
+
+entertainment <- rnorm(1e5, 8.2, 2.55) %>% as_tibble() %>% 
+  mutate(product = paste0("entertainment"))
+
+amazon <- rbind(electrical, security, sensors, entertainment)
+
+amazon %>% 
+  ggplot(aes(value, fill = product)) +
+  geom_histogram(binwidth = 0.05, alpha = 0.7, position = 'identity') +
+  scale_x_continuous(limits = c(0, 20)) +
+  scale_y_continuous(labels = comma_format()) +
+  scale_fill_brewer(palette = 'Spectral') +
+  labs(x = "Time to Interactive (seconds)", y = NULL,
+       title = "Amazon: time to interactive by product category (n=100K)")
+```
+
+Well, this is quite shocking (pun intended) - the electrical category's _time_to_interactive_ is not only faster but its central tendency is also less dispersed than the other three. 
+
+Why might that be the case? Specific business focus on these products? Less teams working on it? Not enough products? All conjecture on my part without digging deeper into the site.
+
+Finally, what is the probability the electrical category is faster than security (2nd place)?
+```{r message=FALSE, warning=FALSE}
+mean(electrical$value < security$value) * 100
+```
+
+## Wrapping up
+
+With data simulation we can account for sample size, uncertainty and interpretability. We can achieve this understanding without building something entirely new either.
+
+This methodology can be applied to any aspect of digital marketing where data is the lifeblood of the channel. For example...
+
+* Rankings: your daily rank went from #9 to #1 only to celebrate too early and it drops back down to #8 the next day. If you calculated the probability of hitting #1 from the source data, would you not have celebrated as early?
+* Traffic: was the spike in site visitors a real phenomenon or just random chance?
+* Click-through Rate: how do you handle low volume data where you only received 2 clicks and 2 impressions? You don't want to kick out data because it is telling you something! (check out my R guide and the section on [estimating CTR with empirical Bayes](https://www.christopheryee.org/blog/getting-started-with-r-using-google-search-console-data/))
+
+
+## Intentional exclusion
+I specifically left out certain concepts to get the reader excited about using R to simulate their own data. Although important, I will leave those for future articles but the following are notes for myself:
+
+* Foundation for Bayesian statistics
+* No mention of incorporating conjugate priors
+* Other R distribution functions: **dnorm**, **pnorm**, **qnorm**
+* Minimized mathematical notation
+

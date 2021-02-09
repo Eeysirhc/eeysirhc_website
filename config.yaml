@@ -1,0 +1,59 @@
+theme: "hugo-PaperMod"
+baseURL: https://www.christopheryee.org
+languageCode: en-us
+title: Christopher Yee
+paginate: 5
+
+enableRobotsTXT: true
+
+googleAnalytics: UA-25419882-1
+
+ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]
+
+menu:
+    main:
+        - identifier: about
+          name: about
+          url: /about/
+          weight: 5      
+        - identifier: news
+          name: news
+          url: /news/
+          weight: 10
+        - identifier: blog
+          name: blog
+          url: /blog/
+          weight: 15          
+          
+          
+params: 
+    description: "Christopher Yee is part of the SEO Intelligence division at Uber. He is a data-driven human all about the #rstats life. Former Director of Optimization @ FT Optimize, SEO @ Square, American Eagle Outfitters, HP Inc., Macys, and CafePress."
+    #author: Christopher Yee
+    
+    homeInfoParams:
+        Title: "![cyee-logo](/images/cyee-logo-edit.png)"
+        Content: >
+            SEO Skunkworks @ Uber
+            
+    socialIcons:
+        - name: github
+          url: "https://github.com/Eeysirhc"
+        - name: twitter
+          url: "https://twitter.com/Eeysirhc"
+        - name: linkedin
+          url: "https://www.linkedin.com/in/seochrisyee/"  
+        - name: KoFi
+          url: "https://ko-fi.com/eeysirhc"          
+            
+            
+    assets:
+        favicon: "favicon/favicon.ico"
+
+
+
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+

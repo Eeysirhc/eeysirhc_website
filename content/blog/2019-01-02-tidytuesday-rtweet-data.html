@@ -1,0 +1,117 @@
+---
+title: "TidyTuesday: rtweet Data"
+author: Christopher Yee
+date: 2019-01-01
+layout: post
+slug: tidytuesday-rtweet-data
+categories:
+- TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 01/01/2019 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-01">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+library(tidytext)
+library(topicmodels)
+
+tweets_raw &lt;- as_tibble(readRDS(&quot;rstats_tweets.rds&quot;))</code></pre>
+<div id="parse-data-and-identify-top-users" class="section level3">
+<h3>Parse data and identify top users</h3>
+<pre class="r"><code># IDEA BEHIND THIS IS TO FILTER OUT BOTS
+
+# FIND TOP USERS
+top_interactions &lt;- tweets_raw %&gt;%
+  select(screen_name, favorite_count, retweet_count) %&gt;%
+  group_by(screen_name) %&gt;%
+  summarize(favorite = sum(favorite_count),
+            retweet = sum(retweet_count)) %&gt;%
+  group_by(screen_name) %&gt;%
+  mutate(total = sum(favorite, retweet)) %&gt;%
+  arrange(desc(total)) %&gt;%
+  head(12) 
+
+# JOIN TOP USERS WITH RAW DATASET
+tweets &lt;- tweets_raw %&gt;% 
+  inner_join(top_interactions, by=&#39;screen_name&#39;)
+
+# FINAL DATA PROCESSING
+tweets_parsed &lt;- tweets %&gt;% 
+  select(screen_name, text) %&gt;%
+  group_by(screen_name) %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  anti_join(stop_words) %&gt;%
+  filter(!grepl(&quot;https|t.co|http|bit.ly|kindly|goo.gl|rstats|amp&quot;, word)) # REMOVE EXTRA STOP WORDS</code></pre>
+</div>
+<div id="what-are-the-most-significant-keywords-for-each-rstats-twitter-user" class="section level3">
+<h3>What are the most significant keywords for each #rstats Twitter user?</h3>
+<pre class="r"><code>tweets_tfidf &lt;- tweets_parsed %&gt;%
+  count(screen_name, word, sort = TRUE) %&gt;%
+  ungroup() %&gt;%
+  bind_tf_idf(word, screen_name, n)
+
+tweets_tfidf %&gt;%
+  filter(!near(tf, 1)) %&gt;%
+  arrange(desc(tf_idf)) %&gt;%
+  group_by(screen_name) %&gt;%
+  distinct(screen_name, word, .keep_all = TRUE) %&gt;%
+  top_n(10, tf_idf) %&gt;%
+  ungroup() %&gt;%
+  mutate(word = factor(word, levels = rev(unique(word)))) %&gt;%
+  ggplot(aes(word, tf_idf, fill = screen_name)) + 
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~screen_name, ncol = 4, scales = &quot;free&quot;) +
+  coord_flip() +
+  theme_light() +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Highest TF-IDF words for top #rstats Twitter users&quot;,
+       caption = &quot;Source: data from {rtweet} package&quot;) +
+  scale_fill_brewer(palette = &#39;Paired&#39;)</code></pre>
+<p><img src="/images/rstats_tfidf_twitter.png" /></p>
+</div>
+<div id="what-are-the-topics-and-highest-proability-keywords-for-each" class="section level3">
+<h3>What are the topics and highest proability keywords for each?</h3>
+<pre class="r"><code>tweet_words &lt;- tweets_parsed %&gt;%
+  count(screen_name, word, sort = TRUE) %&gt;%
+  ungroup()
+
+tweet_dtm &lt;- tweet_words %&gt;%
+  cast_dtm(screen_name, word, n)
+
+tweets_lda &lt;- LDA(tweet_dtm, k=12, control = list(seed = 2019))
+
+tidy_lda &lt;- tidy(tweets_lda)
+
+top_terms &lt;- tidy_lda %&gt;% 
+  group_by(topic) %&gt;%
+  top_n(10, beta) %&gt;%
+  ungroup() %&gt;%
+  arrange(topic, -beta)
+
+top_terms %&gt;%
+  mutate(term = reorder(term, beta)) %&gt;%
+  group_by(topic, term) %&gt;%
+  arrange(desc(beta)) %&gt;%
+  ungroup() %&gt;%
+  mutate(term = factor(paste(term, topic, sep = &quot;__&quot;),
+                       levels = rev(paste(term, topic, sep = &quot;__&quot;)))) %&gt;%
+  ggplot(aes(term, beta, fill = as.factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  coord_flip() +
+  scale_x_discrete(labels = function(x) gsub(&quot;__.+$&quot;, &quot;&quot;, x)) +
+  scale_fill_brewer(palette = &#39;Paired&#39;) +
+  labs(title = &quot;Top 10 terms in each LDA topic from #rstats&quot;,
+       caption = &quot;Source: data from {rtweet} package&quot;,
+       x = &quot;&quot;,
+       y = &quot;&quot;) +
+  theme_light() +
+  facet_wrap(~topic, ncol = 4, scales = &quot;free&quot;)</code></pre>
+<p><img src="/images/rstats_lda_topics.png" /></p>
+</div>

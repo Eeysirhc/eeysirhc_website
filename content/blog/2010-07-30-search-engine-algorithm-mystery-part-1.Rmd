@@ -1,0 +1,65 @@
+---
+author: Christopher Yee
+date: 2010-07-30 04:26:45+00:00
+layout: post
+slug: search-engine-algorithm-mystery-part-1
+title: Search Engine Algorithm Mystery, Part 1
+categories:
+- Search Engine Optimization
+---
+
+I appear to have stumbled across a search engine algorithm mystery when it comes to getting my pages ranked.  In a matter of three days I was whomped (is that a word?) off the charts by Google for lord knows what factor.  In spite of this, I gained rank elsewhere on their SERPs.  Every search engine has their own unique crawl rate and algorithm but I didn't realize there was such a BIG difference between the three major search engines (Google, Yahoo!, Bing) until I discovered the following:
+
+==========
+
+Search Term: [christopher yee](http://www.christopheryee.org)
+
+Date: 7/26/2010
+Google - **#0**
+Yahoo - **#0**
+Bing - **#41** (SEM/PPC Job Interview, Part 2); **#71** (Let My SEO Journey Begin)
+
+
+
+Date: 7/29/2010
+Google - **#78**
+Yahoo - **#0**
+Bing - **#40** ([SEM/PPC Job Interview, Part 2](http://www.christopheryee.org/semppc-job-interview-part-2/)); **#70** ([Let My SEO Journey Begin](http://www.christopheryee.org/let-my-seo-journey-begin/))
+
+==========
+
+Search Term: [seo christopher yee](http://www.christopheryee.org)
+
+Date: 7/26/2010
+Google - **#4**
+Yahoo - **#0**
+Bing - **#2** (Let My SEO Journey Begin); **#3** (SEM/PPC Job Interview, Part 2)
+
+Date: 7/29/2010
+Google - **#63**
+Yahoo - **#0**
+Bing - **#2 **(Let My SEO Journey Begin); **#3** ([What is SEO?](http://www.christopheryee.org/what-is-seo/))
+
+==========
+
+In essence, I was knocked down 59 ranks for SEO Adventures but gained 78 for Christopher Yee (un-ranked in the first 100 results before).  Would it have something to do with me trying to rank both my blog AND my name?  Maybe the fact that those two terms are unrelated?  Nor do I think it has anything to do with keyword density (not that I count it) but the word I use most often is "search engine" (16 times thus far excluding this post) which is only a 2.3% density and doesn't really count as keyword stuffing.
+
+I failed in ranking for my blog - for now - but what you CAN take away from this blog post is how the different search engines and their algorithms work.
+
+
+
+	
+  * Google crawl rates are pretty frequent and is (possibly) very strict regarding adherence to SEO guidelines.
+
+	
+  * Although I think Yahoo! hates me, I speculate I am not getting ranked because I do not have <meta> tags in my header section.
+
+	
+  * Bing's search spiders crawl around very often and are relatively lax on following SEO guidelines.
+
+
+So what did I do wrong (or right)?  I don't know yet but I'm confident answering all those questions some way or some how is a good start!
+
+...to be continued...
+
+note: SEO Adventures blog is officially one month old

@@ -1,0 +1,697 @@
+---
+title: Exploratory data analysis on COVID-19 search queries
+author: Christopher Yee
+date: '2020-05-05'
+slug: exploratory-data-analysis-on-covid-19-search-queries
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>The team at Bing were generous enough to release search query data with COVID-19 intent. The files are broken down by country and state level granularity so we can understand how the world is coping with the pandemic through search.</p>
+<p>What follows is an exploratory analysis on how US Bing users are searching for COVID-19 (a.k.a. coronavirus) information.</p>
+<div id="tldr" class="section level2">
+<h2>tl;dr</h2>
+<p>COVID-19 search queries generally fall into five distinct categories:</p>
+<blockquote>
+<p><strong>1. Awareness<br />
+2. Consideration<br />
+3. Management<br />
+4. Unease<br />
+5. Advocacy (?)</strong></p>
+</blockquote>
+</div>
+<div id="about-the-data" class="section level2">
+<h2>About <a href="https://github.com/microsoft/BingCoronavirusQuerySet">the data</a></h2>
+<ul>
+<li>Bing search logs</li>
+<li>Desktop only</li>
+<li>Date ranges: 2020-01-01 to 2020-04-30</li>
+<li>Only searches that were issued many times by multiple users were included</li>
+<li>Dataset includes queries from all over the world that had an intent related to the Coronavirus or Covid-19</li>
+<li>In some cases this intent is explicit in the query itself, e.g. “Coronavirus updates Seattle” in other cases it is implicit , e.g. “Shelter in place”</li>
+<li>Implicit intent of search queries (e.g. Toilet paper) were extracted by using <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2007/07/craswellszummer-random-walks-sigir07.pdf">random walks on the click graph approach</a></li>
+<li>All personal data was removed</li>
+</ul>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<p>Here is a <a href="https://github.com/Eeysirhc/random_scripts/blob/master/consolidate_bing_covid19_files.R">simple script</a> I wrote to retrieve, parse and compile state level data into a CSV where we can execute it with the following <a href="https://twitter.com/search?q=%23rstats">#rstats</a> command:</p>
+<pre class="r"><code>source(&quot;consolidate_bing_covid19_files.R&quot;)</code></pre>
+<p>We can then read in the data and filter on searches based in the USA:</p>
+<pre class="r"><code>library(tidyverse)
+library(lubridate)
+library(scales)
+
+covid_raw &lt;- read_csv(&quot;coronavirus-queriesbystate.csv&quot;)
+
+covid &lt;- covid_raw %&gt;% 
+  filter(Country == &#39;United States&#39;) %&gt;% 
+  mutate(Month = floor_date(Date, &quot;month&quot;))</code></pre>
+</div>
+<div id="data-check" class="section level2">
+<h2>Data check</h2>
+<p>How many observations per month?</p>
+<pre class="r"><code>covid %&gt;% 
+  count(Month) %&gt;% 
+  kableExtra::kable(&quot;markdown&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Month</th>
+<th align="right">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">2020-01-01</td>
+<td align="right">17338</td>
+</tr>
+<tr class="even">
+<td align="left">2020-02-01</td>
+<td align="right">51080</td>
+</tr>
+<tr class="odd">
+<td align="left">2020-03-01</td>
+<td align="right">436027</td>
+</tr>
+<tr class="even">
+<td align="left">2020-04-01</td>
+<td align="right">384403</td>
+</tr>
+</tbody>
+</table>
+<p>What about unique search queries per month?</p>
+<pre class="r"><code>covid %&gt;% 
+  group_by(Month) %&gt;% 
+  distinct(Query) %&gt;% 
+  count() %&gt;% 
+  ungroup() %&gt;%   
+  ggplot(aes(Month, n)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = comma_format()) +
+  theme_minimal() +
+  labs(x = NULL, y = NULL,
+       title = &quot;Count of unique COVID-19 search queries per month&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
+<p>Distribution of popularity score?</p>
+<pre class="r"><code>covid %&gt;% 
+  ggplot() +
+  geom_histogram(aes(PopularityScore, fill = IsImplicitIntent), color = &#39;white&#39;) +
+  scale_y_continuous(labels = comma_format()) +
+  theme_minimal() +
+  theme(legend.position = &#39;top&#39;) +
+  labs(x = &quot;Popularity Score&quot;, y = NULL,
+       title = &quot;Distribution of COVID-19 search queries by Bing&#39;s popularity score&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+<p>Distribution of search query length?</p>
+<pre class="r"><code>covid %&gt;% 
+  distinct(Query, IsImplicitIntent) %&gt;% 
+  mutate(qlength = str_count(Query, &#39;\\w+&#39;)) %&gt;% 
+  ggplot() +
+  geom_histogram(aes(qlength, fill = IsImplicitIntent), color = &#39;white&#39;) +
+  scale_y_continuous(labels = comma_format()) +
+  theme_minimal() +
+  theme(legend.position = &#39;top&#39;) +
+  labs(x = &quot;Search Query Length&quot;, y = NULL,
+       title = &quot;Distribution of COVID-19 search query length&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)  </code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
+<p>And a quick glimpse on what our dataset looks like:</p>
+<pre class="r"><code>set.seed(2103)
+
+covid %&gt;% 
+  sample_n(1) %&gt;% 
+  glimpse()</code></pre>
+<pre><code>## Rows: 1
+## Columns: 7
+## $ Date             &lt;date&gt; 2020-03-30
+## $ Query            &lt;chr&gt; &quot;homeland security coronavirus&quot;
+## $ IsImplicitIntent &lt;lgl&gt; FALSE
+## $ State            &lt;chr&gt; &quot;New York&quot;
+## $ Country          &lt;chr&gt; &quot;United States&quot;
+## $ PopularityScore  &lt;dbl&gt; 1
+## $ Month            &lt;date&gt; 2020-03-01</code></pre>
+<p>With our (hand) sanity check out of the way, let’s start with something simple.</p>
+</div>
+<div id="what-are-the-top-queries-by-month-based-on-popularity" class="section level2">
+<h2>What are the top queries by month based on popularity?</h2>
+<pre class="r"><code>covid_popularity &lt;- covid %&gt;% 
+  group_by(Query, Month, IsImplicitIntent) %&gt;% 
+  summarize(score = mean(PopularityScore)) %&gt;% 
+  group_by(Month) %&gt;% 
+  top_n(10, score) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(Query = reorder(Query, score)) 
+
+covid_popularity %&gt;% 
+  ggplot(aes(Query, score, fill = IsImplicitIntent)) +
+  geom_col(alpha = 0.7) +
+  coord_flip() +
+  facet_wrap(~Month, scales = &quot;free&quot;) +
+  scale_fill_manual(values = c(&quot;#D55E00&quot;, &quot;#0072B2&quot;)) +
+  theme_bw() +
+  theme(legend.position = &#39;top&#39;) +
+  labs(title = &quot;Top COVID-19 search queries by month based on popularity score&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;,
+       x = NULL, y = &quot;Popularity Score&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+<p>As expected, search queries in January and February are primarily focused on the latest updates by location, potential symptoms, and international responses to the virus (China, UK, South Korea).</p>
+<p>Search intent changes in March and April as the pandemic spreads to the US where queries revolve around coping with the new normal: store operating hours, unemployment, and information about celebrities who have died from the virus (Joe Diffie, Hilary Heath).</p>
+<p>Bing’s popularity score works well enough but the results might skew towards queries that were searched the most - let’s try something different.</p>
+</div>
+<div id="what-are-the-defining-terms-for-each-month" class="section level2">
+<h2>What are the defining terms for each month?</h2>
+<p>We’ll use <a href="https://juliasilge.com/blog/introducing-tidylo/">weighted log odds</a> (it’s <a href="https://www.christopheryee.org/blog/tf-idf-explained-with-help-from-us-presidents/">similar to TF-IDF</a> but <a href="https://medium.com/@TSchnoebelen/i-dare-say-you-will-never-use-tf-idf-again-4918408b2310">much better</a>) to underscore some of the more nuanced search terms and help us describe the collective mindset for each month.</p>
+<pre class="r"><code>library(tidylo)
+library(ggrepel)
+
+covid_logodds &lt;- covid %&gt;% 
+  group_by(Month, IsImplicitIntent) %&gt;% 
+  count(Query, sort = TRUE) %&gt;% 
+  ungroup() %&gt;% 
+  bind_log_odds(Month, Query, n) %&gt;% 
+  arrange(-log_odds_weighted)
+
+covid_logodds %&gt;% 
+  group_by(Month) %&gt;% 
+  top_n(10, log_odds_weighted) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(Month = factor(Month),
+         Query = fct_reorder(Query, log_odds_weighted)) %&gt;% 
+  ggplot(aes(Query, log_odds_weighted, fill = IsImplicitIntent)) +
+  geom_col(alpha = 0.7) +
+  coord_flip() +
+  facet_wrap(~Month, scales = &#39;free_y&#39;) +
+  scale_fill_manual(values = c(&quot;#D55E00&quot;, &quot;#0072B2&quot;)) +
+  theme_bw() +
+  theme(legend.position = &#39;top&#39;) +
+  labs(title = &#39;Top COVID-19 search queries by month based on weighted log odds&#39;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;,
+       x = NULL, y = &quot;Weighted Log Odds&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+<p>We might be on to something here…</p>
+<ul>
+<li>January: users want information about the origins of COVID-19</li>
+<li>February: searches focused on international and domestic developments for the fight against coronavirus</li>
+<li>March: queries shift to viral prevention and deterrence as the US heads into psuedo-lockdown</li>
+<li>April: user attention is on national COVID-19 updates and case numbers</li>
+</ul>
+</div>
+<div id="how-do-queries-differ-between-january-and-april" class="section level2">
+<h2>How do queries differ between January and April?</h2>
+<p>Let’s step back a bit and visualize how we might characterize user searches in January vs April.</p>
+<pre class="r"><code>covid_logodds %&gt;% 
+  filter(Month == &#39;2020-01-01&#39; | Month == &#39;2020-04-01&#39;) %&gt;% 
+  group_by(Month) %&gt;% 
+  top_n(30, n) %&gt;% 
+  ungroup() %&gt;% 
+  ggplot(aes(n, log_odds_weighted, label = Query, color = IsImplicitIntent)) +
+  geom_point() +
+  geom_text_repel() +
+  geom_hline(yintercept = 0, lty = 2) +
+  scale_color_manual(values = c(&quot;#D55E00&quot;, &quot;#0072B2&quot;)) +
+  facet_grid(Month ~ .) +
+  expand_limits(x = 0) +
+  theme_bw() +
+  theme(legend.position = &#39;top&#39;) +
+  labs(title = &#39;Top COVID-19 search queries based on weighted log odds&#39;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;,
+       x = &quot;Frequency&quot;, y = &quot;Weighted Log Odds&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
+<p>Different view but the same takeaway as before.</p>
+<p>One thing to note about this chart: <em>coronavirus</em> was the most searched query in January but its importance is dampened on the weighted log odds scale. In April, <em>coronavirus</em> is still a high frequency term but its prominence is placed well below all other new queries during the same time frame.</p>
+</div>
+<div id="covid-19-search-stages" class="section level2">
+<h2>COVID-19 search stages</h2>
+<p>Based on the above, it appears our search queries loosely follow a typical marketing funnel but we’ll modify the framework to our use case:</p>
+<blockquote>
+<p><strong>1. Awareness<br />
+2. Consideration<br />
+3. Management<br />
+4. Unease<br />
+5. Advocacy (?)</strong></p>
+</blockquote>
+<p>A quick blurb about each…</p>
+<p><em>Awareness</em>: high level and broad informational queries where our users just started learning about the virus.</p>
+<blockquote>
+<ul>
+<li>coronavirus symptoms</li>
+<li>what is the coronavirus</li>
+<li>coronavirus fatality rate</li>
+<li>coronavirus first symptoms</li>
+<li>where did the coronavirus come from</li>
+</ul>
+</blockquote>
+<p><em>Consideration</em>: search terms in this category are focused on what cohorts will be affected by the virus and how best to prepare as news about the pandemic goes mainstream.</p>
+<blockquote>
+<ul>
+<li>how to prepare for coronavirus</li>
+<li>is coronavirus in [city/state]</li>
+<li>how old is california coronavirus patient</li>
+<li>are face masks effective for coronavirus</li>
+<li>who is dying from coronavirus</li>
+</ul>
+</blockquote>
+<p><em>Management</em>: this stage of our users seek information on how to live through the pandemic.</p>
+<blockquote>
+<ul>
+<li>[state] unemployment website/claim/portal/assistance<br />
+</li>
+<li>[city/state] lockdown/curfew/quarantine/stay at home</li>
+<li>stimulus checks for 2020</li>
+<li>working from home coronavirus</li>
+<li>covid19 positive messages for high school graduates</li>
+</ul>
+</blockquote>
+<p><em>Unease</em>: with people stuck inside they are getting anxious and want specific information about what’s going on outside of their homes or to have this all be over with.</p>
+<blockquote>
+<ul>
+<li>[state] covid 19 news/map/updates/cases/curve/deaths</li>
+<li>when will coronavirus end/peak in [state]</li>
+<li>2nd wave of coronavirus</li>
+<li>[state] coronavirus reopening</li>
+<li>does alcohol/lysol/bleach/ozone/hot water/heat/freezing/microwave/windex kill coronavirus</li>
+</ul>
+</blockquote>
+<p><em>Advocacy (?)</em>: we haven’t reached this phase yet but I suspect in May we will see more enforcement-based queries such as <em>how to convince my parents to stay home</em> (lol).</p>
+</div>
+<div id="the-5-ws-1-h" class="section level2">
+<h2>The 5 W’s &amp; 1 H</h2>
+<p>For the next section, let’s keep the framework in mind as we churn out a few charts and emphasize how intent has changed over time.</p>
+<div id="prepare-data-frame" class="section level3">
+<h3>Prepare data frame</h3>
+<pre class="r"><code>covid_mentions &lt;- covid %&gt;% 
+  mutate(segment = case_when(str_detect(Query, &quot;who&quot;) ~ &quot;who&quot;,
+                             str_detect(Query, &quot;what&quot;) ~ &quot;what&quot;,
+                             str_detect(Query, &quot;where&quot;) ~ &quot;where&quot;,
+                             str_detect(Query, &quot;when&quot;) ~ &quot;when&quot;,
+                             str_detect(Query, &quot;why&quot;) ~ &quot;why&quot;,
+                             str_detect(Query, &quot;how&quot;) ~ &quot;how&quot;,
+                             TRUE ~ &quot;-&quot;)) %&gt;% 
+  filter(segment != &#39;-&#39;) %&gt;% 
+  group_by(segment, Month, IsImplicitIntent) %&gt;% 
+  count(Query, sort = TRUE) %&gt;% 
+  ungroup() </code></pre>
+</div>
+<div id="simplified-plotting-function" class="section level3">
+<h3>Simplified plotting function</h3>
+<pre class="r"><code>wwwwwh_plot &lt;- function(keyword){
+  covid_mentions %&gt;% 
+    filter(segment == keyword) %&gt;%
+    bind_log_odds(Month, Query, n) %&gt;% 
+    arrange(-log_odds_weighted) %&gt;% 
+    group_by(Month) %&gt;% 
+    top_n(10, log_odds_weighted) %&gt;% 
+    ungroup() %&gt;% 
+    mutate(Month = factor(Month),
+           Query = fct_reorder(Query, log_odds_weighted)) %&gt;% 
+    ggplot(aes(Query, log_odds_weighted, fill = IsImplicitIntent)) +
+    geom_col(alpha = 0.8) +
+    coord_flip() +
+    facet_wrap(~Month, scales = &#39;free_y&#39;) +
+    scale_fill_manual(values = c(&quot;#56B4E9&quot;, &quot;#009E73&quot;)) +
+    scale_x_discrete(labels = wrap_format(40)) +
+    theme_bw() +
+    theme(legend.position = &#39;top&#39;) +
+    labs(title = &#39;Top COVID-19 search queries by month based on weighted log odds&#39;,
+         subtitle = paste0(&quot;Segment by &#39;&quot;, keyword, &quot;&#39; query modifiers&quot;),
+         caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;,
+         x = NULL, y = &quot;Weighted Log Odds&quot;)
+}</code></pre>
+</div>
+<div id="who-queries" class="section level3">
+<h3>“Who” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;who&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-14-1.png" width="960" /></p>
+</div>
+<div id="what-queries" class="section level3">
+<h3>“What” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;what&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-15-1.png" width="960" /></p>
+</div>
+<div id="where-queries" class="section level3">
+<h3>“Where” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;where&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-16-1.png" width="960" /></p>
+</div>
+<div id="when-queries" class="section level3">
+<h3>“When” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;when&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-17-1.png" width="960" /></p>
+</div>
+<div id="why-queries" class="section level3">
+<h3>“Why” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;why&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-18-1.png" width="960" /></p>
+</div>
+<div id="how-queries" class="section level3">
+<h3>“How” queries</h3>
+<pre class="r"><code>wwwwwh_plot(&quot;how&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-19-1.png" width="960" /></p>
+</div>
+</div>
+<div id="discovering-semantic-relationships" class="section level2">
+<h2>Discovering semantic relationships</h2>
+<p>Let’s add another data point by creating word embeddings to capture and retain the linguistic context between each term.</p>
+<div id="glove-word-embeddings" class="section level3">
+<h3>GloVe word embeddings</h3>
+<pre class="r"><code>library(tidytext)
+library(tm)
+library(text2vec)
+
+covid_words &lt;- covid %&gt;% 
+  select(Query) %&gt;% 
+  unnest_tokens(word, Query) %&gt;% 
+  filter(!str_detect(word, &quot;[^[:alpha:]]&quot;)) %&gt;%
+  anti_join(stop_words)
+
+tokens &lt;- list(covid_words$word)
+
+it &lt;- itoken(tokens, progressbar = TRUE)
+
+vocab &lt;- create_vocabulary(it)
+vocab &lt;- prune_vocabulary(vocab, term_count_min = 150)
+
+vectorizer &lt;- vocab_vectorizer(vocab)
+
+tcm &lt;- create_tcm(it, vectorizer, skip_grams_window = 3)
+
+glove &lt;- GlobalVectors$new(rank = 150, x_max = 20)
+
+wv_main &lt;- glove$fit_transform(tcm, n_iter = 5000, convergence_tol = 0.0001)
+wv_context &lt;- glove$components
+word_vectors &lt;- wv_main + t(wv_context)</code></pre>
+</div>
+<div id="t-sne-visualizing-high-dimensionality" class="section level3">
+<h3>t-SNE: visualizing high dimensionality</h3>
+<pre class="r"><code>library(Rtsne)
+
+tsne &lt;- Rtsne(word_vectors[, -1], dims = 2, perplexity = 200, 
+              max_iter = 1000, pca = TRUE, n_threads = 10)
+
+tsne$Y %&gt;%
+  as.data.frame() %&gt;%
+  mutate(word = row.names(word_vectors)) %&gt;% 
+  ggplot(aes(x = V1, y = V2, label = word)) +
+  geom_text(size = 4, show.legend = FALSE) +
+  theme_minimal() +
+   theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+    labs(title = &quot;COVID-19 search query word embeddings&quot;,
+         caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-21-1.png" width="960" /></p>
+<p>The above visualization is a 2D representation of all words associated with COVID-19 search queries from US Bing users.</p>
+<p>So, how did we do overall? Let’s test out the word <em>stimulus</em>:</p>
+<pre class="r"><code># FUNCTION TO RETRIEVE TOP 10 MOST SIMILAR WORDS WITH COSINE &gt; 0.50
+find_similar_words &lt;- function(word, n = 10) {
+  similarities &lt;- word_vectors[word, , drop = FALSE] %&gt;%
+    sim2(word_vectors, y = ., method = &quot;cosine&quot;)
+  
+  similarities[,1] %&gt;% sort(decreasing = TRUE) %&gt;% 
+    head(n) %&gt;% 
+    bind_rows() %&gt;% 
+    gather(word, cosine) %&gt;% 
+    filter(cosine &gt; 0.50) 
+}
+
+stimulus &lt;- find_similar_words(&quot;stimulus&quot;)
+
+stimulus %&gt;% kableExtra::kable(&quot;markdown&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">word</th>
+<th align="right">cosine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">stimulus</td>
+<td align="right">1.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">check</td>
+<td align="right">0.8509592</td>
+</tr>
+<tr class="odd">
+<td align="left">checks</td>
+<td align="right">0.8449955</td>
+</tr>
+<tr class="even">
+<td align="left">package</td>
+<td align="right">0.8441638</td>
+</tr>
+<tr class="odd">
+<td align="left">business</td>
+<td align="right">0.6047240</td>
+</tr>
+<tr class="even">
+<td align="left">stats</td>
+<td align="right">0.5274038</td>
+</tr>
+<tr class="odd">
+<td align="left">calculator</td>
+<td align="right">0.5260959</td>
+</tr>
+<tr class="even">
+<td align="left">worldometer</td>
+<td align="right">0.5256503</td>
+</tr>
+<tr class="odd">
+<td align="left">update</td>
+<td align="right">0.5235919</td>
+</tr>
+<tr class="even">
+<td align="left">bill</td>
+<td align="right">0.5187948</td>
+</tr>
+</tbody>
+</table>
+<p>Not too bad - we were able to identify related terms for the IRS stimulus plan.</p>
+<p>We can also visualize and inspect how they sit in our 2D vector space.</p>
+<pre class="r"><code>tsne$Y %&gt;%
+  as.data.frame() %&gt;%
+  mutate(word = row.names(word_vectors),
+         highlight = case_when(word %in% stimulus$word ~ &#39;highlight&#39;,
+                               TRUE ~ &#39;-&#39;)) %&gt;% 
+  ggplot(aes(x = V1, y = V2, label = word, color = highlight)) +
+  geom_text(size = 4, show.legend = FALSE) +
+  scale_color_manual(values = c(&quot;grey80&quot;, &quot;red&quot;)) +
+  theme_minimal() +
+   theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+    labs(title = &quot;COVID-19 search query word embeddings&quot;,
+         subtitle = &quot;with cosine similarity &gt; 0.50&quot;,
+         caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-23-1.png" width="960" /></p>
+<p>Let’s try a few more just for fun:</p>
+<pre class="r"><code>df1 &lt;- find_similar_words(&quot;age&quot;) 
+df2 &lt;- find_similar_words(&quot;toilet&quot;) 
+df3 &lt;- find_similar_words(&quot;hand&quot;)
+
+wv_final &lt;- tsne$Y %&gt;%
+  as.data.frame() %&gt;%
+  mutate(word = row.names(word_vectors),
+         highlight = case_when(word %in% df1$word ~ &#39;df1&#39;,
+                               word %in% df2$word ~ &#39;df2&#39;,
+                               word %in% df3$word ~ &#39;df3&#39;,
+                               TRUE ~ &#39;-&#39;)) 
+
+p &lt;- wv_final %&gt;% 
+  ggplot(aes(x = V1, y = V2, label = word, color = highlight)) +
+  geom_text(size = 4, show.legend = FALSE) +
+  scale_color_manual(values = c(&quot;grey80&quot;, &quot;midnightblue&quot;, &quot;#009E73&quot;, &quot;#CC79A7&quot;)) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  labs(title = &quot;COVID-19 search query word embeddings&quot;,
+       subtitle = &quot;with cosine similarity &gt; 0.50&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)
+
+p</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-24-1.png" width="960" /></p>
+<p>This looks pretty good to me!</p>
+<p><em>Toilet</em> is (unsprisingly) related to <em>paper</em> with <em>shortage</em> and <em>hoarding</em> following right behind it.</p>
+<pre class="r"><code>df2 %&gt;% kableExtra::kable(&quot;markdown&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">word</th>
+<th align="right">cosine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">toilet</td>
+<td align="right">1.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">paper</td>
+<td align="right">0.9362227</td>
+</tr>
+<tr class="odd">
+<td align="left">buy</td>
+<td align="right">0.6669480</td>
+</tr>
+<tr class="even">
+<td align="left">shortage</td>
+<td align="right">0.6077611</td>
+</tr>
+<tr class="odd">
+<td align="left">people</td>
+<td align="right">0.5298464</td>
+</tr>
+</tbody>
+</table>
+<p><em>Hand</em> has <em>sanitizer</em> in its back pocket and we can infer the search query intent is focused around making your own disinfectant.</p>
+<pre class="r"><code>df3 %&gt;% kableExtra::kable(&quot;markdown&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">word</th>
+<th align="right">cosine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">hand</td>
+<td align="right">1.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">sanitizer</td>
+<td align="right">0.9892406</td>
+</tr>
+<tr class="odd">
+<td align="left">homemade</td>
+<td align="right">0.8175468</td>
+</tr>
+<tr class="even">
+<td align="left">recipe</td>
+<td align="right">0.7023749</td>
+</tr>
+<tr class="odd">
+<td align="left">masks</td>
+<td align="right">0.5500787</td>
+</tr>
+<tr class="even">
+<td align="left">mask</td>
+<td align="right">0.5204016</td>
+</tr>
+<tr class="odd">
+<td align="left">diy</td>
+<td align="right">0.5165350</td>
+</tr>
+<tr class="even">
+<td align="left">update</td>
+<td align="right">0.5037100</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="bonus" class="section level3">
+<h3>Bonus</h3>
+<p>And if we only want to highlight the distances for the words we care about…</p>
+<pre class="r"><code>wv_final %&gt;% 
+  filter(word %in% c(df1$word, df2$word, df3$word)) %&gt;% 
+  ggplot(aes(x = V1, y = V2, label = word, color = highlight)) +
+  geom_point() +
+  geom_text_repel(size = 4, show.legend = FALSE) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;,
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  scale_color_manual(values = c(&quot;midnightblue&quot;, &quot;#009E73&quot;, &quot;#CC79A7&quot;)) +
+  scale_x_continuous(limits = c(-4, 4)) +
+  scale_y_continuous(limits = c(-4, 4)) +
+  labs(title = &quot;COVID-19 search query word embeddings&quot;,
+       subtitle = &quot;with cosine similarity &gt; 0.50&quot;,       
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-28-1.png" width="960" /></p>
+</div>
+<div id="honorable-mention" class="section level3">
+<h3>Honorable mention</h3>
+<pre class="r"><code># TOP 10 WITH COSINE &gt; 0.40
+find_sim_words &lt;- function(word, n = 10) {
+  similarities &lt;- word_vectors[word, , drop = FALSE] %&gt;%
+    sim2(word_vectors, y = ., method = &quot;cosine&quot;)
+  
+  similarities[,1] %&gt;% sort(decreasing = TRUE) %&gt;% 
+    head(n) %&gt;% 
+    bind_rows() %&gt;% 
+    gather(word, cosine) %&gt;% 
+    filter(cosine &gt; 0.40) 
+}
+
+hm &lt;- find_sim_words(&quot;kill&quot;)
+
+p_hm &lt;- tsne$Y %&gt;%
+  as.data.frame() %&gt;%
+  mutate(word = row.names(word_vectors),
+         highlight = case_when(word %in% hm$word ~ &#39;highlight&#39;)) %&gt;% 
+  filter(!is.na(highlight)) %&gt;% 
+  mutate(highlight = case_when(word == &#39;kill&#39; ~ &#39;kill&#39;,
+                               TRUE ~ highlight)) %&gt;% 
+  ggplot(aes(x = V1, y = V2, label = word, color = highlight)) +
+  geom_point() +
+  geom_text_repel(size = 4, show.legend = FALSE) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;,
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  scale_color_manual(values = c(&quot;steelblue&quot;, &#39;red&#39;)) +
+  scale_x_continuous(limits = c(-4, 4)) +
+  scale_y_continuous(limits = c(-4, 4)) + 
+  labs(title = &quot;COVID-19 search query word embeddings&quot;,
+       subtitle = &quot;Words with cosine similarity &gt; 0.40 to: kill&quot;,
+       caption = &quot;by: @eeysirhc\nSource: Bing Coronavirus Query Set&quot;)
+
+p_hm</code></pre>
+<p><img src="/blog/2020-05-03-exploratory-data-analysis-on-covid-19-search-queries_files/figure-html/unnamed-chunk-29-1.png" width="960" /></p>
+</div>
+</div>
+<div id="application" class="section level2">
+<h2>Application</h2>
+<p>The following is out of scope but conceptually we can chain together a simple machine learning pipeline with what we have thus far:</p>
+<ul>
+<li>Label subset of the data according to our COVID-19 search framework</li>
+<li>Develop word embeddings for our keyword universe</li>
+<li>Run model to assign labels for new searh queries that come in</li>
+</ul>
+<p>From here how you utilize and act on the data would depend on the industry. A few examples:</p>
+<ul>
+<li>Health org: anticipate new cases by state based on search query data</li>
+<li>Government: recognize public sentiment and use as one (of many) data points to drive policy</li>
+<li>News site: surface relevant content and related articles to nudge user engagement</li>
+</ul>
+</div>
+<div id="potential-directions" class="section level2">
+<h2>Potential directions</h2>
+<ul>
+<li>Compare NY/NJ search data against other US states</li>
+<li>Incoroprate sentiment analysis as an additional metric to understand how intent changes over time</li>
+<li>Include word vectors for rest of world to identify unknown topics in the US (and vice versa)</li>
+</ul>
+</div>
+<div id="acknowledgements" class="section level2">
+<h2>Acknowledgements</h2>
+<ul>
+<li>The amazing <a href="https://github.com/juliasilge/tidylo">{tidylo}</a> package from <a href="https://twitter.com/juliasilge">Julia Silge</a></li>
+<li><a href="http://text2vec.org/glove.html">GloVe Word Embeddings</a></li>
+<li><a href="https://m-clark.github.io/text-analysis-with-R/word-embeddings.html">Text analysis in R</a></li>
+<li><a href="https://justrthings.com/2019/03/04/sentiment-analysis-word-embedding-and-topic-modeling-on-venom-reviews/">Just R Things</a></li>
+</ul>
+</div>
+<div id="related" class="section level2">
+<h2>Related</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/script-to-track-global-coronavirus-pandemic-cases/">Script to track global coronavirus pandemic cases</a></li>
+<li><a href="https://www.christopheryee.org/blog/script-to-track-covid-19-cases-in-the-us/">Script to track COVID-19 cases in the US</a></li>
+</ul>
+</div>

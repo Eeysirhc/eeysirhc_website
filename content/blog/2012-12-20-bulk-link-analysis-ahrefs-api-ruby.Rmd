@@ -1,0 +1,104 @@
+---
+author: Christopher Yee
+date: 2012-12-20 16:53:40+00:00
+layout: post
+slug: bulk-link-analysis-ahrefs-api-ruby
+title: Bulk Link Analysis with the aHrefs API using Ruby
+categories:
+- SEO Tools
+---
+
+One of my top blog posts this year is the [bulk URL checker](http://www.christopheryee.org/bulk-url-checker-curl/) and has become my staple tool for HTTP checks en masse when I don't want to fire up third party software.  This accomplishment got me hooked (on coding) and to keep my momentum going I decided to write a Ruby script which interfaced with the aHrefs API and emulate their [batch analysis tool](http://ahrefs.com/labs/batch_analysis.php).
+
+
+<blockquote>If you're only interested in the bulk link analysis script then you can find it [here](https://github.com/Eeysirhc/ahrefs-api).</blockquote>
+
+
+It may look simple but it took me a couple hours to complete and needs some cleaning up on my part.  This file is a good start for anyone who needs a quick analysis about a list (big or small) of URLs and their links.  Regardless, I'll continue to build upon it so it resembles that of the aHrefs tool.
+
+
+## What Does It Do?
+
+
+The script is built with the [Ruby programming language](http://www.ruby-lang.org/en/) and analyzes a list of URLs in bulk by accessing the aHrefs API then responds with the appropriate data (exact match).
+
+The current version returns the target URL and the following link metrics to the page: total backlinks, linking root domains, unique IP addresses, .COM links, .EDU links and .GOV links.  It will also indicate the remaining API calls in your account upon completion.
+
+
+
+This is what it looks like in action...
+
+
+![ahrefs_action](/images/ahrefs_action.png)
+
+
+
+
+
+## Where Can I Get My Copy?
+
+
+**1)** The command line is required so Macs can use their Terminal whereas Windows users will need the [RubyInstaller](http://rubyinstaller.org/downloads/).  Installation and navigation is beyond the scope of this post but you can find a fairly basic tutorial by [Distilled](http://www.distilled.net/blog/seo/the-beginners-guide-to-using-the-command-line-for-seo/).
+
+**2)** Head over to my [Github repository](https://github.com/Eeysirhc/ahrefs-api) and grab the Ruby script.
+
+**3)** If you are unsure of how to do the previous step then [click here](https://raw.github.com/Eeysirhc/ahrefs-api/master/ruby-ahrefs.rb) and save the contents on your computer as a _.rb_ extension.
+
+**4)** Insert your aHrefs [API key](http://ahrefs.com/api/) in line #12.
+
+    
+    require 'open-uri'
+    require 'json'
+    
+    output = File.open('ahrefs_results.csv','w')
+    
+    header = "Target URL \t Total Backlinks \t Linking Domains \t Unique IPs \t .Com Links \t .Edu Links \t .Gov Links \n"
+    
+    puts header
+    output.write header
+    
+    key = "INSERT_YOUR_API_KEY_HERE"
+    
+    # Change .CSV to .TXT or other file below if needed
+    File.open("links.csv").each {|line|
+
+
+**5) **Open your favorite text editor (not MS Word), add your target websites (one URL per line) and save the document as _links.csv_
+
+**6)** Type _ruby file_name.rb_ (or whatever you named the file) and hit enter.
+
+**7)** Analyze results.
+
+**8)** Win.
+
+
+## Final Thoughts
+
+
+The script now spits out the data file as _ahrefs_results.csv_ so you don't need to do anything.  <del>If you want to save the results to a CSV file (which I'm sure you do) then append "_ > output_file.csv_ " at the end of the command before you hit enter. This is the same function from my previous post about [combining multiple Adwords files](http://www.christopheryee.org/painlessly-combine-multiple-adwords-csv/).</del>
+
+If your list of links isn't in .csv format, you can change line #15 accordingly to accept another file such as .txt.
+
+    
+    require 'open-uri'
+    require 'json'
+    
+    output = File.open('ahrefs_results.csv','w')
+    
+    header = "Target URL \t Total Backlinks \t Linking Domains \t Unique IPs \t .Com Links \t .Edu Links \t .Gov Links \n"
+    
+    puts header
+    output.write header
+    
+    key = "INSERT_YOUR_API_KEY_HERE"
+    
+    # Change .CSV to .TXT or other file below if needed
+    File.open("links.csv").each {|line|
+
+
+Lastly, big thanks to [Eric Wu](https://twitter.com/eywu) who offered a ton of optimization suggestions but I have yet to implement them all.  If you like this sort of technical stuff then definitely follow him for more [advanced command line tutorials](http://searchsignals.com/tutorials/command-line-seo/#axzz2FTXcUh00).
+
+I'm totally addicted and have another one in the pipeline which pings the SEOmoz Linkscape API - stay tuned!
+
+
+<blockquote>**Update Oct. 2013:** The examples have been changed based on [this code edit](http://www.christopheryee.org/updated-ahrefs-link-analysis-script/).</blockquote>

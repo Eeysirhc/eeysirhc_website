@@ -1,0 +1,200 @@
+---
+title: "Firearm Sales: How are Americans coping with 2020?"
+author: Christopher Yee
+date: '2020-09-14'
+slug: firearm-sales-how-are-americans-coping-with-2020
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>The US has a peculiar relationship with guns where we frequently observe nontrivial spikes in firearm sales. These are triggered (pun intended) by various political, economic, and social events at the time.</p>
+<p>With 2020 being an especially chaotic year, I wanted to explore how that phenomenon is reflected in American gun purchases thus far.</p>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns</code></pre>
+</div>
+<div id="retrieve-data" class="section level2">
+<h2>Retrieve data</h2>
+<p>I was unable to find confirmed and accurate gun purchase data that is free on the web. However, we can use data from the FBI’s <a href="https://www.fbi.gov/services/cjis/nics">National Instant Criminal Background Check System</a> (NICS) as a proxy.</p>
+<blockquote>
+<p>Note #1: the assumption we are making here is <strong>most</strong> background checks will result in the sale of a firearm.</p>
+</blockquote>
+<p>The NICS data is stored in PDF format but thanks to the <a href="https://github.com/BuzzFeedNews/nics-firearm-background-checks">BuzzFeed News team</a> they already wrote the code to parse and sanitize these files. What is even more amazing is how they went the extra mile to update these statistics on a regular basis.</p>
+<pre class="python"><code>nics_raw = pd.read_csv(&quot;https://raw.githubusercontent.com/BuzzFeedNews/nics-firearm-background-checks/master/data/nics-firearm-background-checks.csv&quot;)
+
+nics = nics_raw
+
+nics.month = pd.to_datetime(nics.month, infer_datetime_format=True)</code></pre>
+<p>Let’s verify what variables are at our disposal:</p>
+<pre class="python"><code>nics_raw.dtypes</code></pre>
+<pre><code>## month                        datetime64[ns]
+## state                                object
+## permit                              float64
+## permit_recheck                      float64
+## handgun                             float64
+## long_gun                            float64
+## other                               float64
+## multiple                              int64
+## admin                               float64
+## prepawn_handgun                     float64
+## prepawn_long_gun                    float64
+## prepawn_other                       float64
+## redemption_handgun                  float64
+## redemption_long_gun                 float64
+## redemption_other                    float64
+## returned_handgun                    float64
+## returned_long_gun                   float64
+## returned_other                      float64
+## rentals_handgun                     float64
+## rentals_long_gun                    float64
+## private_sale_handgun                float64
+## private_sale_long_gun               float64
+## private_sale_other                  float64
+## return_to_seller_handgun            float64
+## return_to_seller_long_gun           float64
+## return_to_seller_other              float64
+## totals                                int64
+## dtype: object</code></pre>
+<p>With this many variables our analysis can go a million different ways. We’ll limit our scope to a few dimensions and keep them in mind for a future article.</p>
+</div>
+<div id="what-is-the-trend-in-firearm-background-checks" class="section level2">
+<h2>What is the trend in firearm background checks?</h2>
+<pre class="python"><code>nics_total = nics[[&#39;month&#39;, &#39;totals&#39;]]
+nics_total = nics_total.groupby(&#39;month&#39;).agg(&#39;sum&#39;).reset_index()
+
+plt.figure(figsize=(15, 10))
+
+sns.lineplot(x=&#39;month&#39;, y=&#39;totals&#39;, data=nics_total, marker=&#39;o&#39;, color=&#39;seagreen&#39;)
+plt.title(&quot;Total NICS Firearm Background Checks&quot;)
+plt.xlabel(&quot;&quot;)
+plt.ylabel(&quot;&quot;)
+plt.figtext(0.9, 0.05, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.03, &quot;source: Federal Bureau of Investigation&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-09-07-how-many-guns-did-americans-purchase-in-2020-so-far_files/figure-html/unnamed-chunk-5-1.png" width="1440" /></p>
+<p>It is quite apparent the 2000s have a steady flow of background checks but that gradually increased over time from 2008 onward. My mind immediately recalls a few major events during those time frames:</p>
+<ul>
+<li>2000 to 2008 - the Bush administration and the country as a whole was focused on a post-9/11 world with two foreign wars in the Middle East</li>
+<li>2008 to 2016 - mass shootings plagued the country with the Obama administration attempting to drive domestic policy related to gun control</li>
+<li>2016 to present - background checks are fairly stable throughout the Trump administration but there is a significant jump in 2020</li>
+</ul>
+</div>
+<div id="what-type-of-gun-receives-the-most-background-checks" class="section level2">
+<h2>What type of gun receives the most background checks?</h2>
+<pre class="python"><code>nics_guntype = nics[[&#39;month&#39;, &#39;handgun&#39;, &#39;long_gun&#39;]]
+nics_guntype = nics_guntype.groupby(&#39;month&#39;).agg(&#39;sum&#39;).reset_index()
+
+nics_guntype_parsed = (pd.melt(nics_guntype, id_vars=[&#39;month&#39;], 
+    value_vars=[&#39;handgun&#39;, &#39;long_gun&#39;], var_name=&#39;type&#39;))
+
+plt.figure(figsize=(15, 10))
+
+sns.lineplot(x=&#39;month&#39;, y=&#39;value&#39;, hue=&#39;type&#39;, data=nics_guntype_parsed, marker=&#39;o&#39;)
+plt.title(&quot;Total NICS Firearm Background Checks by Type&quot;)
+plt.xlabel(&quot;&quot;)
+plt.ylabel(&quot;&quot;)
+plt.figtext(0.9, 0.05, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.03, &quot;source: Federal Bureau of Investigation&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-09-07-how-many-guns-did-americans-purchase-in-2020-so-far_files/figure-html/unnamed-chunk-6-1.png" width="1440" /></p>
+<p>According to this chart, it appears long guns have remained relatively stable for the past two decades. In contrast, we observe an increase in handgun purchases from 2008, surpassing long guns by 2015, and exhibiting a surge in early 2020.</p>
+</div>
+<div id="what-is-the-ratio-of-handgun-to-long-guns" class="section level2">
+<h2>What is the ratio of handgun to long guns?</h2>
+<p>To better compare the two types of guns we can normalize our values as a ratio: how many handguns are purchased for each long gun (and vice versa)?</p>
+<pre class="python"><code>nics_ratio = nics_guntype
+nics_ratio[&#39;handgun_ratio&#39;] = nics_guntype[&#39;handgun&#39;] / nics_guntype[&#39;long_gun&#39;]
+nics_ratio[&#39;longgun_ratio&#39;] = nics_guntype[&#39;long_gun&#39;] / nics_guntype[&#39;handgun&#39;]
+
+nics_ratio = (pd.melt(nics_ratio, id_vars=[&#39;month&#39;], 
+    value_vars=[&#39;handgun_ratio&#39;, &#39;longgun_ratio&#39;], var_name=&#39;type&#39;))
+
+plt.figure(figsize=(15, 10)) 
+
+sns.lineplot(x=&#39;month&#39;, y=&#39;value&#39;, hue=&#39;type&#39;, data=nics_ratio, marker=&#39;o&#39;)
+plt.title(&quot;NICS Firearm Background Checks by Ratio of Firearm Type&quot;)
+plt.xlabel(&quot;&quot;)
+plt.ylabel(&quot;&quot;)
+plt.figtext(0.9, 0.05, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.03, &quot;source: Federal Bureau of Investigation&quot;, horizontalalignment=&quot;right&quot;)
+plt.legend()
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-09-07-how-many-guns-did-americans-purchase-in-2020-so-far_files/figure-html/unnamed-chunk-7-1.png" width="1440" /></p>
+<p>This is quite interesting: even though total long gun background checks have remained flat, the ratio has fallen dramatically.</p>
+<p>Indeed, just 20 years ago Americans were purchasing 4-6 long guns for every handgun. By 2020 this trend has flipped where we get about 4 handguns for every long gun!</p>
+</div>
+<div id="what-caused-the-influx-of-gun-sales-in-2020" class="section level2">
+<h2>What caused the influx of gun sales in 2020?</h2>
+<pre class="python"><code>nics_thisyear = nics_guntype_parsed[nics_guntype_parsed[&#39;month&#39;] &gt;= &#39;2019-01-01&#39;]
+
+plt.figure(figsize=(15, 10)) 
+
+sns.lineplot(x=&#39;month&#39;, y=&#39;value&#39;, hue=&#39;type&#39;, data=nics_thisyear, marker=&#39;o&#39;);
+plt.title(&quot;NICS Firearm Background Checks by Type since 2019&quot;)
+plt.axvline(x=&quot;2020-03-01&quot;, color=&quot;grey&quot;, linestyle=&#39;dashed&#39;)
+plt.axvline(x=&quot;2020-06-01&quot;, color=&quot;grey&quot;, linestyle=&#39;dashed&#39;)
+plt.xlabel(&quot;&quot;)
+plt.ylabel(&quot;&quot;)
+plt.ylim(bottom=0, top=2e6);
+plt.figtext(0.9, 0.05, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.03, &quot;source: Federal Bureau of Investigation&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-09-07-how-many-guns-did-americans-purchase-in-2020-so-far_files/figure-html/unnamed-chunk-8-1.png" width="1440" /></p>
+<p>The plot above highlights two major spikes in firearm sales - especially for handguns.</p>
+<ul>
+<li>March: the <a href="https://www.christopheryee.org/blog/script-to-track-covid-19-cases-in-the-us/">coronavirus</a> reaches the shores of the US and forces the country to go into <a href="https://twitter.com/Eeysirhc/status/1240802603337842688?s=20">pseudo-lockdown</a></li>
+<li>June: <a href="https://blacklivesmatter.com/">Black Lives Matter</a> protests erupt across the country due to the <a href="https://en.wikipedia.org/wiki/Killing_of_George_Floyd">extrajudicial killing of George Floyd</a></li>
+</ul>
+<p>If we focus just on March there is a +92% year-over-year increase for handguns and +74% for long guns.</p>
+<pre class="python"><code>nics_guntype[&#39;index_year&#39;] = pd.DatetimeIndex(nics_guntype[&#39;month&#39;]).year
+nics_guntype[&#39;index_month&#39;] = pd.DatetimeIndex(nics_guntype[&#39;month&#39;]).month
+nics_guntype = nics_guntype[[&#39;month&#39;, &#39;handgun&#39;, &#39;long_gun&#39;, &#39;index_month&#39;]]
+
+(nics_guntype[nics_guntype[&#39;index_month&#39;] == 3]
+    .sort_values(&#39;month&#39;, ascending=False).head())</code></pre>
+<pre><code>##          month    handgun  long_gun  index_month
+## 256 2020-03-01  1392677.0  758073.0            3
+## 244 2019-03-01   727226.0  435698.0            3
+## 232 2018-03-01   781452.0  540979.0            3
+## 220 2017-03-01   751866.0  461273.0            3
+## 208 2016-03-01   736630.0  430837.0            3</code></pre>
+<p>So, how are Americans coping with 2020 thus far?</p>
+<p>We are buying lots and lots of guns which, admittedly, is 100% expected.</p>
+</div>
+<div id="moment-of-zen" class="section level2">
+<h2>Moment of zen</h2>
+<p>And just for fun…</p>
+<pre class="python"><code>nics_state = (nics[[&#39;month&#39;, &#39;state&#39;, &#39;handgun&#39;, &#39;long_gun&#39;]]
+    .groupby([&#39;month&#39;, &#39;state&#39;]).agg(&#39;sum&#39;).reset_index())
+
+nics_state[&#39;handgun_ratio&#39;] = nics_state[&#39;handgun&#39;] / nics_state[&#39;long_gun&#39;]
+nics_state[&#39;longgun_ratio&#39;] = nics_state[&#39;long_gun&#39;] / nics_state[&#39;handgun&#39;]
+
+states = [&#39;California&#39;, &#39;Tennessee&#39;, &#39;Vermont&#39;, &#39;New Jersey&#39;, &#39;Texas&#39;, &#39;Arizona&#39;, &#39;Georgia&#39;, &#39;Florida&#39;, &#39;Alabama&#39;]
+
+nics_state_filter = nics_state[nics_state[&#39;state&#39;].isin(states)]
+
+nics_state_parsed = (pd.melt(nics_state_filter, id_vars=[&#39;month&#39;, &#39;state&#39;],
+    value_vars=[&#39;handgun_ratio&#39;, &#39;longgun_ratio&#39;], var_name=&#39;type&#39;))
+
+plt.figure(figsize=(15,10))
+
+p = sns.FacetGrid(nics_state_parsed, col=&quot;state&quot;, hue=&quot;type&quot;, col_wrap=3)
+p = (p.map(plt.plot, &quot;month&quot;, &quot;value&quot;).add_legend()
+    .set_xlabels(&quot;&quot;).set_ylabels(&quot;&quot;))
+plt.figtext(0.95, 0.02, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.95, 0.00, &quot;source: Federal Bureau of Investigation&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-09-07-how-many-guns-did-americans-purchase-in-2020-so-far_files/figure-html/unnamed-chunk-10-1.png" width="1008" /></p>
+</div>

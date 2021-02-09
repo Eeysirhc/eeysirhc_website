@@ -1,0 +1,200 @@
+---
+title: 'Long Tail Search Keywords: Volume or Length?'
+author: Christopher Yee
+date: '2019-05-20'
+slug: long-tail-search-keywords-volume-or-length
+categories:
+  - Search Engine Optimization
+---
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(scales)
+
+data <- read_csv("https://raw.githubusercontent.com/Eeysirhc/r_gsc_project/master/gsc_anonymized_keywords.csv")
+
+data <- data %>% 
+  rename(website = segment)
+```
+
+I stumbled upon an interesting poll last week...
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">SEO folks. When you reference &quot;a long tail query&quot; do you mean:<br><br>(Trying again - deleted last poll as I phrased it ambiguously. Sorry.)</p>&mdash; Will Critchlow (@willcritchlow) <a href="https://twitter.com/willcritchlow/status/1128314318271991808?ref_src=twsrc%5Etfw">May 14, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+...and was amazed by the sheer number of incorrect responses.
+
+Ever the skeptic, I wanted to make sure this was a real phenomenon despite the 1.2K survey responses.
+
+Using Monte Carlo simulation we find there is a 100% chance the polling differences between the three groups are statistically significant (see notes for conjugate priors).
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+n <- 1217
+words <- n*0.51
+volume <- n*0.40
+other <- n*0.09
+
+sim_words <- as_tibble(rbeta(1e5, words+7, (n-words)+13)) %>% mutate(answer = paste0("Many words in query"))
+sim_volume <- as_tibble(rbeta(1e5, volume+14, (n-volume)+6)) %>% mutate(answer = paste0("Low volume query"))
+sim_other <- as_tibble(rbeta(1e5, other+1, (n-other)+19)) %>% mutate(answer = paste0("Something else"))
+
+survey <- rbind(sim_words, sim_volume, sim_other)
+
+survey %>% 
+  ggplot() +
+  geom_density(aes(value, fill = answer), alpha = 0.5) +
+  labs(x = "Response Rate", y = "Density", fill = "Answer",
+       title = "Question: When you reference a \"long tail query\" what do you mean ?",
+       subtitle = "Simulation of 100K surveys with n=1.2K") +
+  scale_x_continuous(labels = percent_format(round(1))) +
+  scale_fill_brewer(palette = 'Dark2') +
+  theme_bw()
+```
+
+However, I have yet to see hard evidence from any of the two dominant perspectives. The _many words in keyword_ group use Google to find a bunch of images from the Cretaceous period of the internet. The _low volume query_ bunch just finger wag and talk down to the (misinformed) majority.
+
+This compels me to ask: regardless of your response, how would you present your point of view to visually replicate the theory of the long tail curve (logarithmic)?
+
+With this post I intend to answer that question by using real world Google Search Console data from four websites with varying levels of organic search traffic.  You can also play with the anonymized dataset [here](https://github.com/Eeysirhc/r_gsc_project/blob/master/gsc_anonymized_keywords.csv).
+
+## Long tail: many words in query
+
+This cohort states there is a linear relationship between the length of the keyword and search volume.
+
+Thus, a 1-word search query will have more search volume than a 2-word search query; a 2-word search query will have more volume than a 3-word search query; and so on and so on.
+
+If I were to take that definition we can then visualize it as the following:
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+data %>% 
+  mutate(length = as.factor(length)) %>% 
+  group_by(website, length) %>% 
+  summarize(clicks = sum(clicks)) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_col(aes(length, clicks, fill = website), show.legend = FALSE, alpha = 0.8) +
+  scale_y_continuous(labels = comma_format()) +
+  facet_wrap(~website, scales = 'free_y') +
+  scale_fill_brewer(palette = 'Spectral') +
+  theme_bw() +
+  labs(x = 'Keyword Length', y = "Clicks")
+```
+
+Odd - this does not look like the long tail demand curve we have come to know and love.
+
+Perhaps what we want is the total count in each query length bucket rather than actual search volume?
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+data %>% 
+  ggplot() +
+  geom_histogram(aes(length, fill = website), 
+                 binwidth = 1, alpha = 0.8, show.legend = FALSE,
+                 col = 'white') +
+  scale_x_continuous(labels = number_format(),
+                     limits = c(0,10)) +
+  scale_y_continuous(labels = comma_format()) +
+  facet_wrap(~website, scales = 'free_y') +
+  scale_fill_brewer(palette = 'Set2') +
+  theme_bw() +
+  labs(x = 'Keyword Length', y = "Count")
+```
+
+Not even close.
+
+## Long tail: low volume query
+
+Here's the [wikipedia](https://en.wikipedia.org/wiki/Long_tail) definition:
+
+> ...a long tail of some distributions of numbers is the portion of the distribution having a large number of occurrences far from the "head" or central part of the distribution. The distribution could involve popularities, random numbers of occurrences of events with various probabilities, etc...
+
+This can be put into practice by taking every keyword then sort by descending order based on total clicks (a.k.a. popluarity).  Afterwards, we can use the cumulative distribution function for each keyword per website to illustrate the power law in action (80% of traffic comes from 20% of the keywords).
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+data %>% 
+  group_by(website) %>% 
+  mutate(distro = cume_dist(clicks)) %>% 
+  mutate(rank = row_number(),
+         segment = case_when(distro >= 0.80 ~ 'Head',
+                             TRUE ~ 'Tail')) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_point(aes(reorder(rank, -clicks), clicks, color = segment)) +
+  geom_line(aes(reorder(rank, -clicks), clicks, color = segment), group = 1) +
+  facet_wrap(~website, scales = 'free') +
+  scale_y_continuous(labels = comma_format()) +
+  scale_color_brewer(palette = 'Set1') +
+  theme_bw() + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) +
+  labs(y = "Clicks", x = "Keyword (descending click order)", color = 'Segment')
+```
+
+Winner winner chicken dinner.
+
+## tl;dr 
+The long tail is defined by search query volume.
+
+## Bonus
+
+And of course, this wouldn't be a data visualization blog post if I wasn't able to show clicks and keyword length on the same logarithmic chart ;]
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+data %>% 
+  group_by(website) %>% 
+  mutate(length = as.factor(length)) %>% 
+  top_n(100, clicks) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_col(aes(reorder(keyword, -clicks), clicks, fill = length)) +
+  facet_wrap(~website, scales = 'free') +
+  scale_y_continuous(labels = comma_format()) +
+  scale_fill_brewer(palette = 'Paired') +
+  labs(x = 'Keyword (descending click order)', y = 'Clicks', fill = 'Keyword Length') +
+  theme_bw() + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+```
+
+## Notes
+
+I used a weak prior with the assumption that most respondents would choose the correct answer:
+
+* _Low volume query_ with Beta(14,6) 
+* _Many words query_ with Beta(7,13)
+* _Something else_ with Beta(1,19)
+
+Example of what our simulation would look like with 100 responses:
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+lowvol_words <- as_tibble(rbeta(1e5, 51+7, 49+13)) %>% mutate(answer = paste0("Many words in query"))
+lowvol_volume <- as_tibble(rbeta(1e5, 40+14, 60+6)) %>% mutate(answer = paste0("Low volume query"))
+lowvol_other <- as_tibble(rbeta(1e5, 9+1, 91+19)) %>% mutate(answer = paste0("Something else"))
+
+lowvol_survey <- rbind(lowvol_words, lowvol_volume, lowvol_other)
+
+lowvol_survey %>% 
+  ggplot() +
+  geom_density(aes(value, fill = answer), alpha = 0.5) +
+  labs(x = "Response Rate", y = "Density", fill = "Answer",
+       title = "Question: When you reference a \"long tail query\" what do you mean ?",
+       subtitle = "Simulation of 100K surveys when n=100") +
+  scale_x_continuous(labels = percent_format(round(1))) +
+  scale_fill_brewer(palette = 'Dark2') +
+  theme_bw()
+```
+
+Probability _many words in query_ is greater than _low volume query_ cohort (%):
+```{r echo=FALSE}
+mean(lowvol_words$value > lowvol_volume$value) * 100
+```
+
+### Soapbox
+
+What this means to me is the industry is still plagued by bad advice where popularity (via the conference circuit, twitter, etc.) equates to domain knowledge.  We have "leaders" who hear a few [fancy words](https://twitter.com/Eeysirhc/status/1079876113273212928) then [bastardize](https://twitter.com/Eeysirhc/status/293415917633810432) the meaning without fully [understanding the concepts](https://twitter.com/randfish/status/1128921327362924545).  Any critique is immediately shut down.
+
+On the other side of the aisle are the very enthusiastic newcomers who want to learn everything.  However, misinformation and mistakes continue to linger in the annals of the search results which trickle down to the next generation of SEO. They take in all information as gospel...never questioning or thinking critically.
+
+I don't know what the appropriate solution is but it's worth mentioning here so we can at least hold ourselves to a higher standard - elevating everyone else in the process.

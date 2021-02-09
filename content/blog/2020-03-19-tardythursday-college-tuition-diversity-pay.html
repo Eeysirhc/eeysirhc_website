@@ -1,0 +1,52 @@
+---
+title: 'TardyThursday: College Tuition, Diversity & Pay'
+author: Christopher Yee
+date: '2020-03-19'
+slug: tardythursday-college-tuition-diversity-pay
+categories:
+  - TidyTuesday
+---
+
+
+
+<p>The differences between this unsanctioned #tardythursday and the official <a href="https://github.com/rfordatascience/tidytuesday">#tidytuesday</a>:</p>
+<ol style="list-style-type: decimal">
+<li>These will publish on Thursday (obviously)</li>
+<li>The dataset will come from a completely different week of TidyTuesday</li>
+<li>For a surprise, I’ll code with either <a href="https://twitter.com/search?q=%23rstats">#rstats</a> or python (similar to <a href="https://www.christopheryee.org/blog/makeovermonday-women-in-the-workforce/">#makeovermonday</a>)</li>
+</ol>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt</code></pre>
+</div>
+<div id="download-and-parse-data" class="section level2">
+<h2>Download and parse data</h2>
+<pre class="python"><code>df_raw=pd.read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-10/salary_potential.csv&quot;)
+
+df=df_raw[[&#39;state_name&#39;, &#39;early_career_pay&#39;, &#39;mid_career_pay&#39;]].groupby(&#39;state_name&#39;).mean().reset_index()</code></pre>
+</div>
+<div id="visualize-dataset" class="section level2">
+<h2>Visualize dataset</h2>
+<pre class="python"><code>sns.set(style=&quot;darkgrid&quot;)
+plt.figure(figsize=(20,15))
+
+g=sns.regplot(x=&quot;early_career_pay&quot;, y=&quot;mid_career_pay&quot;, data=df)
+
+for line in range(0,df.shape[0]):
+     g.text(df.early_career_pay[line]+0.01, df.mid_career_pay[line], 
+     df.state_name[line], horizontalalignment=&#39;left&#39;, 
+     size=&#39;medium&#39;, color=&#39;black&#39;)
+        
+plt.xlabel(&quot;Early Career Pay&quot;)
+plt.ylabel(&quot;Mid Career Pay&quot;)
+plt.title(&quot;Average Salary Potential by State: Early vs Mid Career&quot;,
+      x=0.01, horizontalalignment=&quot;left&quot;, fontsize=16)
+plt.figtext(0.9, 0.09, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.08, &quot;Source: TuitionTracker.org&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-03-19-tardythursday-college-tuition-diversity-pay_files/figure-html/unnamed-chunk-3-1.png" width="1920" /></p>
+<p>Now, all that is left is to find something catchy for the other days of the week - lol.</p>
+</div>

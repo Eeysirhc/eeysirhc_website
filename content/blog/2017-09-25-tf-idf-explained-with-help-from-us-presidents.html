@@ -1,0 +1,52 @@
+---
+author: Christopher Yee
+date: 2017-09-25 18:05:28+00:00
+layout: post
+slug: tf-idf-explained-with-help-from-us-presidents
+title: 'TF-IDF Explained: With Help From US Presidents'
+categories:
+- Data Visualization
+---
+
+
+
+<p>TF-IDF, or Term Frequency-Inverse Document Frequency, has long been utilized by search engines to score and rank a document’s relevance for any given search query.  In spite of this, I think it continues to be a misunderstood or under-the-radar concept in the broader SEO world due to 1) “keyword density” being much easier to explain and 2) it’s like a word salad when you read it for the very first time.</p>
+<p>With the help from past US Presidents and their <a href="http://www.presidency.ucsb.edu/sou.php">State of the Union addresses</a>, I’ll attempt to explain this numerical statistic in its simplest form.</p>
+<div id="the-basics" class="section level2">
+<h2>The Basics</h2>
+<p>At its core, <a href="https://en.wikipedia.org/wiki/Tf%E2%80%93idf">TF-IDF</a> is used to quantify how important a word is to a document when compared with a larger collection of text.  This essentially gives less prominence to a word that has been used more frequently, and more weight to a word which has been used less across a known text corpus.  The beauty of this calculation is it efficiently removes commonly used words like “the”, “but”, “for”, etc. yet it can distill the document down to its primary lexical components.</p>
+<p>For example, SEO of  yesteryear dictates: “if you want to rank for that keyword then you need to mention it X times on the page.”  This obviously isn’t the case but let’s run with this as a working example.</p>
+<p>If we take the State of the Union addresses from George Washington, Abraham Lincoln, Dwight D. Eisenhower, Bill Clinton, George W. Bush &amp; Barack Obama, we can plot out their term frequencies to get something like this:</p>
+<p><img src="/images/all-prez-termfreq.png" /></p>
+<p>Common words among the last three US Presidents? America, American(s), people, tax and jobs.  “World” is a high frequency term after Eisenhower presumably because US foreign policy placed more emphasis on the international realm post-WW2, instead of its reclusive pre-war status.</p>
+<p>With “traditional” keyword density, the aforementioned visualization is quite ambiguous and difficult for search engines to match user query to the appropriate content.  It doesn’t tell us a whole lot about relative significance or even how one US President differs from the other - they all look the same!</p>
+<p>It’s also interesting to call out George Washington and Lincoln: why do they have so few repetitive words?  My first guess is professional speech writing wasn’t a mainstream occupation in the 19th century.  That said, I’ll leave it up to the history buffs to clarify.</p>
+</div>
+<div id="tf-idf-applied" class="section level2">
+<h2><strong>TF-IDF Applied</strong></h2>
+<p>Now, let’s see how TF-IDF fares with the same set of text documents from our US Presidents.</p>
+<p><img src="/images/all-prez-tfidf.png" /></p>
+<p>This is much cleaner with a quick synopsis below:</p>
+<ul>
+<li><p>George Washington = dealing with the militia and Indian tribes (aka native Americans)</p></li>
+<li><p>Abraham Lincoln = emancipation (proclamation) of colored persons and slaves, rebellion suppression (aka the US Civil War) and the naval blockade during that time</p></li>
+<li><p>Dwight D. Eisenhower = economic programs/budgets/expenditures and overall mobilization against Communism in 1954 (speech on the “Domino Theory”)</p></li>
+<li><p>Bill Clinton = jobs in America, challenges relating to crime/guns, focus on the family (parents, child) and education (college, schools)</p></li>
+<li><p>George W. Bush = the war on terror/terrorism/terrorists, Iraq, Afghanistan, Al-Qaeda and Saddam Hussein</p></li>
+<li><p>Barack Obama = jobs/workforce/businesses in America, political reform (democrats &amp; republicans), the country deficit, oil and Afghanistan</p></li>
+</ul>
+<p>It looks to me as though TF-IDF did an amazing job summarizing the focus of each presidential tenure!</p>
+<p>Since we’re already here, we might as well examine how our current Commander in Chief is doing based on his recent State of the Union address:
+<img src="/images/trump-sotu.png" />
+Based solely on term frequency in the image above, it’s unsurprising to see commonly used terms for a presidential address like this.  And how about its TF-IDF relative to other State of the Union addresses?</p>
+<p><img src="/images/trump-single-tfidf.png" />
+Important terms include immigration &amp; the foreign ban, infrastructure (relating to the border wall), Paul Ryan, Obamacare and a number of name’s which may or may not be related to government policy.</p>
+</div>
+<div id="wrap-up" class="section level2">
+<h2><strong>Wrap-Up</strong></h2>
+<p>I don’t recommend changing your entire SEO strategy based on this piece of information but two action items come to mind:</p>
+<ol style="list-style-type: decimal">
+<li><p>Education - this is especially important for enterprise SEO but leverage the concept of TF-IDF, and the examples here, to dispel the misguided belief about how our discipline is all about “keyword density”</p></li>
+<li><p>Big picture - it’s worthless optimizing for an individual TF-IDF score but instead use it in tandem with other on-page factors (e.g. synonyms, topical themes, natural language, etc.) so you’re holistically addressing user intent</p></li>
+</ol>
+</div>

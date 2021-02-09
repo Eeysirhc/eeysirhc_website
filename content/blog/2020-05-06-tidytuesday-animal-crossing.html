@@ -1,0 +1,60 @@
+---
+title: 'TidyTuesday: Animal Crossing'
+author: Christopher Yee
+date: '2020-05-06'
+slug: tidytuesday-animal-crossing
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Data from <a href="https://twitter.com/hashtag/tidytuesday">#tidytuesday</a> week of 2020-05-05 (<a href="https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-05-05/readme.md">source</a>)</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(ggfortify)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<pre class="r"><code>villagers_raw &lt;- read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/villagers.csv&#39;)</code></pre>
+</div>
+<div id="process-data" class="section level2">
+<h2>Process data</h2>
+<pre class="r"><code>villagers &lt;- villagers_raw %&gt;% 
+  select(gender, species, personality) %&gt;% 
+  mutate(species = str_to_title(species)) %&gt;%
+  group_by(gender, species, personality) %&gt;% 
+  summarize(n = n()) %&gt;% 
+  mutate(pct_total = n / sum(n)) %&gt;% 
+  ungroup() </code></pre>
+</div>
+<div id="visualize-data" class="section level2">
+<h2>Visualize data</h2>
+<pre class="r"><code>villagers %&gt;% 
+  ggplot(aes(personality, pct_total, fill = gender, color = gender, group = gender)) +
+  geom_polygon(alpha = 0.5) +
+  geom_point() +
+  coord_polar() +
+  facet_wrap(~species) +
+  labs(x = NULL, y = NULL, color = NULL, fill = NULL, 
+       title = &quot;Animal Crossing: villager personality traits by species &amp; gender&quot;,
+       caption = &quot;by: @eeysirhc\nsource:VillagerDB&quot;) +
+  theme_bw() +
+  theme(legend.position = &#39;top&#39;,
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())</code></pre>
+<p><img src="/blog/2020-05-06-tidytuesday-animal-crossing_files/figure-html/unnamed-chunk-4-1.png" width="1920" /></p>
+</div>
+<div id="moment-of-zen" class="section level2">
+<h2>Moment of zen</h2>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+<a href="https://twitter.com/hashtag/tidytuesday?src=hash&amp;ref_src=twsrc%5Etfw">#tidytuesday</a> about <a href="https://twitter.com/hashtag/AnimalCrossing?src=hash&amp;ref_src=twsrc%5Etfw">#AnimalCrossing</a> villager personality traits for species x gender<br><br>Crankiest neighbor? male kangaroo<br>Most normal? female octopus<a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> code: <a href="https://t.co/j9bU36DG3r">https://t.co/j9bU36DG3r</a> <a href="https://twitter.com/hashtag/tardytuesday?src=hash&amp;ref_src=twsrc%5Etfw">#tardytuesday</a> <a href="https://t.co/uNTZtVhuz3">pic.twitter.com/uNTZtVhuz3</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1257939908062138368?ref_src=twsrc%5Etfw">May 6, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>

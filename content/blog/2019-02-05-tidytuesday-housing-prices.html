@@ -1,0 +1,105 @@
+---
+title: 'TidyTuesday: Housing Prices'
+author: Christopher Yee
+date: '2019-02-05'
+slug: tidytuesday-housing-prices
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<blockquote>
+<p>Instead of a static visualization I decided to build a barebones Shiny app this week. The purpose is to improve the interactivity of the final output - one of <a href="https://www.christopheryee.org/blog/retrospective-introspection-in-2018/">my 2019 goals</a> to level up advanced R knowledge. You can find the <a href="https://github.com/Eeysirhc/tidytuesday/blob/master/20190205-housing_prices/app.R">full code here</a>.</p>
+</blockquote>
+<p>Analyzing data for #tidytuesday week of 2/5/2019 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-05">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES
+library(tidyverse)
+library(scales)
+library(shiny)
+
+state_hpi_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-05/state_hpi.csv&quot;)</code></pre>
+<div id="process-the-raw-data" class="section level3">
+<h3>Process the raw data</h3>
+<pre class="r"><code>state_hpi &lt;- state_hpi_raw %&gt;%
+  group_by(state, year) %&gt;%
+  summarize(us_avg = mean(us_avg),
+            price_index = mean(price_index)) %&gt;%
+  mutate(pct_diff = (price_index / us_avg) - 1,
+         segment = ifelse(pct_diff &gt; 0, &#39;above&#39;, &#39;below&#39;),
+         segment = str_to_title(segment))</code></pre>
+</div>
+<div id="build-the-ui-level" class="section level3">
+<h3>Build the UI level</h3>
+<ul>
+<li>Include a drop down menu to select output data by state abbreviation</li>
+</ul>
+<pre class="r"><code>ui &lt;- fluidPage(
+  &quot;Housing Price Index: US Average vs State&quot;,
+  selectInput(inputId = &quot;select_state&quot;,
+              label = &quot;Choose a state&quot;,
+              c(state.abb)),
+  plotOutput(&quot;hpi1&quot;),
+  plotOutput(&quot;hpi2&quot;)
+)</code></pre>
+</div>
+<div id="build-the-server-level" class="section level3">
+<h3>Build the server level</h3>
+<ul>
+<li>Plot 1: Time series for a given state average annual housing price index compared to the US average</li>
+<li>Plot 2: Time series for the percentage difference of a given state housing price index against the US average</li>
+</ul>
+<pre class="r"><code>server &lt;- function(input, output, session) {
+  
+  output$hpi1 &lt;- renderPlot({
+    state_hpi %&gt;%
+      filter(state == input$select_state) %&gt;%
+      group_by(year, state) %&gt;%
+      summarize(price_index = mean(price_index),
+                us_avg = mean(us_avg)) %&gt;% 
+      ggplot() +
+      geom_line(aes(year, price_index), size = 2, color = &#39;steelblue&#39;) +
+      geom_col(aes(year, us_avg), alpha = 0.3, fill = &#39;grey54&#39;) +
+      theme_bw() +
+      labs(x = NULL,
+           y = &quot;Housing Price Index&quot;) + 
+      theme_bw(base_size = 15) + 
+      scale_y_continuous(limits = c(0,300)) 
+  })
+  
+  output$hpi2 &lt;- renderPlot({
+    state_hpi %&gt;%
+      filter(state == input$select_state) %&gt;%
+      ggplot() + 
+      geom_col(aes(year, pct_diff, fill = segment), alpha = 0.8) +
+      geom_hline(yintercept = 0, lty = &#39;dashed&#39;) +
+      scale_fill_brewer(palette = &#39;Set1&#39;, direction = -1) +
+      scale_y_continuous(labels = percent_format(round(1))) +
+      theme_bw(base_size = 15) +
+      theme(legend.position = &#39;top&#39;) +
+      labs(x = NULL,
+           y = &quot;Difference to US Average&quot;,
+           fill = NULL)
+    })  
+}</code></pre>
+</div>
+<div id="build-the-app-level" class="section level3">
+<h3>Build the app level</h3>
+<pre class="r"><code>shinyApp(ui, server)</code></pre>
+<blockquote>
+<p>Check out the <a href="https://eeysirhc.shinyapps.io/20190205-housing_prices/">final production build here</a></p>
+</blockquote>
+</div>
+<div id="future-versions" class="section level3">
+<h3>Future versions</h3>
+<p>Shiny was easier to use than expected and I look forward to building out this dashboard in the coming weeks. Here are some additional features I plan to include:</p>
+<ul>
+<li>Geospatial data</li>
+<li>Multiple facet selection</li>
+<li>Break out sections for improved readability</li>
+<li>Metric cards</li>
+<li>Dynamic filtering for top_n values</li>
+</ul>
+</div>

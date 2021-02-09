@@ -1,0 +1,198 @@
+---
+title: Calculating & estimating annual salaries with R
+author: Christopher Yee
+date: '2019-11-26'
+slug: calculating-estimating-annual-salaries-with-r
+categories:
+  - Data Science
+---
+
+
+
+<p>A couple weeks ago, a friend asked me about my base annual salary during my time as Square’s SEO Lead.</p>
+<p>Rather than spitting out a number, I thought it would be more interesting to see if we could answer her question using <a href="https://twitter.com/search?q=%23rstats&amp;src=tyah">#rstats</a>.</p>
+<div id="tldr" class="section level2">
+<h2>tl;dr</h2>
+<p>This is what I posted on Twitter:</p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+Ok <a href="https://twitter.com/hashtag/bayesian?src=hash&amp;ref_src=twsrc%5Etfw">#bayesian</a> twitter: helping a friend with salary negotiations and this incorporates what she wants, job boards, confirmed salaries, etc……how do I validate if this model is a load of crock or not? <a href="https://t.co/WUfcdHBtUX">pic.twitter.com/WUfcdHBtUX</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1192489242162675712?ref_src=twsrc%5Etfw">November 7, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>In the off chance someone smart stumbles across this, it would be great to hear how I can validate goodness of fit? I suspect I am missing the loss function here but unsure of how to code it.</p>
+</div>
+<div id="the-problem" class="section level2">
+<h2>The problem</h2>
+<p>If you ask anyone in the SEO industry, people will have a general idea of what the potential salary might be for a “Director of SEO” in San Francisco. One person might say it’s anywhere between $280K-$350K per year while another will state $150K-$230K.</p>
+<p>However, webistes like Glassdoor might give a range of $107K-$200K.</p>
+<p>Who should you trust and how do you know you’re not under cutting your own value or shooting way over the fence? All of the above are very possible values but how do we get more confident about where that true value may lie?</p>
+</div>
+<div id="objective" class="section level2">
+<h2>Objective</h2>
+<p>The purpose of this article is to provide a full code walkthrough on how you can build your own model to answer the question: <em>what is the estimated salary range for a given position?</em></p>
+<p>In my opinion, there are three reasons why I think this will be helpful for any job seeker:</p>
+<ol style="list-style-type: decimal">
+<li>Job aggregation websites provide these statistics but there is a lot of variance between them</li>
+<li>Everyone will have wildly different guesses on the base salary</li>
+<li>This can improve your confidence during salary negoations if you are over/under indexing to that of the market</li>
+</ol>
+<p>My goal is to incorporate all three data sources and determine what that salary might be. For our use case we’ll try to estimate the base salary in San Francisco, CA for a “Director of SEO.”</p>
+</div>
+<div id="approach-the-uniform-distribution" class="section level2">
+<h2>Approach: the uniform distribution</h2>
+<p>The answers for these questions typically have a range of values: from a minimum of $X to a maximum of $Y.</p>
+<p>Unlike my previous <a href="https://www.christopheryee.org/blog/exploring-page-speed-with-data-simulation/">articles using the normal distribution</a>, this is the perfect use case for the <a href="https://en.wikipedia.org/wiki/Uniform_distribution_(continuous)">uniform distribution</a>. According to Wikipedia:</p>
+<blockquote>
+<p>…there is an arbitrary outcome that lies between certain bounds…all intervals of the same length on the distribution’s support are equally probable.</p>
+</blockquote>
+<p>Thus, someone can believe the “SEO Director” position might have a salary range of $110K-$120K. If they meet someone with that job title, they may be inclined to think that person’s gross annual take home pay can be $111K but $119K is also just as likely. However, it will only stay within those upper and lower bounds.</p>
+<p><img src="/blog/2019-11-19-estimating-seo-salaries-with-the-uniform-distribution_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+</div>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(scales)</code></pre>
+</div>
+<div id="simulation-function-for-the-uniform-distribution" class="section level2">
+<h2>Simulation function for the uniform distribution</h2>
+<p>This will generate 100K trials for each variable we create.</p>
+<pre class="r"><code>salary_sim &lt;- function(min_salary, max_slary, segment){
+  values &lt;- runif(1e5, min_salary, max_slary) %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(segment = paste0(segment))
+}</code></pre>
+<blockquote>
+<p>If you want to learn more about this then check out my article about <a href="https://www.christopheryee.org/blog/r-functions-for-data-simulation-sampling-and-visualization/">R functions for data simulation, sampling &amp; visualization</a></p>
+</blockquote>
+</div>
+<div id="generate-our-dataset" class="section level2">
+<h2>Generate our dataset</h2>
+<p>I checked a number of job listing websites where I set the search location to “San Francisco, CA” for “Director of SEO.” I then created the variables below using our <strong>salary_sim</strong> function:</p>
+<pre class="r"><code>glassdoor &lt;- salary_sim(107000, 223000, &quot;glassdoor&quot;)
+indeed &lt;- salary_sim(90000, 150000, &quot;indeed&quot;)
+payscale &lt;- salary_sim(125000, 176000, &quot;payscale&quot;)
+ziprecruiter &lt;- salary_sim(143990, 195498, &quot;ziprecruiter&quot;)
+salary &lt;- salary_sim(170121, 233854, &quot;salary&quot;) 
+comparably &lt;- salary_sim(115148, 173020, &quot;comparably&quot;)</code></pre>
+<p>We want to include what other people think the salary range is based on their own professional experiences. I started with a few but feel free to add your own!</p>
+<pre class="r"><code>guess1 &lt;- salary_sim(180000, 300000, &quot;guess1&quot;)
+guess2 &lt;- salary_sim(150000, 300000, &quot;guess2&quot;)
+guess3 &lt;- salary_sim( 180000, 250000, &quot;guess3&quot;)</code></pre>
+<p>The data illustrates a wide range of base salaries - there are some in the low $100K but others as high as $300K per anum.</p>
+<pre class="r"><code>salary_range &lt;- rbind(glassdoor, indeed, payscale, ziprecruiter, salary, 
+                      comparably, guess1, guess2, guess3)
+
+salary_range %&gt;% 
+  ggplot(aes(value, fill = segment, color = segment)) +
+  geom_density(alpha = 0.5) +
+  scale_x_continuous(limits = c(50000, 350000),
+                     labels = dollar_format()) +
+  labs(x = NULL, y = NULL) +
+  facet_wrap(~segment, ncol = 3) +
+  theme_light() +
+  theme(axis.text.y = element_blank(),
+        legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2019-11-19-estimating-seo-salaries-with-the-uniform-distribution_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>With values all over the place, how do we know what is an acceptable salary proposal? Something you are happy with but also realistic to that of the market?</p>
+<p>The great thing is we can include that in our model and call this variable the <strong>sweet_spot</strong>. Let’s use a minimum of $120K and a maximum of $160K:</p>
+<pre class="r"><code>sweet_spot &lt;- salary_sim(120000, 160000, &quot;sweet_spot&quot;)</code></pre>
+</div>
+<div id="making-decisions" class="section level2">
+<h2>Making decisions</h2>
+<p>We can now combine all of our data to quantify what salary range we would be happy with if we accept an offer as “Director of SEO” in San Francisco:</p>
+<pre class="r"><code>potential &lt;- ((glassdoor$value + 
+                 indeed$value +
+                 payscale$value + 
+                 ziprecruiter$value + 
+                 salary$value + 
+                 comparably$value +
+                 guess1$value +
+                 guess2$value +
+                 guess3$value +
+                 sweet_spot$value) / 10) %&gt;%
+  as_tibble() %&gt;% 
+  mutate(segment = paste0(&quot;potential&quot;))
+
+output &lt;- rbind(potential, sweet_spot)</code></pre>
+<p>And then plot our result:</p>
+<pre class="r"><code>output %&gt;% 
+  ggplot(aes(value, fill = segment, color = segment)) +
+  geom_density(alpha = 0.5) +
+  scale_x_continuous(limits = c(80000, 250000),
+                     labels = dollar_format()) +
+  labs(x = NULL, y = NULL, fill = NULL, color = NULL,
+       title = &quot;Estimated base salary range for Director of SEO in San Francisco, CA&quot;,
+       caption = &quot;Uniform distribution from 10 sources with 100K trials each&quot;) +
+  theme_light() +
+  theme(axis.text.y = element_blank()) +
+  theme(legend.position = &#39;top&#39;)</code></pre>
+<p><img src="/blog/2019-11-19-estimating-seo-salaries-with-the-uniform-distribution_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>A few interesting call outs here. First, we know our <strong>sweet_spot</strong> is way too low. Our max value is $160K but the average for the <strong>potential</strong> segment is:</p>
+<pre class="r"><code>mean(potential$value)</code></pre>
+<pre><code>## [1] 177093.4</code></pre>
+<p>That is more than $17K difference from what we were expecting!</p>
+<p>Second, we can quantify the probability we should be asking for more than our maximum value of $160K:</p>
+<pre class="r"><code>sum(potential$value &gt; 160000) / length(potential$value) * 100</code></pre>
+<pre><code>## [1] 98.842</code></pre>
+<p>The recommendation to my friend: definitely ask for more!</p>
+</div>
+<div id="ignore-specific-data" class="section level2">
+<h2>Ignore specific data</h2>
+<p>It’s very likely someone will not believe the statistics they see on these websites and think they should be paid more.</p>
+<p>In my opinion, the beauty in this approach is we can incorporate their beliefs as well if they want to exclude specific data.</p>
+<p>Let’s take a hypothetical person who thinks they should be making anywhere between $230K-$330K per year as an “SEO Director” in San Francisco. Maybe they want to kick out some of the lower end salary ranges and retain only the values on the premium side.</p>
+<p>Here’s what that code might look like and we’ll compare it with our first candidate:</p>
+<pre class="r"><code>sweet_spot2 &lt;- salary_sim(230000, 330000, &quot;sweet_spot2&quot;)
+
+potential2 &lt;- ((glassdoor$value + 
+                 ziprecruiter$value + 
+                 salary$value + 
+                 guess1$value +
+                 guess2$value +
+                 guess3$value +
+                 sweet_spot2$value) / 7) %&gt;%
+  as_tibble() %&gt;% 
+  mutate(segment = paste0(&quot;potential2&quot;))
+
+output2 &lt;- rbind(potential, potential2, sweet_spot2)</code></pre>
+<p>…and to plot our results:</p>
+<pre class="r"><code>output2 %&gt;% 
+  ggplot(aes(value, fill = segment, color = segment)) +
+  geom_density(alpha = 0.5) +
+  scale_x_continuous(limits = c(80000, 400000),
+                     labels = dollar_format()) +
+  scale_fill_brewer(palette = &#39;Set2&#39;) +
+  scale_color_brewer(palette = &#39;Set2&#39;) +
+  labs(x = NULL, y = NULL, color = NULL, fill = NULL,
+       title = &quot;Estimated base salary range for Director of SEO in San Francisco, CA&quot;,
+       caption = &quot;Uniform distribution from 7 sources with 100K trials each&quot;) +
+  theme_light() +
+  theme(axis.text.y = element_blank(),
+        legend.position = &#39;top&#39;)</code></pre>
+<p><img src="/blog/2019-11-19-estimating-seo-salaries-with-the-uniform-distribution_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<p>So, how confident should this person be in asking for at least a $230K annual salary?</p>
+<pre class="r"><code>sum(potential2$value &gt; 230000) / length(potential2$value) * 100</code></pre>
+<pre><code>## [1] 7.284</code></pre>
+</div>
+<div id="end-note" class="section level2">
+<h2>End note</h2>
+<p>This was a fun exercise for me in how someone can use R to bring certainty into an uncertain world.</p>
+<p>With that being said, consider this just one of many tools in your negotations toolbox to help you achieve the salary you want.</p>
+<p>Below are two awesome responses from people I respect:</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+It's persuasion and tapping emotions that get the desired salary, not stats.
+</p>
+— Tony Spencer (<span class="citation">@notsleepy</span>) <a href="https://twitter.com/notsleepy/status/1192497863160483840?ref_src=twsrc%5Etfw">November 7, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+If you don’t actively advocate for yourself, no one else will nor should you expect them to. <br><br>If it’s easier for you to leave a job instead of asking for a raise, the issue isn’t the job or pay, it’s your ability to have uncomfortable conversations.
+</p>
+— Yuriy (<span class="citation">@YuriyYarovoy</span>) <a href="https://twitter.com/YuriyYarovoy/status/1192516608742178816?ref_src=twsrc%5Etfw">November 7, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>

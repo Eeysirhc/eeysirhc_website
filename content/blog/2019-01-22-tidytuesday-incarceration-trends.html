@@ -1,0 +1,86 @@
+---
+title: 'TidyTuesday: Incarceration Trends'
+author: Christopher Yee
+date: '2019-01-22'
+slug: tidytuesday-incarceration-trends
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 1/22/2019 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-22">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(lubridate)
+library(RColorBrewer)
+
+prison_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-22/prison_population.csv&quot;)
+
+prison &lt;- prison_raw</code></pre>
+<div id="process-the-raw-data" class="section level3">
+<h3>Process the raw data</h3>
+<pre class="r"><code>total &lt;- prison %&gt;%
+  filter(pop_category != &#39;Total&#39; &amp; pop_category != &#39;Male&#39; &amp; pop_category != &#39;Female&#39;) %&gt;% 
+  select(county_name, urbanicity, pop_category, population, prison_population) %&gt;%
+  na.omit() %&gt;% 
+  group_by(county_name, urbanicity, pop_category) %&gt;%
+  summarize(population = sum(population),
+            prison_population = sum(prison_population)) %&gt;%
+  ungroup() %&gt;%
+  group_by(county_name, urbanicity) %&gt;%
+  mutate(pct_population = population / sum(population),
+         pct_prisoner = prison_population / sum(prison_population))</code></pre>
+</div>
+<div id="what-is-the-proportion-of-populationprisoners-per-demographic-group" class="section level3">
+<h3>What is the proportion of population:prisoners per demographic group ?</h3>
+<pre class="r"><code>total %&gt;%
+  filter(pop_category != &#39;Other&#39;) %&gt;%
+  ggplot() + 
+  geom_point(aes(pct_population, pct_prisoner),
+             alpha = 0.1, size = 2, color = &#39;grey&#39;) +
+  geom_smooth(aes(pct_population, pct_prisoner, color = pop_category),
+              size = 1.2,
+             se = FALSE) +
+  theme_light() +
+  scale_y_continuous(labels = percent_format()) +
+  scale_x_continuous(labels = percent_format()) +
+  labs(x = &quot;County Population&quot;,
+       y = &quot;Prisoner Population&quot;,
+       color = &quot;&quot;,
+       title = &quot;Comparison of county to prison population by ethnicity from 1970 to 2016&quot;,
+       subtitle = &quot;Specific groups are overrepresented in the prisoner population&quot;,
+       caption = &quot;Source: Vera Institute of Justice&quot;) +
+  geom_abline(linetype = &#39;dashed&#39;) +
+  scale_color_brewer(palette = &#39;Set1&#39;) +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        legend.position = &#39;top&#39;,
+        panel.background = element_rect(fill = &#39;gray97&#39;,
+                                        color = &#39;gray97&#39;,
+                                        size = 0.5, linetype = &#39;solid&#39;))</code></pre>
+<p><img src="/blog/2019-01-22-tidytuesday-incarceration-trends_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="does-urbanicity-play-a-role" class="section level3">
+<h3>Does urbanicity play a role ?</h3>
+<p>Answer: variations between different races but long answer short…not really.</p>
+<pre class="r"><code>total %&gt;%
+  filter(pop_category != &#39;Other&#39;) %&gt;%
+  ggplot() + 
+  geom_point(aes(pct_population, pct_prisoner),
+             alpha = 0.1, size = 2, color = &#39;grey&#39;) +
+  geom_smooth(aes(pct_population, pct_prisoner, color = urbanicity),
+              se = FALSE) +
+  theme_light() +
+  scale_y_continuous(labels = percent_format()) +
+  scale_x_continuous(labels = percent_format()) +
+  labs(x = &quot;County Population (%)&quot;,
+       y = &quot;Prisoner Population (%)&quot;,
+       color = &quot;Urbanicity&quot;) +
+  facet_wrap(~pop_category) +
+  geom_abline(linetype = &#39;dashed&#39;)</code></pre>
+<p><img src="/blog/2019-01-22-tidytuesday-incarceration-trends_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

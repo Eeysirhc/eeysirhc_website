@@ -1,0 +1,129 @@
+---
+title: Algorithm to prioritize home improvement projects
+author: Christopher Yee
+date: '2020-07-02'
+slug: algorithm-to-prioritize-home-improvement-projects
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(scales)
+library(knitr)
+library(kableExtra)
+
+projects_raw <- read_csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/project_list.csv")
+
+projects <- projects_raw %>% 
+  mutate(Price = str_replace_all(Price, ",", ""),
+         Price = str_replace_all(Price, "\\$", ""),
+         Price = as.numeric(Price)) 
+```
+
+I moved to Los Angeles with my wife in October 2019 where we had a list of home improvement projects we wanted to complete or things to purchase. 
+
+The problem we faced was disagreement on where to start since we had to juggle costs and compromise on what was most important at the time.
+
+For example, if we focused too much on lower ticket purchases we would delay projects that had potential to improve our home value.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+projects %>% 
+  arrange(-Price) %>% 
+  select(-Importance) %>% 
+  head(5) %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(0, bold = T)
+```
+
+Conversely, if we emphasized projects which increased home value then we would miss out on buying basic quality of life improvements.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+projects %>% 
+  arrange(Price) %>% 
+  select(-Importance) %>% 
+  head(5) %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(0, bold = T)
+```
+
+Our goal was to get through all of these as fast as possible without sacrificing importance but also being mindful of the costs involved.
+
+What came out of our discussions was a simple algorithm in an Excel spreadsheet which calculated priorities and incorporated both factors:
+
+> __Priority = Importance^2 / log10(Price)__
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+priority <- function(price, importance){
+  value = round(((importance^2) / (log10(price))), 2)
+  }
+```
+
+* _Importance_: with 1 being the lowest, we place this variable on an exponential curve so each incremental level indicates greater prominence
+* _Price_: to make various price points easier to work with (\$1 vs \$1,000) we normalize them on a log10 scale
+
+In my opinion, this is an elegant solution to our use case because 1) we keep the cost variable constant for each item and 2) it centers our debates around importance and how to rank (or re-rank) things in our list.
+
+But, does it work? 
+
+Let's look at a sample where we've filled out Price and Importance: 
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+projects %>%
+  arrange(-Price) %>% 
+  head(10) %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(0, bold = T)
+```
+
+Now let's compute the Priority score for each:
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+projects %>%
+  arrange(-Price) %>% 
+  head(10) %>% 
+  mutate(Priority = priority(Price, Importance)) %>% 
+  arrange(-Priority) %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  row_spec(0, bold = T)
+```
+
+Notable mentions...
+
+* High cost and low importance: our "renovate brick walls" with \$5k in price was dropped to the bottom of our list with a Priority score of 0.27
+* Low cost and high importance: we **really** needed a couch when we moved in so it's good to see that made it as our top priority
+* Tie breaker: the projects with the same \$10k in price have been prioritized appropriately
+
+If you found this remotely useful/interesting then please don't hesitate to share with others!
+
+## Moment of zen
+
+Contour plot to visualize the outcome of our _function(price, importance)_:
+
+<p>
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+projects_priority <- projects %>% 
+  mutate(Priority = priority(Price, Importance)) %>% 
+  arrange(-Priority) 
+
+projects_priority %>% 
+  ggplot(aes(Price, Importance, Priority)) +
+  geom_density_2d_filled(alpha = 0.8, show.legend = FALSE) +
+  geom_point(color = 'white') +
+  scale_x_continuous(limits = c(-1000, 12000),
+                     labels = dollar_format()) +
+  scale_y_continuous(limits = c(-5, 15)) +
+  labs(fill = NULL) +
+  theme_minimal()
+```
+
+
+
+

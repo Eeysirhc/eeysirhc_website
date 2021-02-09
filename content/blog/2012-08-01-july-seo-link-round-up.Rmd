@@ -1,0 +1,30 @@
+---
+author: Christopher Yee
+date: 2012-08-01 03:25:38+00:00
+layout: post
+slug: july-seo-link-round-up
+title: July SEO Link Round-up
+categories:
+- Search Engine Optimization
+---
+
+I've been preoccupied this month with my [recent job change](http://www.christopheryee.org/goodbye-cafepress-hello-macys/) so I don't have anything insightful to share.  However, that doesn't mean cool things aren't happening on other websites!  Below are my top five favorite blog posts for the month.
+
+**[Web Analytics Consulting: A Simple Framework For Smarter Decisions](http://www.kaushik.net/avinash/web-analytics-consulting-framework-smarter-decisions/)**
+Avinash does an incredible job detailing the different components of consulting as a web analyst.  I've always clumped the three aspects together but his framework has helped identify my strengths/weaknesses and what clients I should take on in the future.  That being said, I believe every SEO should be competent in data analysis (DA).
+
+**[MozCon 2012 Presentation Slides](http://www.seomoz.org/mozcon-live/agenda)**
+I took a quick glance at a handful of the PowerPoint slides and must admit that I'm already impressed.  There is a total of 28 downloadable decks with topics that address the recent Google algorithm updates, advanced keyword research, Excel wizardy and even project management.  I plan to plow through the ones that sound interesting this weekend with a nice hot cup of coffee.
+
+
+
+**[Using Gephi with Google Analytics to Visualize Keywords and Landing Pages](http://www.mostlymaths.net/2011/08/using-gephi-to-visualize-keywords-and.html)**
+I really like this post for two reasons: 1) I'm a big fan of [data visualization](http://www.christopheryee.org/category/data-visualization/) and 2) I've been meaning to learn the basics of Gephi.  Thus, this is an excellent primer for someone who wants to use Gephi for visualizing SEO data but doesn't have time to read the tutorials.
+
+**[Robots.txt Best Practices for SEO](http://www.rimmkaufman.com/blog/robots-txt-best-practices-for-seo/03072012/)**
+The robots.txt file is a heavy hitter and can have profound consequences if it is utilized incorrectly.  I'm glad Adam set the record straight and called out the glaring mistakes from the Search Engine Watch article.  Maybe it's about time to review your own exclusion file?
+
+**[Annie Cushing's Must-Have Tools](https://docs.google.com/spreadsheet/lv?pli=1&key=0AlgVNSddFpwxdE9rbUZzVEVock5tODFOVWVqellWaWc&f=true&noheader=true&gid=12&utm_source=buffer&buffer_share=0ce6a)**
+This is one massive [collection of tools](http://www.christopheryee.org/category/seo-tools/) located in a single Google Docs file.  Annie lists out plenty of tools from competitive analysis to data visualization and social media to web analytics.  I'm already familiar with about 90% of those mentioned but it's a good resource for SEO beginners or anyone starting out in online marketing.
+
+Now that I've shared my top five, what are some of your favorite posts that I may have missed?

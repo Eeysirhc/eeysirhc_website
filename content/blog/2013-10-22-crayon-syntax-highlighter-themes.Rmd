@@ -1,0 +1,262 @@
+---
+author: Christopher Yee
+date: 2013-10-22 03:37:12+00:00
+layout: post
+slug: crayon-syntax-highlighter-themes
+title: Crayon Syntax Highlighter Themes
+categories:
+- SEO Tools
+---
+
+> This article is seriously outdated since I no longer use WordPress
+
+If you write a technical blog post about optimizing source code for SEO or programming scripts, I highly recommend the [Crayon Syntax Highlighter](http://wordpress.org/plugins/crayon-syntax-highlighter/) for WordPress users - it gives your examples a nice, snazzy look to it.  The plugin includes 25 default themes but I couldn't find a good preview gallery for them anywhere so I decided to list them all out below.  Enjoy!
+
+
+## Ado
+
+
+
+    
+    This is the "Ado" theme.
+
+
+
+
+## Arduino Ide
+
+
+
+    
+    This is the "Arduino Ide" theme.
+
+
+
+
+## Cg Cookie
+
+
+
+    
+    This is the "Cg Cookie" theme.
+
+
+
+
+## Classic
+
+
+
+    
+    This is the "Classic" theme.
+
+
+
+
+## Eclipse
+
+
+
+    
+    This is the "Eclipse" theme.
+
+
+
+
+
+## Epicgeeks
+
+
+
+    
+    This is the "Epicgeeks" theme.
+
+
+
+
+## Familiar
+
+
+
+    
+    This is the "Familiar" theme.
+
+
+
+
+## Feeldesign
+
+
+
+    
+    This is the "Feeldesign" theme.
+
+
+
+
+## Github
+
+
+
+    
+    This is the "Github" theme.
+
+
+
+
+## Idle
+
+
+
+    
+    This is the "Idle" theme.
+
+
+
+
+## Inlellij Idea
+
+
+
+    
+    This is the "Inlellij Idea" theme.
+
+
+
+
+## Mirc Dark
+
+
+
+    
+    This is the "Mirc Dark" theme.
+
+
+
+
+## Monokai
+
+
+
+    
+    This is the "Monokai" theme.
+
+
+
+
+## Neon
+
+
+
+    
+    This is the "Neon" theme.
+
+
+
+
+## Secrets of Rock
+
+
+
+    
+    This is the "Secrets of Rock" theme.
+
+
+
+
+## Solarized Dark
+
+
+
+    
+    This is the "Solarized Dark" theme.
+
+
+
+
+## Solarized Light
+
+
+
+    
+    This is the "Solarized Light" theme.
+
+
+
+
+## Son of Obsidian
+
+
+
+    
+    This is the "Son of Obsidian" theme.
+
+
+
+
+## Ssms2012
+
+
+
+    
+    This is the "Ssms2012" theme.
+
+
+
+
+## Terminal
+
+
+
+    
+    This is the "Terminal" theme.
+
+
+
+
+## Tomorrow
+
+
+
+    
+    This is the "Tomorrow" theme.
+
+
+
+
+## Tomorrow Night
+
+
+
+    
+    This is the "Tomorrow Night" theme.
+
+
+
+
+## Twilight
+
+
+
+    
+    This is the "Twilight" theme.
+
+
+
+
+## Vs2012
+
+
+
+    
+    This is the "Vs2012" theme.
+
+
+
+
+## Vs2012 Black
+
+
+
+    
+    This is the "Vs2012 Black" theme.

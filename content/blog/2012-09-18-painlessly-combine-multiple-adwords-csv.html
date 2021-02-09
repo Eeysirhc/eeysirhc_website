@@ -1,0 +1,20 @@
+---
+author: Christopher Yee
+date: 2012-09-18 03:24:41+00:00
+layout: post
+slug: painlessly-combine-multiple-adwords-csv
+title: How to Painlessly Combine Multiple Adwords CSVs
+categories:
+- SEO Tools
+---
+
+
+
+<p>When I first started doing keyword research I found myself easily downloading 10+ CSV files from the Google Adwords Keyword Tool.  This became a (painful) problem because I had to manually copy and paste all the data into a single Excel file.</p>
+<p>Fast forward a few months when I finally found the perfect solution: using the <em>CAT</em> function (short for <em>CONCATENATE</em>) within the command line.  Mac users can get started immediately with their Terminal (located in the Utilities folder); Windows users will have to <a href="http://cygwin.com/install.html">download Cygwin</a>.</p>
+<p>Are you ready for the super secret code to painlessly aggregate all your CSV files into a single document?  Here you go…</p>
+<pre><code>cat *.csv &gt;&gt; OUTPUT_FILE.csv</code></pre>
+<p>And this is how it looks like in action…</p>
+<p><img src="/images/cat_final.png" /></p>
+<p>The _*.csv_ portion of the code tells the computer to fetch all files ending in <em>.csv</em>.  The remaining line appends all the data into <em>OUTPUT_FILE.csv</em> or whatever you want to name it - in the image above it’s <em>combine.csv</em>.</p>
+<p>Merging of your files should take less than 3 seconds.  Painless, right?!</p>

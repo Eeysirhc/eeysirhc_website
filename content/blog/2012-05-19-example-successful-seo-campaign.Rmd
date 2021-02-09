@@ -1,0 +1,63 @@
+---
+author: Christopher Yee
+date: 2012-05-19 17:56:28+00:00
+layout: post
+slug: example-successful-seo-campaign
+title: Example of a Successful SEO Campaign
+categories:
+- Search Engine Optimization
+---
+
+I love [optimizing websites for search engines](http://www.christopheryee.org/category/search-engine-optimization/) so much I regularly do consulting work on the side.  But what I love more than _THAT_ is showing clients the amazing year-over-year results of a successful SEO campaign.
+
+The data from the images below come from an eCommerce website in an extremely competitive niche.  When I first started in April 2011, they received an average of 80 visits per day; that number jumped to ~200 visits per day - a 150% increase!
+
+Here's how their weekly organic traffic (excludes branded terms and not provided) looks like for the past year:
+
+![](/images/organic-traffic.png)
+
+
+
+And here's the month over month comparison:
+
+![](/images/overall-compare.png)
+
+It goes without saying that looking at overall traffic doesn't tell you much so I segmented by their product category pages (excludes branded terms and not provided):
+
+![](/images/category-traffic.png)
+
+And the month over month comparison:
+
+![](/images/category-compare.png)
+
+And yes, I know the user engagement rates are pretty terrible but there was nothing I could do about it since getting any UX/Design changes done was like walking through a (political) mine field.
+
+What did I do to get all this free traffic?  Nothing you probably couldn't find reading [the](http://www.seomoz.org/blog) [various](http://www.distilled.net/blog/) [blogs](https://seogadget.co.uk/blog/) [out](http://www.ninebyblue.com/blog/) [there](http://www.portent.com/blog/).  If you're looking for specifics, here's a quick hit list in the order the projects were executed:
+
+
+
+	
+  * **Keyword Research** - they just weren't targeting the right keywords.
+
+	
+  * **Source Code Optimization** - involved many crucial on-page elements such as the title, h1 and body text.
+
+	
+  * **Technical Infrastructure Optimization** - dealt with cleaning up the domain by addressing canonicalization issues, HTTP responses and robots exclusion.
+
+	
+  * **[Internal Link Building](http://www.christopheryee.org/the-power-of-internal-link-building/)** - cross linked their various category and product pages to improve crawler access.
+
+	
+  * **Content Creation** - managed a team of two outsourced content writers for the company blog.
+
+	
+  * **External Link Building** - hired, trained and managed a team of three link builders for website outreach.
+
+	
+  * **Digital Asset Optimization** - focused primarily on image optimization.
+
+
+Other things that helped was a healthy dose of optimism, perseverance to succeed and a little [algorithm change from Google](http://searchengineland.com/google-talks-penguin-update-recover-negative-seo-120463).
+
+Now that I've shared my example, how about you leave yours in the comments below?

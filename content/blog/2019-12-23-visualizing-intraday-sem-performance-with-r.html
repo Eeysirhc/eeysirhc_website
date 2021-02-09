@@ -1,0 +1,97 @@
+---
+title: Visualizing intraday SEM performance with R
+author: Christopher Yee
+date: '2019-12-23'
+slug: visualizing-intraday-sem-performance-with-r
+categories:
+  - Data Visualization
+---
+
+
+
+<p>Aside from the base bid, Google SEM campaign performance can be influenced by contextual signals from the customer. These include but are not limited to: device, location, gender, parental status, household income, etc.</p>
+<p>For this post we’ll focus on ad schedule (or intraday) and visualize how time of day and day of week is performing.</p>
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<pre class="r"><code>library(tidyverse)
+
+# ANONYMIZED SAMPLE DATA
+df &lt;- read_csv(&quot;https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/intraday_performance.csv&quot;)</code></pre>
+<div id="spot-check-our-data" class="section level3">
+<h3>Spot check our data</h3>
+<pre class="r"><code>df %&gt;% 
+  sample_n(20)</code></pre>
+<pre><code>## # A tibble: 20 x 5
+##    account   day_of_week hour_of_day   roas conv_rate
+##    &lt;chr&gt;     &lt;chr&gt;             &lt;dbl&gt;  &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Account 3 Tuesday               5 0.509    0.0183 
+##  2 Account 2 Friday                4 1.11     0.0401 
+##  3 Account 2 Sunday               11 1.07     0.0309 
+##  4 Account 3 Saturday             18 1.09     0.0301 
+##  5 Account 1 Thursday             19 0.303    0.0165 
+##  6 Account 1 Tuesday               8 0.362    0.0230 
+##  7 Account 2 Saturday              4 0.722    0.0340 
+##  8 Account 3 Friday               10 0.653    0.00844
+##  9 Account 2 Wednesday             8 0.448    0.0262 
+## 10 Account 1 Saturday              9 0.858    0.0467 
+## 11 Account 1 Saturday             18 0.266    0.0136 
+## 12 Account 1 Saturday              8 0.871    0.0349 
+## 13 Account 2 Friday               14 0.546    0.0196 
+## 14 Account 1 Sunday                5 0.0444   0.00889
+## 15 Account 3 Wednesday            21 0.530    0.0248 
+## 16 Account 1 Tuesday              16 0.801    0.0451 
+## 17 Account 2 Monday                2 0.884    0.0230 
+## 18 Account 2 Wednesday            19 0.772    0.0275 
+## 19 Account 3 Monday               21 0.444    0.0367 
+## 20 Account 1 Tuesday               3 0        0</code></pre>
+</div>
+</div>
+<div id="clean-data" class="section level2">
+<h2>Clean data</h2>
+<div id="convert-to-factors" class="section level3">
+<h3>Convert to factors</h3>
+<p>The <em>day_of_week</em> is a character and <em>time_of_day</em> is a double data type. We need to transform them to factors so they don’t surprise us later.</p>
+<pre class="r"><code>df_clean &lt;- df %&gt;% 
+  mutate(day_of_week = as.factor(day_of_week),
+         hour_of_day = as.factor(hour_of_day)) </code></pre>
+</div>
+<div id="reorder-day-of-week" class="section level3">
+<h3>Reorder day of week</h3>
+<p>If we plot our chart now it won’t be correct because <em>day_of_week</em> will not be arranged properly from Sunday to Saturday format.</p>
+<pre class="r"><code>levels(df_clean$day_of_week)</code></pre>
+<pre><code>## [1] &quot;Friday&quot;    &quot;Monday&quot;    &quot;Saturday&quot;  &quot;Sunday&quot;    &quot;Thursday&quot;  &quot;Tuesday&quot;  
+## [7] &quot;Wednesday&quot;</code></pre>
+<p>We can quickly refactor with a few lines of code:</p>
+<pre class="r"><code>df_clean$day_of_week &lt;- factor(df_clean$day_of_week, 
+                               levels = c(&quot;Saturday&quot;, &quot;Friday&quot;, &quot;Thursday&quot;,
+                                          &quot;Wednesday&quot;, &quot;Tuesday&quot;, &quot;Monday&quot;, &quot;Sunday&quot;))</code></pre>
+<p>Let’s check to make sure it did what we wanted:</p>
+<pre class="r"><code>levels(df_clean$day_of_week)</code></pre>
+<pre><code>## [1] &quot;Saturday&quot;  &quot;Friday&quot;    &quot;Thursday&quot;  &quot;Wednesday&quot; &quot;Tuesday&quot;   &quot;Monday&quot;   
+## [7] &quot;Sunday&quot;</code></pre>
+</div>
+</div>
+<div id="plot-our-results" class="section level2">
+<h2>Plot our results</h2>
+<pre class="r"><code>df_clean %&gt;% 
+  ggplot(aes(hour_of_day, day_of_week, fill = conv_rate)) +
+  geom_tile(color = &#39;white&#39;) +
+  scale_fill_gradient2(low = &#39;grey&#39;, mid = &#39;white&#39;, high = &#39;steelblue&#39;) +
+  labs(y = NULL, x = &quot;Hour of Day&quot;, fill = &quot;Conversion Rate&quot;) +
+  theme_minimal() </code></pre>
+<p><img src="/blog/2019-12-23-visualizing-intraday-sem-performance-with-r_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>We can quickly see from this visualization that Tuesday &amp; Wednesdays at midnight the conversion rate is 7% or higher. Conversely, 10AM on Saturday has a conversion rate close to the 0% range.</p>
+<p>With this insight we can then amplify or dampen our intraday bid modifiers to improve overall campaign efficiencies.</p>
+<div id="and-for-the-love-of-data" class="section level3">
+<h3>And for the love of data…</h3>
+<p>…<a href="https://www.christopheryee.org/blog/for-the-love-of-data-segment/">segment</a>!</p>
+<pre class="r"><code>df_clean %&gt;% 
+  ggplot(aes(hour_of_day, day_of_week, fill = conv_rate)) +
+  geom_tile(color = &#39;white&#39;) +
+  scale_fill_gradient2(low = &#39;grey&#39;, mid = &#39;white&#39;, high = &#39;steelblue&#39;) +
+  labs(y = NULL, x = &quot;Hour of Day&quot;, fill = &quot;Conversion Rate&quot;) +
+  theme_minimal() +
+  facet_grid(account ~ .)</code></pre>
+<p><img src="/blog/2019-12-23-visualizing-intraday-sem-performance-with-r_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>

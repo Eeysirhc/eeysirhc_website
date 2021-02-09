@@ -1,0 +1,27 @@
+---
+author: Christopher Yee
+date: 2013-03-19 03:14:55+00:00
+layout: post
+slug: updated-ahrefs-link-analysis-script
+title: Updated aHrefs Link Analysis Script
+categories:
+- SEO Tools
+---
+
+I updated my [aHrefs bulk link analysis script](http://www.christopheryee.org/bulk-link-analysis-ahrefs-api-ruby/) to improve its functionality by adding two features.
+
+
+
+	
+  1. The script now returns the results in a CSV file called _ahrefs_results.csv_
+
+	
+  2. Introduces the _.map_ Ruby enumerable for a "cleaner" syntax
+
+
+
+
+<blockquote>The source code for this Ruby script can be found at [my Github repository](https://github.com/Eeysirhc/ahrefs-api).</blockquote>
+
+
+My next task is defining individual functions to eliminate any code redundancy and ultimately speed up the API calls.  Stay tuned!

@@ -1,0 +1,109 @@
+---
+title: 'TidyTuesday: Beer Production'
+author: Christopher Yee
+date: '2020-04-14'
+slug: tidytuesday-beer-production
+categories:
+  - TidyTuesday
+---
+
+Data from [#tidytuesday](https://twitter.com/search?q=%23tidytuesday) week of 2020-03-31 ([source](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-03-31/readme.md))
+
+## Load packages
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(gganimate)
+library(gifski)
+```
+
+## Download data
+```{r results='hide', message=FALSE, warning=FALSE}
+beer_states_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_states.csv")
+```
+
+## Clean data
+```{r results='hide', message=FALSE, warning=FALSE}
+beer_total <- beer_states_raw %>% 
+  
+  # FILL NULL VALUES WITH 0
+  replace(., is.na(.), 0) %>% 
+  
+  # REMOVE LINE ITEM FOR 'TOTAL'
+  filter(state != 'total') %>% 
+  
+  # COMPUTE TOTAL BARRELS PER YEAR BY STATE  
+  group_by(year, state) %>% 
+  summarize(total_barrels = sum(barrels)) %>% 
+  
+  ungroup() 
+```
+
+## Create rankings
+```{r results='hide', message=FALSE, warning=FALSE}
+beer_final <- beer_total %>% 
+  
+  group_by(year) %>% 
+  mutate(
+    
+    # CALCULATE RANKINGS BY TOTAL BARRELS PRODUCED EACH YEAR
+    rank = min_rank(-total_barrels) * 1.0,
+    
+    # STATE TOTAL DIVIDE BY STATE RANKED #1 PER YEAR
+    produced = total_barrels / total_barrels[rank == 1],
+    
+    # CLEANED TEXT LABEL
+    produced_label = paste0(" ", round(total_barrels / 1e6, 2), " M")) %>% 
+  
+  group_by(state) %>% 
+  
+  # SELECT TOP 20
+  filter(rank <= 20) %>% 
+  
+  ungroup()
+```
+
+## Animate bar chart
+```{r message=FALSE, warning=FALSE}
+p <- beer_final %>% 
+  ggplot(aes(rank, produced, fill = state)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(rank, y = 0, label = state, hjust = 1.5)) +
+  geom_text(aes(rank, y = produced, label = produced_label, hjust = 0)) +
+  coord_flip() +
+  scale_x_reverse() +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  transition_time(year) +
+  labs(title = "US Beer Production by State",
+       subtitle = "Barrels produced each year: {round(frame_time)}",
+       caption = "by: @eeysirhc\nsource: Alcohol and Tobacco Tax and Trade Bureau",
+       x = NULL, y = NULL) 
+
+animate(p, nframes = 300, fps = 12,
+        width = 1000, height = 800, renderer = gifski_renderer())
+```
+
+## Save .gif
+
+Last but not least, don't forget to save the file to your working directory:
+```{r eval=FALSE}
+anim_save("toast.gif")
+```
+
+## Acknowledgements
+
+* [Thomas Lin Pedersen](https://twitter.com/thomasp85) for the [{gganimate} package](https://github.com/thomasp85/gganimate)
+* The contributors to this [StackOverflow answer](https://stackoverflow.com/questions/53162821/animated-sorted-bar-chart-with-bars-overtaking-each-other/53163549)
+
+
+## Related
+
+* [TidyTuesday: Milk Production](https://www.christopheryee.org/blog/tidytuesday-milk-production/)
+* [TardyThursday: College Tuition, Diversity & Pay](https://www.christopheryee.org/blog/tardythursday-college-tuition-diversity-pay/)
+
+
+
+
+
+

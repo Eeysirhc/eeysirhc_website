@@ -1,0 +1,289 @@
+---
+title: Mining Google Trends data with R
+author: Christopher Yee
+date: '2019-06-28'
+slug: mining-google-trends-data-with-r-featuring-gtrendsr
+categories:
+  - Data Visualization
+---
+
+[Google Trends](https://trends.google.com/trends/?geo=US) is great for understanding relative search popularity for a given keyword or phrase. However, if we wanted to explore the topics some more it is quite clunky to retrieve that data within the web interface.
+
+Enter the **gtrendsR** package for [#rstats](https://twitter.com/search?q=%23rstats&src=tyah) and what better way to demonstrate how this works than by pulling search popularity for _ramen_, _pho_, and _spaghetti_ (hot on the heels of my last article about [ramen ratings](https://www.christopheryee.org/blog/tidytuesday-ramen-ratings/))!
+
+## Load packages
+```{r results='hide', message=FALSE, warning=FALSE}
+library(tidyverse)
+library(lubridate)
+library(gtrendsR)
+```
+
+## Extract Google Trends data
+Maximum of five keywords at a time and let's focus only on US search interest.
+```{r results='hide', message=FALSE, warning=FALSE}
+food <- gtrends(c("ramen", "pho", "spaghetti"), 
+               geo = c("US"))
+```
+
+## Clean up our dataframe
+```{r results='hide', message=FALSE, warning=FALSE}
+food_timeseries <- as_tibble(food$interest_over_time) %>% 
+  mutate(date = ymd(date)) %>% # CONVERT DATE FORMAT
+  filter(date < Sys.Date() - 7) # REMOVE "NOISY" DATA FROM LAST SEVEN DAYS
+```
+
+## Quick peek at data
+```{r message=FALSE, warning=FALSE}
+food_timeseries
+```
+
+## Graph interest over time
+```{r eval=FALSE}
+food_timeseries %>% 
+  ggplot() +
+  geom_line(aes(date, hits, color = keyword), size = 1) +
+  scale_y_continuous(limits = c(0, 100)) +
+  scale_color_brewer(palette = 'Set2') +
+  theme_bw() +
+  labs(x = NULL,
+       y = "Relative Search Interest",
+       color = NULL,
+       title = "Google Trends: interest over time (US)") 
+```
+
+![](/images/gtrends-graph.png)
+
+It looks like _ramen_ has picked up traction over the last five years and even surpassed _spaghetti_ popularity earlier this year.
+
+I wonder what that will look like a year from now? We'll look to using the prophet package from Facebook to forecast future popularity.
+
+# Forecasting relative search popularity
+
+## Load packages
+```{r eval=FALSE}
+library(prophet)
+```
+
+## Prepare the data
+Let's see how we do for _ramen_ search popularity.
+```{r eval=FALSE}
+ramen_timeseries <- food_timeseries %>% 
+  filter(keyword == 'ramen') %>% 
+  select(date, hits) %>% 
+  mutate(date = ymd(date)) %>% 
+  rename(ds = date, y = hits) %>% # CONVERT COLUMN HEADERS FOR PROPHET
+  arrange(ds) # ARRANGE BY DATE
+```
+
+## Build the model
+```{r eval=FALSE}
+ramen_m <- prophet(ramen_timeseries)
+ramen_future <- make_future_dataframe(ramen_m, periods = 365) # PREDICT 365 DAYS
+ramen_ftdata <- as_tibble(predict(ramen_m, ramen_future))
+```
+
+## Combine forecast with actuals
+```{r eval=FALSE}
+ramen_forecast <- ramen_ftdata %>% 
+  mutate(ds = ymd(ds),
+         segment = case_when(ds > Sys.Date()-7 ~ 'forecast',
+                             TRUE ~ 'actual'), # SEGMENT ACTUAL VS FORECAST DATA
+         keyword = paste0("ramen")) %>% 
+  select(ds, segment, yhat_lower, yhat, yhat_upper, keyword) %>% 
+  left_join(ramen_timeseries) # JOIN ACTUAL DATA
+```
+
+## Plot forecasting results
+```{r eval=FALSE}
+ramen_forecast %>% 
+  rename(date = ds,
+         actual = y) %>% 
+  ggplot() +
+  geom_line(aes(date, actual)) + # PLOT ACTUALS DATA
+  geom_point(data = subset(ramen_forecast, segment == 'forecast'),
+            aes(ds, yhat), color = 'salmon', size = 0.1) + # PLOT PREDICTION DATA
+  geom_ribbon(data = subset(ramen_forecast, segment == 'forecast'),
+            aes(ds, ymin = yhat_lower, ymax = yhat_upper), 
+            fill = 'salmon', alpha = 0.3) + # SHADE PREDICTION DATA REGION
+  scale_y_continuous(limits = c(0,100)) +
+  theme_bw() +
+  labs(x = NULL, y = "Relative Search Interest",
+       title = "Google Trends: interest over time for \"ramen\" (US)")
+```
+
+![](/images/gtrends-ramen.png)
+
+The chart above doesn't look too bad however this is relative search popularity so we need to compare the prediction with _pho_ and _spaghetti_ as well.
+
+```{r eval=FALSE}
+# FUTURE NOTE: REFACTOR FOR DRY PRINCIPLES
+
+# BUILD FORECASTING MODEL FOR PHO
+pho_timeseries <- food_timeseries %>% 
+  filter(keyword == 'pho') %>% 
+  select(date, hits) %>% 
+  mutate(date = ymd(date)) %>% 
+  rename(ds = date, y = hits) %>% 
+  arrange(ds)
+
+pho_m <- prophet(pho_timeseries)
+pho_future <- make_future_dataframe(pho_m, periods = 365)
+pho_ftdata <- as_tibble(predict(pho_m, pho_future))
+
+pho_forecast <- pho_ftdata %>% 
+  mutate(ds = ymd(ds),
+         segment = case_when(ds > Sys.Date()-7 ~ 'forecast',
+                             TRUE ~ 'actual'),
+         keyword = paste0("pho")) %>% 
+  select(ds, segment, yhat_lower, yhat, yhat_upper, keyword) %>% 
+  left_join(pho_timeseries)
+
+# BUILD FORECASTING MODEL FOR SPAGHETTI
+spaghetti_timeseries <- food_timeseries %>% 
+  filter(keyword == 'spaghetti') %>% 
+  select(date, hits) %>% 
+  mutate(date = ymd(date)) %>% 
+  rename(ds = date, y = hits) %>% 
+  arrange(ds)
+
+spaghetti_m <- prophet(spaghetti_timeseries)
+spaghetti_future <- make_future_dataframe(spaghetti_m, periods = 365)
+spaghetti_ftdata <- as_tibble(predict(spaghetti_m, spaghetti_future))
+
+spaghetti_forecast <- spaghetti_ftdata %>% 
+  mutate(ds = ymd(ds),
+         segment = case_when(ds > Sys.Date()-7 ~ 'forecast',
+                             TRUE ~ 'actual'),
+         keyword = paste0("spaghetti")) %>% 
+  select(ds, segment, yhat_lower, yhat, yhat_upper, keyword) %>% 
+  left_join(spaghetti_timeseries)
+
+# COMBINE ALL MODELS
+keyword_forecast <- rbind(ramen_forecast, pho_forecast, spaghetti_forecast) %>% 
+  rename(date = ds, actual = y)
+```
+
+## Final plot
+```{r eval=FALSE}
+keyword_forecast %>% 
+  ggplot() +
+  geom_line(aes(date, actual, color = keyword), size = 1) +
+  geom_ribbon(data = subset(keyword_forecast, segment == 'forecast'),
+              aes(date, ymin = yhat_lower, ymax = yhat_upper, fill = keyword), 
+            alpha = 0.3) +
+  geom_point(data = subset(keyword_forecast, segment == 'forecast'),
+             aes(date, yhat, color = keyword), size = 0.1) +
+  scale_y_continuous(limits = c(0,100)) +
+  scale_color_brewer(palette = 'Set2') +
+  scale_fill_brewer(palette = 'Set2') +
+  theme_bw() +
+  labs(x = NULL, y = "Relative Search Interest",
+       title = "Google Trends: interest over time (US)") 
+```
+
+![](/images/gtrends-forecast.png)
+
+One year from now we should expect to see _ramen_ at the top followed by _pho_ and _spaghetti_ fighting for a close second in terms of relative search interest.
+
+# Text mining related queries
+The other awesome functionality provided by the gtrendsR package is pulling top & rising queries for each topic.
+
+Here's a sample result for _pho_:
+```{r message=FALSE, warning=FALSE}
+food_related <- as_tibble(food$related_queries)
+
+food_related %>% 
+  filter(keyword == 'pho')
+```
+
+We can call it a day at this point but it would be too boring - let's do some text mining to see if we can find any lexical nuggets.
+
+## Load packages
+```{r eval=FALSE}
+library(tidytext)
+library(igraph)
+library(ggraph)
+
+a <- grid::arrow(type = "closed", length = unit(.15, "inches"))
+```
+
+I'm curious: what is the relationship of the top queries for _ramen_, _pho_ and _spaghetti_ ?
+
+## Parse data and create graph
+```{r eval=FALSE}
+topqueries_bigram <- food_related %>% 
+  filter(related_queries == 'top') %>% 
+  unnest_tokens(bigram, value, token = 'ngrams', n = 3) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+  filter(!word1 %in% stop_words$word, !word2 %in% stop_words$word) %>% 
+  count(word1, word2, sort = TRUE) %>% 
+  filter(!is.na(word1), !is.na(word2)) %>% 
+  graph_from_data_frame() 
+```
+
+## Plot graph
+```{r eval=FALSE}
+set.seed(0612)
+
+ggraph(topqueries_bigram, layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE,
+                 arrow = a, end_cap = circle(.07, 'inches')) +
+  geom_node_point(color = 'steelblue', size = 3) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  theme_void() +
+  labs(title = "Google Trends: top queries (US)",
+       caption = "by: @eeysirhc")
+```
+
+![](/images/gtrends-topqueries.png)
+
+Not bad - we were able to visualize how _spaghetti_ terms are relatively different and thus further away from its soupier Asian counterparts. Moreover, we were able to sift through the nosie and identify the related terms for each topic.
+
+Now, just for fun, what about the relationship between rising queries?
+
+Before we build our graph we want to spice things up a bit by adding an additional layer on top of the data. In this case, varying the size and color of our nodes based on the number of word occurrences.
+```{r eval=FALSE}
+word_counts <- food_related %>% 
+  select(value) %>% 
+  unnest_tokens(word, value) %>% 
+  count(word, sort = TRUE) %>% 
+  filter(!word %in% stop_words$word)
+```
+
+## Parse data and create graph
+```{r eval=FALSE}
+risingqueries_bigram <- food_related %>% 
+  filter(related_queries == 'rising') %>% 
+  unnest_tokens(bigram, value, token = 'ngrams', n = 3) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>% 
+  filter(!word1 %in% stop_words$word, !word2 %in% stop_words$word) %>%
+  count(word1, word2, sort = TRUE) %>% 
+  filter(!is.na(word1), !is.na(word2)) %>% 
+  graph_from_data_frame(vertices = word_counts) 
+```
+
+## Plot graph
+```{r eval=FALSE}
+set.seed(0613)
+
+ggraph(risingqueries_bigram, layout = "fr") +
+  geom_edge_link(aes(edge_alpha = n), show.legend = FALSE,
+                 arrow = a, end_cap = circle(.07, 'inches')) +
+  geom_node_point(aes(size = n, color = n)) +
+  geom_node_text(aes(label = name), vjust = 1, hjust = 1) +
+  scale_color_gradient2(low = 'salmon', high = 'seagreen', midpoint = 25) +
+  theme_void() +
+  theme(legend.position = 'none') +
+  labs(title = 'Google Trends: rising queries (US)',
+       caption = "by: @eeysirhc") 
+```
+
+![](/images/gtrends-risingqueries.png)
+
+# Wrapping up
+You will find a million methods on how to download Google Trends data. 
+
+This is just one way to do it in R where we pulled the data, plotted historical trends, forecasted future search popularity, and even performed some light text mining to find relationship between words.
+
+
+

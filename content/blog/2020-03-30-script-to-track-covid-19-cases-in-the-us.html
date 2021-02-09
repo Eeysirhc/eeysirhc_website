@@ -1,0 +1,76 @@
+---
+title: Script to track COVID-19 cases in the US
+author: Christopher Yee
+date: '2020-03-30'
+slug: script-to-track-covid-19-cases-in-the-us
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>A couple weeks ago I shared an <a href="https://twitter.com/search?q=%23rstats">#rstats</a> script to track <a href="https://www.christopheryee.org/blog/script-to-track-global-coronavirus-pandemic-cases/">global coronavirus cases</a> by country.</p>
+<p>The <a href="https://github.com/nytimes/covid-19-data">New York Times</a> also released COVID-19 data for new cases in the United States, both at the state and county level. You can run the code below on a daily basis to get the most up to date figures.</p>
+<p>Feel free to modify for your own needs:</p>
+<pre class="r"><code>library(scales)
+library(tidyverse)
+library(gghighlight)
+
+state &lt;- read_csv(&quot;https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv&quot;)
+county &lt;- read_csv(&quot;https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv&quot;)</code></pre>
+<div id="state" class="section level2">
+<h2>State</h2>
+<pre class="r"><code>state %&gt;%
+  group_by(date, state) %&gt;%
+  mutate(total_cases = cumsum(cases)) %&gt;%
+  ungroup() %&gt;%
+  filter(total_cases &gt;= 100) %&gt;% # MINIMUM 100 CASES
+  group_by(state) %&gt;%
+  mutate(day_index = row_number(),
+         n = n()) %&gt;%
+  ungroup() %&gt;%
+  filter(n &gt;= 12) %&gt;% # MINIMUM 12 DAYS
+  ggplot(aes(day_index, total_cases, color = state, fill = state)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  facet_wrap(~state, ncol = 4) +
+  labs(title = &quot;COVID-19: cumulative daily new cases by US states (log scale)&quot;,
+       x = &quot;Days since 100th reported case&quot;,
+       y = NULL, fill = NULL, color = NULL, 
+       caption = &quot;by: @eeysirhc\nSource: New York Times&quot;) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;) +
+  expand_limits(x = 30)</code></pre>
+<p><img src="/images/coronavirus-cases-usa.png" /></p>
+</div>
+<div id="county" class="section level2">
+<h2>County</h2>
+<p>For the county level, we’ll focus only on California:</p>
+<pre class="r"><code>county %&gt;%
+  filter(state == &#39;California&#39;) %&gt;%
+  group_by(date, county) %&gt;%
+  mutate(total_cases = cumsum(cases)) %&gt;%
+  ungroup() %&gt;%
+  filter(total_cases &gt;= 50) %&gt;% # MINIMUM 50 CASES
+  group_by(county) %&gt;%
+  mutate(day_index = row_number(),
+         n = n()) %&gt;%
+  ungroup() %&gt;%
+  ggplot(aes(day_index, total_cases, color = county, fill = county)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  facet_wrap(~county, ncol = 4) +
+  labs(title = &quot;COVID-19: cumulative daily new cases by California counties (log scale)&quot;,
+       x = &quot;Days since 50th reported case&quot;,
+       y = NULL, fill = NULL, color = NULL, 
+       caption = &quot;by: @eeysirhc\nSource: New York Times&quot;) +  
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/images/coronavirus-cases-california.png" /></p>
+</div>

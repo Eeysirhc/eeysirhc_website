@@ -1,0 +1,212 @@
+---
+title: Visualizing Netflix viewing activity
+author: Christopher Yee
+date: '2019-07-02'
+slug: visualizing-netflix-viewing-activity
+categories:
+  - Data Visualization
+---
+
+
+
+<p>If you are like me then it’s very likely you share your Netflix account with multiple users.</p>
+<p>If you are also like me then it’s very likely you would be curious about how your Netflix viewing activity coompares and contrasts to all the parasites on your account!</p>
+<p>In this post we’ll leverage <a href="https://twitter.com/search?q=%23rstats&amp;src=typd">#rstats</a> to visualize what that will look like.</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<p>Let’s fire up our favorite packages.</p>
+<pre class="r"><code>library(tidyverse)
+library(lubridate)
+library(igraph)
+library(ggraph)
+library(tidygraph)
+library(influenceR)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<p>With the exception of my own viewing activity (I’m not ashamed!), I have provided anonymized Netflix viewing data from a few family and friends for you to follow along.</p>
+<pre class="r"><code>netflix_views_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/Eeysirhc/netflix_views/master/netflix_views.csv&quot;)
+
+netflix_views &lt;- netflix_views_raw</code></pre>
+</div>
+<div id="peek-at-our-raw-dataset" class="section level2">
+<h2>Peek at our raw dataset</h2>
+<p>We can draw a random sample from our dataset to see what we are working with.</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  sample_n(10)</code></pre>
+<pre><code>## # A tibble: 10 x 3
+##    Title                                                        Date    user    
+##    &lt;chr&gt;                                                        &lt;chr&gt;   &lt;chr&gt;   
+##  1 The Umbrella Academy: Season 1: We Only See Each Other at W… 2/17/19 Chris   
+##  2 High Society                                                 2/16/19 Chris   
+##  3 Kaze No Stigma: Season 1: The One to be Protected            2/26/12 A_sibli…
+##  4 Luck-Key                                                     7/4/18  Chris   
+##  5 Law &amp; Order: Special Victims Unit: The Sixth Year: Intoxica… 11/21/… A_sibli…
+##  6 Elfen Lied: Annihilation                                     3/5/12  A_sibli…
+##  7 Imposters: Season 1: Ladies and Gentlemen, the Doctor Is In  4/29/19 Chris   
+##  8 Waiting for Forever                                          2/7/12  A_sibli…
+##  9 Spartacus: Blood and Sand: Sacramentum Gladiatorum           3/27/11 A_sibli…
+## 10 Arrow: Season 2: Broken Dolls                                10/9/14 A_sibli…</code></pre>
+<p>A couple data processing steps immediately spring to mind:</p>
+<ul>
+<li><em>Title</em> is going to be messy if we do not canonicalize to the base name</li>
+<li>For the <em>User</em> column we can replace the dummy values so it’s easier to interpret later</li>
+</ul>
+</div>
+<div id="transform-the-data" class="section level2">
+<h2>Transform the data</h2>
+<div id="title---extract-only-the-name-of-the-show-or-movie" class="section level3">
+<h3>Title - extract only the name of the show or movie</h3>
+<p>As always, we’ll take a quick look at the data.</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  select(Title) %&gt;% 
+  tail() # ONLY LOOK AT THE LAST FEW ROWS OF DATA</code></pre>
+<pre><code>## # A tibble: 6 x 1
+##   Title                                                                         
+##   &lt;chr&gt;                                                                         
+## 1 Johnny Test: Season 3: Johnny Long Legs / Johnny Test in Outer Space          
+## 2 Johnny Test: Season 2: 00-Johnny / Johnny of the Jungle                       
+## 3 Johnny Test: Season 2: Johnnyland / Johnny&#39;s Got a Brand New Dad              
+## 4 DreamWorks Happy Holidays from Madagascar: Volume 1: Madagascar Penguins in a…
+## 5 Teen Beach Movie                                                              
+## 6 Knockout</code></pre>
+<p>We can then clean up our <em>Title</em> variable with the <strong>separate</strong> function.</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  select(Title) %&gt;% 
+  tail() %&gt;% 
+  separate(Title, c(&quot;title&quot;), sep = &quot;:&quot;, extra =&#39;drop&#39;) </code></pre>
+<pre><code>## # A tibble: 6 x 1
+##   title                                    
+##   &lt;chr&gt;                                    
+## 1 Johnny Test                              
+## 2 Johnny Test                              
+## 3 Johnny Test                              
+## 4 DreamWorks Happy Holidays from Madagascar
+## 5 Teen Beach Movie                         
+## 6 Knockout</code></pre>
+<p>What we did with the above was drop everything after the first colon to remove season number along with its corresponding episode name.</p>
+</div>
+<div id="user---replace-fake-values-with..fake-names" class="section level3">
+<h3>User - replace fake values with…..fake names</h3>
+<p>How do we know what we need to change? We can do a quick <strong>count</strong> on the <em>User</em> column.</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  count(user, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   user          n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 A_sibling  5302
+## 2 B_sibling  1742
+## 3 D_sibling   960
+## 4 Chris       923
+## 5 C_sibling    97</code></pre>
+<p>The above result informs us we need to change four of those dummy values so we’ll use a combination of <strong>mutate</strong> and <strong>case_when</strong> to achieve that.</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  sample_n(10) %&gt;% 
+  select(user) %&gt;% 
+  mutate(user = case_when(user == &#39;A_sibling&#39; ~ &quot;Apple&quot;,
+                          user == &#39;B_sibling&#39; ~ &quot;Banana&quot;,
+                          user == &#39;C_sibling&#39; ~ &quot;Cherry&quot;,
+                          user == &#39;D_sibling&#39; ~ &quot;Dragon Fruit&quot;,
+                          TRUE ~ user)) # THIS SAYS: IF NOTHING ELSE THEN USE THE ORIGINAL VALUE</code></pre>
+<pre><code>## # A tibble: 10 x 1
+##    user        
+##    &lt;chr&gt;       
+##  1 Dragon Fruit
+##  2 Apple       
+##  3 Apple       
+##  4 Apple       
+##  5 Apple       
+##  6 Apple       
+##  7 Dragon Fruit
+##  8 Apple       
+##  9 Banana      
+## 10 Apple</code></pre>
+<p>Did it do what we wanted ?</p>
+<pre class="r"><code>netflix_views %&gt;% 
+  #sample_n(10) %&gt;% COMMENT THIS PORTION OUT SO WE DON&#39;T TAKE A SAMPLE
+  select(user) %&gt;% 
+  mutate(user = case_when(user == &#39;A_sibling&#39; ~ &quot;Apple&quot;,
+                          user == &#39;B_sibling&#39; ~ &quot;Banana&quot;,
+                          user == &#39;C_sibling&#39; ~ &quot;Cherry&quot;,
+                          user == &#39;D_sibling&#39; ~ &quot;Dragon Fruit&quot;,
+                          TRUE ~ user)) %&gt;% 
+  count(user, sort = TRUE)</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   user             n
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 Apple         5302
+## 2 Banana        1742
+## 3 Dragon Fruit   960
+## 4 Chris          923
+## 5 Cherry          97</code></pre>
+</div>
+<div id="putting-it-all-together---tidyverse-style" class="section level3">
+<h3>Putting it all together - <a href="https://twitter.com/search?q=%23tidyverse&amp;src=typd">#tidyverse</a> style</h3>
+<pre class="r"><code>netflix_clean &lt;- netflix_views %&gt;% 
+  select(Date, user, Title) %&gt;% # REARRANGE COLJUMNS
+  separate(Title, c(&quot;title&quot;), sep = &quot;:&quot;, extra =&#39;drop&#39;) %&gt;% 
+  mutate(user = case_when(user == &#39;A_sibling&#39; ~ &quot;Apple&quot;,
+                          user == &#39;B_sibling&#39; ~ &quot;Banana&quot;,
+                          user == &#39;C_sibling&#39; ~ &quot;Cherry&quot;,
+                          user == &#39;D_sibling&#39; ~ &quot;Dragon Fruit&quot;,
+                          TRUE ~ user)) %&gt;% 
+  mutate(Date = mdy(Date)) %&gt;% 
+  filter(Date &gt;= Sys.Date() - 730)  # FILTER WITHIN THE PAST TWO YEARS</code></pre>
+<p>And let’s validate our work:</p>
+<pre class="r"><code>netflix_clean</code></pre>
+<pre><code>## # A tibble: 261 x 3
+##    Date       user  title    
+##    &lt;date&gt;     &lt;chr&gt; &lt;chr&gt;    
+##  1 2019-04-29 Chris Imposters
+##  2 2019-04-29 Chris Imposters
+##  3 2019-04-29 Chris Imposters
+##  4 2019-04-28 Chris Imposters
+##  5 2019-04-28 Chris Imposters
+##  6 2019-04-28 Chris Imposters
+##  7 2019-04-28 Chris Imposters
+##  8 2019-04-28 Chris Imposters
+##  9 2019-04-28 Chris Imposters
+## 10 2019-04-28 Chris Imposters
+## # … with 251 more rows</code></pre>
+<p>Now that we are done cleaning our data we can finally build our network graph.</p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+In Data Science, 80% of time spent prepare data, 20% of time spent complain about need for prepare data.
+</p>
+— Big Data Borat (<span class="citation">@BigDataBorat</span>) <a href="https://twitter.com/BigDataBorat/status/306596352991830016?ref_src=twsrc%5Etfw">February 27, 2013</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div>
+<div id="build-network-graph" class="section level2">
+<h2>Build network graph</h2>
+<pre class="r"><code>netflix_graph &lt;- netflix_clean %&gt;% 
+  count(user, title, sort = TRUE) %&gt;% # COUNT THE NUMBER OF VIEWS PER USER BY TITLE
+  filter(n &gt;= 10) %&gt;% # FILTER OUT LOW VOLUME DATA
+  as_tbl_graph(directed = FALSE) %&gt;% 
+  mutate(group = group_infomap(),
+         neighbors = centrality_degree(),
+         center = node_is_center(),
+         dist_to_center = node_distance_to(node_is_center()),
+         keyplayer = node_is_keyplayer(k = 5)) %&gt;% 
+  activate(edges) %&gt;% 
+  filter(!edge_is_multiple()) %&gt;% 
+  mutate(centrality_e = centrality_edge_betweenness())</code></pre>
+<p>If you want more details on the above then I encourage you to check out this <a href="https://www.data-imaginist.com/2017/ggraph-introduction-edges/">amazing intro to the ggraph package</a>.</p>
+</div>
+<div id="visualize-network-graph" class="section level2">
+<h2>Visualize network graph</h2>
+<pre class="r"><code>ggraph(netflix_graph, layout = &#39;kk&#39;) + 
+  geom_edge_link(alpha = 0.5, color = &#39;grey54&#39;) +
+  geom_node_point(aes(color = factor(group)), size = 3, show.legend = FALSE) +
+  geom_node_text(aes(label = name), size = 3, repel = TRUE) +
+  scale_color_brewer(palette = &quot;Set1&quot;) +
+  theme_void() +
+  labs(caption = &quot;by: @eeysirhc&quot;)</code></pre>
+<p><img src="/blog/2019-07-02-visualizing-netflix-viewing-activity_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>Now it’s your turn - where do you lie in this network graph based on your own Netflix viewing activity? Do we watch similar TV shows or not really? How do you compare &amp; contrast against your family and friends? What happens if you change the threshold from <em>10</em> to <em>20</em>?</p>
+<p>Don’t hesitate to share your results on <a href="https://twitter.com/Eeysirhc">Twitter</a>!</p>
+</div>

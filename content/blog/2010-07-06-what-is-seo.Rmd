@@ -1,0 +1,30 @@
+---
+author: Christopher Yee
+date: 2010-07-06 16:19:08+00:00
+layout: post
+slug: what-is-seo
+title: What is SEO?
+categories:
+- Search Engine Optimization
+---
+
+Before the [beginning of my SEO journey](http://www.christopheryee.org/let-my-seo-journey-begin/), I had discovered the art and science of Search Engine Optimization a few months back when I was sifting through the Marketing/PR/Ad job postings on Craigslist and stumbled upon a posting titled SEO Analyst.  Intrigued, I Google'd the term and digested a litany of blogs and articles related to SEO where I learned that terms like ROI and traffic conversion isn't a sexual innuendo.  This blog post answers my 3-month old question, "What is SEO?"  But first, we'll need a quick history lesson.
+
+**Christopher Yee and Search Engine History**
+
+My initial experience with search engines back in 1997 was not a very useful one.  Being the geeky kid that I was in middle school, I typed "how to be awesome" in the AltaVista search bar.  The results pages returned wholly unrelated answers to my search query - "Lose 50 pounds in 24 hours" or "The Ultimate Toolkit to be a Millionaire" and even "XXX Hard Core Pony Express XXX."  After this incident, I stopped using search engines for the next 10 years.  This example is a testament to the early search engine days when they relied heavily on <meta> tags.  These were "invisible" tags that told spiders what a particular website was about.  The tags allowed ethically challenged people to insert unrelated keywords (keyword stuffing) to their site and thus traumatizing children such as myself.  It was spammers galore.
+
+
+
+A decade later, the powerhouse search engine known as Google leads the way in providing the most relevant search results to their users.  And boy, did they do a great job.  Their complex algorithms changed my view of search engines forever when I searched for, "how to be awesome" once again in 2006.  In mere seconds, thousands of pages were spit back to me.  Search engines could finally provide users with highly relevant and trusted sites without being hit by endless pages of useless advertisement.  This is where [SEO](http://www.christopheryee.org/category/search-engine-optimization/) comes in.
+
+**What is SEO?**
+_Warning: Boring historical content ahead_
+
+SEO is an acronym for Search Engine Optimization where it is the process of refining a website to increase overall traffic through the use of search engines without paying for the listings - also known as Organic SEO.  There are multiple factors which contribute to a page's search rankings but the most notable ones are the age of the domain, popularity of the link, anchor text, and keyword usage.  I'll go into more detail about these specific topics in the future but for now, just understand that search engines can no longer be manipulated through unethical keyword stuffing tactics.
+
+There are three different camps when it comes to conducting SEO campaigns.  In one corner we have the WhiteHat SEO's who take an ethical approach by adhering to all guidelines as not to "trick" the search engine spiders.  To describe WhiteHats in five words or less: squeaky clean.  On the other end is the BlackHat SEO's who utilize unethical methods where cloaking or automatic content generation is the norm.  BlackHats in five words or less: the ends justify the means.  Lastly, right down the middle there's the GrayHat SEO's who claim that using both sides of the force (yes, that was a Star Wars reference) is the path to enlightenment.  Five words or less about GrayHats: So good I can't choose.
+
+Whatever camp you may have come from, [Christopher Yee](http://www.christopheryee.org/) will focus solely on WhiteHat SEO techniques.  In my opinion, BlackHat and GrayHat practices may bring a page to the top faster but it's only a matter of time before the search engines figure it out and ultimately remove them from their indexes.  Although WhiteHats takes the slow and steady route, they shine in the long run due to patience and persistence.
+
+What are your thoughts?  What was your experience like with early search engines?  Which SEO camp do you reside in?  Post your responses in the comments below!

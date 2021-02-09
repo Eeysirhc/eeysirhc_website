@@ -1,0 +1,83 @@
+---
+author: Christopher Yee
+date: 2011-07-18 00:33:15+00:00
+layout: post
+slug: lessons-learned-one-year-search-engine-optimization
+title: '21 Lessons Learned: One Year of SEO'
+categories:
+- Search Engine Optimization
+---
+
+Wow - [this blog](http://www.christopheryee.org) is officially ONE YEAR OLD!  I have learned a lot about the art and science of search engine optimization since my [journey began](http://www.christopheryee.org/let-my-seo-journey-begin/) and I must admit it has been quite an experience.  Below are some of the lessons learned these past 12 months in no particular order of importance.
+
+
+
+
+
+	
+  1. Want to propose an SEO change?  Justify it with numbers.
+
+	
+  2. People [search for the darn-est things](http://www.christopheryee.org/funny-interesting-search-phrases-2010/).
+
+	
+  3. Reading a book (or blog post) written by an industry leader is different than actually doing it yourself.
+
+	
+  4. Even if you aren't tech savvy learn a little programming - you'll see the world in a different set of lens.
+
+	
+  5. Record EVERYTHING you do - from server end changes to [link acquisition](http://www.christopheryee.org/category/link-building/) dates and more.
+
+	
+  6. Google won't be around forever - optimize for the user first (cliche but still important).
+
+	
+  7. Excel is an SEO's best friend.
+
+	
+  8. The SEO industry (and world) is a small place - work hard and don't f**k up because word gets around.
+
+	
+  9. [Search engines have a lot of work to do to combat spam](http://www.christopheryee.org/5-ways-to-weed-out-bad-seos-like-an-seo/).
+
+	
+  10. Find an SEO mentor at the beginning of your career who will go above and beyond the call of duty to help refine your skills.
+
+	
+  11. Learn the fundamentals of HTML and CSS - the internet is built on it.
+
+	
+  12. Take all industry news with a grain of salt.
+
+	
+  13. New to the SEO world?  [Freelance for small businesses](http://www.christopheryee.org/freelance-seo-important-for-beginners/) - their websites are usually outdated and could use the help.
+
+	
+  14. Developers can be your best friend or worse enemy - make them the former.
+
+	
+  15. 98% of all reports are useless - don't create them unless you include action items.
+
+	
+  16. 79% of all statistics are made up on the spot.
+
+	
+  17. Monitor your web traffic like a newborn baby.
+
+	
+  18. [SEO tools](http://www.christopheryee.org/category/seo-tools/) are only as effective as its user.
+
+	
+  19. Link development is the most grueling and time consuming SEO task - yet it's the most important.
+
+	
+  20. Just because one SEO tactic worked for somebody else doesn't mean it'll work for you.
+
+	
+  21. Take a break and get some sunlight.
+
+
+
+
+And with that, we are officially half way through 2011!

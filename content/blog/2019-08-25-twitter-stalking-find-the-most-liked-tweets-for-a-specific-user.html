@@ -1,0 +1,60 @@
+---
+title: 'Find your favorite Twitter user with the rtweet package'
+author: Christopher Yee
+date: '2019-08-25'
+slug: find-your-favorite-twitter-user-with-the-rtweet-package
+categories:
+  - Miscellaneous
+---
+
+
+
+<p>Do you know who your favorite person on Twitter is? Probably!</p>
+<p>Did you ever want to quantify that statement? Probably not!</p>
+<p>Are you curious to find out who someone else’s favorite Twitter user is? Now you can with R!</p>
+<p>The code below is brought to you by <a href="https://twitter.com/nnstats">Namita</a> and her hilarious tweet:</p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+face some possibly uncomfortable truths about yourself and others with 4 easy lines of code using <a href="https://twitter.com/hashtag/rtweet?src=hash&amp;ref_src=twsrc%5Etfw">#rtweet</a> and the <a href="https://twitter.com/hashtag/tidyverse?src=hash&amp;ref_src=twsrc%5Etfw">#tidyverse</a> <a href="https://t.co/JtRnzk0xu7">pic.twitter.com/JtRnzk0xu7</a>
+</p>
+— Namita (<span class="citation">@nnstats</span>) <a href="https://twitter.com/nnstats/status/1165112790270578688?ref_src=twsrc%5Etfw">August 24, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(rtweet)</code></pre>
+</div>
+<div id="get-twitter-api-key" class="section level2">
+<h2>Get <a href="https://developer.twitter.com/en/docs/basics/apps/overview">Twitter API key</a></h2>
+<pre class="r"><code>create_token(
+  app = &quot;app_name&quot;,
+  consumer_key = &quot;consumer_key&quot;,
+  consumer_secret = &quot;consumer_secret&quot;,
+  access_token = &quot;access_token&quot;,
+  access_secret = &quot;access_secret&quot;
+)</code></pre>
+</div>
+<div id="grab-data" class="section level2">
+<h2>Grab data</h2>
+<pre class="r"><code>twitter_handle &lt;- &quot;eeysirhc&quot;
+
+get_favorites(twitter_handle, n = 3000) %&gt;% 
+  group_by(screen_name) %&gt;% 
+  tally(sort = TRUE, name = &#39;# of tweets liked&#39;) %&gt;% 
+  slice(1:10)</code></pre>
+<pre><code>## # A tibble: 10 x 2
+##    screen_name  `# of tweets liked`
+##    &lt;chr&gt;                      &lt;int&gt;
+##  1 jackiecchu                    26
+##  2 drob                          22
+##  3 eywu                          21
+##  4 DanLeibson                    16
+##  5 dataandme                     14
+##  6 CMastication                  13
+##  7 JHTScherck                    13
+##  8 lauralippay                   13
+##  9 DataChaz                      11
+## 10 nick_eubanks                  10</code></pre>
+<p>Future article: grabbing the top 10 favorite users of my top 10 favorite users and then creating a network graph to identify strong/weak relationships.</p>
+</div>

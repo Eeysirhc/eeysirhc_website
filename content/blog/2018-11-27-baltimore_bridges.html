@@ -1,0 +1,80 @@
+---
+title: "TidyTuesday: Baltimore Bridges"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+author: Christopher Yee
+date: 2018-11-27
+layout: post
+slug: tidytuesday-baltimore-bridges
+categories:
+- TidyTuesday
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 11/27/2018 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-11-27">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+
+bridges_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-27/baltimore_bridges.csv&quot;)
+
+bridges &lt;- bridges_raw</code></pre>
+<div id="do-bridge-conditions-get-better-over-time" class="section level3">
+<h3>Do bridge conditions get better over time?</h3>
+<pre class="r"><code># REORDER BRIDGE_CONDITION FACTORS
+x &lt;- bridges
+x$bridge_condition &lt;- as.factor(x$bridge_condition)
+x$bridge_condition &lt;- factor(x$bridge_condition, levels = c(&quot;Poor&quot;, &quot;Fair&quot;, &quot;Good&quot;))
+
+x %&gt;%  
+  filter(yr_built &gt;= 1900) %&gt;% # removing 2017 due to outlier
+  select(lat, long, yr_built, bridge_condition, avg_daily_traffic) %&gt;%
+  group_by(yr_built, bridge_condition) %&gt;%
+  summarize(avg_daily_traffic = mean(avg_daily_traffic)) %&gt;%
+  ggplot() + 
+  geom_col(aes(yr_built, avg_daily_traffic, fill = bridge_condition),
+           alpha = 0.3) +
+  scale_y_continuous(label = comma_format(), 
+                     limits = c(0, 223000)) +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  scale_color_brewer(palette = &#39;Set1&#39;) +
+  geom_smooth(aes(yr_built, avg_daily_traffic, 
+                  color = bridge_condition),
+              se = FALSE) +
+  theme_bw() +
+  labs(x = &quot;&quot;,
+        y = &quot;&quot;,
+        title = &quot;Baltimore bridges: average daily traffic by year built&quot;,
+       subtitle = &quot;Applied smoothing to highlight differences in bridge conditions and dampen outliers&quot;,
+       fill = &quot;Bridge Condition&quot;,
+       color = &quot;Bridge Condition&quot;) </code></pre>
+<p><img src="/blog/2018-11-27-baltimore_bridges_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="is-the-improvement-consistent-across-all-bridge-owners" class="section level3">
+<h3>Is the improvement consistent across all bridge owners?</h3>
+<pre class="r"><code>x %&gt;%
+  select(owner, bridge_condition, yr_built) %&gt;% 
+  filter(owner != &quot;Army&quot;, owner != &quot;National Park Service&quot;, owner != &quot;Navy/Marines&quot;, 
+         owner != &quot;Other Local Agencies&quot;, owner != &quot;Private (other than railroad)&quot;,
+         owner != &quot;Town or Township Highway Agency&quot;, owner != &quot;Other State Agencies&quot;) %&gt;%
+  filter(yr_built &gt; 1958) %&gt;%
+  ggplot() + 
+  geom_density(aes(x = yr_built, fill = bridge_condition, color = bridge_condition), 
+               alpha = 0.3) +
+  facet_wrap(~owner) +
+  theme_bw() +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  scale_color_brewer(palette = &#39;Set1&#39;) +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       fill = &quot;Bridge Condition&quot;,
+       color = &quot;Bridge Condition&quot;,
+       title = &quot;Baltimore bridges: status of conditions by year built per owner&quot;) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text.y = element_blank())</code></pre>
+<p><img src="/blog/2018-11-27-baltimore_bridges_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>

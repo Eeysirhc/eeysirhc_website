@@ -1,0 +1,89 @@
+---
+title: Visualizing intraday SEM performance with R
+author: Christopher Yee
+date: '2019-12-23'
+slug: visualizing-intraday-sem-performance-with-r
+categories:
+  - Data Visualization
+---
+
+Aside from the base bid, Google SEM campaign performance can be influenced by contextual signals from the customer. These include but are not limited to: device, location, gender, parental status, household income, etc.
+
+For this post we'll focus on ad schedule (or intraday) and visualize how time of day and day of week is performing.
+
+## Load data
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+
+# ANONYMIZED SAMPLE DATA
+df <- read_csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/intraday_performance.csv")
+```
+
+### Spot check our data
+```{r warning=FALSE, message=FALSE}
+df %>% 
+  sample_n(20)
+```
+
+## Clean data
+
+### Convert to factors
+
+The _day_of_week_ is a character and _time_of_day_ is a double data type. We need to transform them to factors so they don't surprise us later.
+
+```{r warning=FALSE, message=FALSE}
+df_clean <- df %>% 
+  mutate(day_of_week = as.factor(day_of_week),
+         hour_of_day = as.factor(hour_of_day)) 
+```
+
+
+### Reorder day of week
+
+If we plot our chart now it won't be correct because _day_of_week_ will not be arranged properly from Sunday to Saturday format.
+```{r warning=FALSE, message=FALSE}
+levels(df_clean$day_of_week)
+```
+
+We can quickly refactor with a few lines of code:
+```{r warning=FALSE, message=FALSE}
+df_clean$day_of_week <- factor(df_clean$day_of_week, 
+                               levels = c("Saturday", "Friday", "Thursday",
+                                          "Wednesday", "Tuesday", "Monday", "Sunday"))
+```
+
+
+Let's check to make sure it did what we wanted:
+```{r warning=FALSE, message=FALSE}
+levels(df_clean$day_of_week)
+```
+
+
+## Plot our results
+```{r warning=FALSE, message=FALSE}
+df_clean %>% 
+  ggplot(aes(hour_of_day, day_of_week, fill = conv_rate)) +
+  geom_tile(color = 'white') +
+  scale_fill_gradient2(low = 'grey', mid = 'white', high = 'steelblue') +
+  labs(y = NULL, x = "Hour of Day", fill = "Conversion Rate") +
+  theme_minimal() 
+```
+
+We can quickly see from this visualization that Tuesday & Wednesdays at midnight the conversion rate is 7% or higher. Conversely, 10AM on Saturday has a conversion rate close to the 0% range.
+
+With this insight we can then amplify or dampen our intraday bid modifiers to improve overall campaign efficiencies.
+
+### And for the love of data...
+
+...[segment](https://www.christopheryee.org/blog/for-the-love-of-data-segment/)!
+
+```{r wanring=FALSE, message=FALSE}
+df_clean %>% 
+  ggplot(aes(hour_of_day, day_of_week, fill = conv_rate)) +
+  geom_tile(color = 'white') +
+  scale_fill_gradient2(low = 'grey', mid = 'white', high = 'steelblue') +
+  labs(y = NULL, x = "Hour of Day", fill = "Conversion Rate") +
+  theme_minimal() +
+  facet_grid(account ~ .)
+```
+

@@ -1,0 +1,84 @@
+---
+title: 'TidyTuesday: Cetaceans Dataset'
+author: Christopher Yee
+date: '2018-12-18'
+slug: tidytuesday-cetaceans-dataset
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 12/18/2018 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-12-18">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+library(lubridate)
+library(tidytext)
+
+cetaceans_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-12-18/allCetaceanData.csv&quot;)
+
+cetaceans &lt;- cetaceans_raw</code></pre>
+<div id="most-notable-cause-of-death-between-male-vs-female" class="section level3">
+<h3>Most notable cause of death between Male vs Female ?</h3>
+<pre class="r"><code>cetaceans %&gt;% 
+  select(sex, COD) %&gt;%
+  filter(sex != &quot;U&quot;) %&gt;%
+  na.omit() %&gt;%
+  mutate(sex = replace(sex, str_detect(sex, &quot;F&quot;), &quot;Female&quot;), 
+         sex = replace(sex, str_detect(sex, &quot;M&quot;), &quot;Male&quot;)) %&gt;%
+  unnest_tokens(bigram, COD, token = &quot;ngrams&quot;, n = 2) %&gt;%
+  count(sex, bigram) %&gt;%
+  bind_tf_idf(bigram, sex, n) %&gt;%
+  arrange(desc(tf_idf)) %&gt;%
+  filter(tf_idf &gt; 0.0011) %&gt;%
+  ggplot() +
+  geom_col(aes(reorder(bigram, tf_idf), tf_idf, fill = sex)) +
+  coord_flip() +
+  scale_fill_brewer(palette = &#39;Set2&#39;,
+                    name = &quot;&quot;) +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Bigrams with highest TF-IDF for cause of death \n between Cetacean genders&quot;,
+       caption = &quot;Source: The Pudding&quot;) +
+  theme_bw() </code></pre>
+<p><img src="/blog/2018-12-18-tidytuesday-cetaceans-dataset_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="what-is-the-primary-cause-of-death-between-born-vs-capture-cetaceans" class="section level3">
+<h3>What is the primary cause of death between Born vs Capture Cetaceans?</h3>
+<pre class="r"><code>cod_acquisition_ratio &lt;- cetaceans %&gt;%
+  select(acquisition, COD) %&gt;%
+  filter(acquisition == &#39;Born&#39; | acquisition == &#39;Capture&#39;) %&gt;%
+  na.omit() %&gt;%
+  mutate(COD = tolower(COD)) %&gt;%
+  count(COD, acquisition) %&gt;%
+  filter(sum(n) &gt;= 10) %&gt;%
+  ungroup() %&gt;%
+  spread(acquisition, n, fill = 0) %&gt;%
+  mutate_if(is.numeric, funs((. + 1) / sum(. +1))) %&gt;%
+  mutate(logratio = log(Born / Capture)) %&gt;%
+  arrange(desc(logratio))
+  
+cod_acquisition_ratio %&gt;%
+  arrange(abs(logratio)) %&gt;%
+  group_by(logratio &lt; 0) %&gt;%
+  top_n(10, abs(logratio)) %&gt;%
+  ungroup() %&gt;%
+  mutate(COD = reorder(COD, logratio)) %&gt;%
+  ggplot() +
+  geom_col(aes(COD, logratio, fill = logratio &lt; 0)) +
+  coord_flip() +
+  scale_fill_brewer(palette = &#39;Accent&#39;,
+                    name = &quot;&quot;, 
+                    labels = c(&quot;Born&quot;, &quot;Capture&quot;)) +
+  theme_bw() +
+  labs(x = &quot;&quot;,
+       y = &quot;Log Odds Ratio (Born / Capture)&quot;,
+       title = &quot;Comparing the odds ratio of words for cause of death \n between Cetacean&#39;s captured from the ocean or \n born in captivity (reported)&quot;,
+       caption = &quot;Source: The Pudding&quot;)</code></pre>
+<p><img src="/blog/2018-12-18-tidytuesday-cetaceans-dataset_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>

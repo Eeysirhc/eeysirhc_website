@@ -1,0 +1,120 @@
+---
+title: Examining drug effectiveness studies via simulation
+author: Christopher Yee
+date: '2020-07-10'
+slug: examining-drug-effectiveness-studies-via-simulation
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>One of my dogs was recently diagnosed with an enlarged heart so the vet prescribed some medicine to mitigate the problem. The box came with a pamphlet which included the company’s effectiveness study for the drug, <a href="https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=5441e5b2-cdc0-477a-bd9a-ec5f8d912281">Vetmedin</a>.</p>
+<p>I thought it would be fun to visualize one portion of the study with simulation. What follows is the <a href="https://twitter.com/search?q=%23rstats">#rstats</a> code I used to examine and review the drug’s efficacy based on the reported results.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(scales)</code></pre>
+</div>
+<div id="encode-data" class="section level2">
+<h2>Encode data</h2>
+<p>For this post we’ll focus only on the <em>Treatment Success on Day 29</em> section.</p>
+<div id="vetmedin-group-experiment" class="section level3">
+<h3>Vetmedin Group (experiment)</h3>
+<ul>
+<li>n = 134</li>
+<li>Success rate = 80.7%</li>
+</ul>
+<pre class="r"><code>exp_success &lt;- 134 * 0.807
+exp_failure &lt;- 134 - exp_success</code></pre>
+</div>
+<div id="active-control-group" class="section level3">
+<h3>Active Control Group</h3>
+<ul>
+<li>n = 131</li>
+<li>Success rate = 76.3%</li>
+</ul>
+<pre class="r"><code>ctl_success &lt;- 131 * 0.763
+ctl_failure &lt;- 131 - ctl_success</code></pre>
+</div>
+</div>
+<div id="create-simulation-function" class="section level2">
+<h2>Create simulation function</h2>
+<p>We’ll simulate 10K trials for each group (total of 20K) using the <a href="https://en.wikipedia.org/wiki/Beta_distribution">beta distribution</a> since it is easier to work with when the data is framed as “successful” vs “not successful”.</p>
+<pre class="r"><code>med_sim &lt;- function(x, y, segment){
+  values &lt;- rbeta(1e4, x, y) %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(segment = paste0(segment))
+}</code></pre>
+</div>
+<div id="simulate-survey-data" class="section level2">
+<h2>Simulate survey data</h2>
+<pre class="r"><code>exp &lt;- med_sim(exp_success, exp_failure, &quot;experiment&quot;)
+ctl &lt;- med_sim(ctl_success, ctl_failure, &quot;control&quot;)</code></pre>
+</div>
+<div id="is-the-experiment-better-than-the-control-group" class="section level2">
+<h2>Is the experiment better than the control group?</h2>
+<pre class="r"><code>exp_sig &lt;- mean(exp$value &gt; ctl$value) * 100
+
+bind_rows(exp, ctl) %&gt;% 
+  ggplot(aes(value, fill = segment)) +
+  geom_histogram(binwidth = 0.005, alpha = 0.8, position = &#39;identity&#39;) +
+  scale_x_continuous(labels = percent_format(round(1))) +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  labs(title = &quot;Vetmedin: effectiveness results for the 29-day field study&quot;,
+       subtitle = paste0(exp_sig, &quot;% chance experiment is greater than control (MC sampling of 10K per group)&quot;),
+       caption = &quot;by: @eeysirhc\nsource: FDA (NADA 141-273)&quot;,
+       x = &quot;Success Rate on Day 29&quot;, 
+       y = NULL, 
+       fill = NULL) +
+  theme_minimal() +
+  theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        legend.position = &#39;top&#39;) </code></pre>
+<p><img src="/blog/2020-07-10-examining-drug-effectiveness-studies-via-simulation_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>Interesting - it looks like the statistical significance threshold for this canine medication was set at 80%.</p>
+<p>I wonder if drugs for humans have the same or different minimum?</p>
+</div>
+<div id="how-much-better-is-the-experiment-over-control" class="section level2">
+<h2>How much better is the experiment over control?</h2>
+<p>Knowing if we achieved statistical significance is good but it would be better if we knew by <strong>how much</strong>.</p>
+<pre class="r"><code>avg_improvement &lt;- median(exp$value / ctl$value - 1)
+
+improvement &lt;- as_tibble((exp$value / ctl$value) - 1) %&gt;% 
+  mutate(segment = ifelse(value &gt; 0.00, &#39;experiment&#39;, &#39;control&#39;))
+
+improvement %&gt;% 
+  ggplot(aes(value, fill = segment)) +
+  geom_histogram(binwidth = 0.005, alpha = 0.8) +
+  geom_vline(xintercept = avg_improvement, lty = 2, color = &#39;red&#39;) +
+  scale_x_continuous(labels = percent_format(round(1))) +
+  scale_y_continuous(labels = comma_format()) +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  labs(y = &quot;Frequency&quot;, 
+       x = NULL, 
+       fill = NULL,
+       title = &quot;Vetmedin: effectiveness results for the 29-day field study&quot;,
+       subtitle = paste0(&quot;Estimated &quot;, round((avg_improvement * 100), 2), &quot;% improvement of experiment over control (&quot;, exp_sig, &quot;% significance)&quot;),
+       caption = &quot;by: @eeysirhc\nsource: FDA (NADA 141-273)&quot;) +
+  theme_minimal() +
+  theme(legend.position = &#39;top&#39;) </code></pre>
+<p><img src="/blog/2020-07-10-examining-drug-effectiveness-studies-via-simulation_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Thus, the Vetmedin study observed an average of +6% improvement over the control group at ~81% significance.</p>
+<p>Since we simulated a total dataset of 20K trials we actually see a range of potential values from the low end of +1% to the extremes of over +20%. Additionally, this illustrates there could be instances where the control group is better than the experiment.</p>
+<p>Would you use it for your dog? That ultimately depends on how much risk you are willing to accept.</p>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>For the uninitiated, this is one way to conduct A/B testing using Bayesian statistics. With the computational power we have on our computers it is no longer necessary to make silly statements such as <em>“we need [insert arbitrary number] conversions to achieve statistical significance.”</em></p>
+</div>
+<div id="you-may-also-like" class="section level2">
+<h2>You may also like</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/exploring-page-speed-with-data-simulation/">Simulating data to explore page speed performance</a></li>
+<li><a href="https://www.christopheryee.org/blog/r-functions-for-data-simulation-sampling-and-visualization/">R functions for simulation, sampling &amp; visualization</a></li>
+<li><a href="https://www.christopheryee.org/blog/calculating-estimating-annual-salaries-with-r/">Calculating &amp; estimating annual salaries with R</a></li>
+<li><a href="https://www.christopheryee.org/blog/using-r-to-calculate-car-lease-payments/">Using R to calculate car lease payments</a></li>
+</ul>
+</div>

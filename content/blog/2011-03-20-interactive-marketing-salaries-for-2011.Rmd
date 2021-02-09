@@ -1,0 +1,19 @@
+---
+author: Christopher Yee
+date: 2011-03-20 21:47:06+00:00
+layout: post
+slug: interactive-marketing-salaries-for-2011
+title: Interactive Marketing Salaries for 2011
+categories:
+- Miscellaneous
+---
+
+Interactive marketing is hot in the job market right now and a recent report by [ClickZ](http://www.clickz.com/clickz/news/2028836/interactive-marketing-salaries-steady-increase) illustrates the increase in salary since 2010.  What is fishy about this study is how they don't account for experience.  For instance, the salary for an interactive copywriter this year gained 2.5% but is that for one who has 6 months or 5 years of experience?
+
+Additionally, the results may be skewed as it doesn't take the location of the respondents into account.  A major city like New York will obviously offer a higher pay grade rather than a small backwater town like Willow Creek, Alaska.
+
+
+
+Even if the numbers are off, the most important thing we can take from this is the fact that companies are beginning to see the potential to have these positions help drive the bottom line.  Where do you fall in these categories?  Do you think it's accurate?
+
+![Interactive Marketing Average Salaries 2011](/images/interactive-marketing-average-salaries.jpg)

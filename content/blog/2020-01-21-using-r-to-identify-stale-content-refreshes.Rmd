@@ -1,0 +1,99 @@
+---
+title: Using R & GSC data to identify stale content
+author: Christopher Yee
+date: '2020-01-21'
+slug: using-r-gsc-data-identify-stale-content
+categories:
+  - Data Science
+---
+
+
+My friend [John-Henry Scherck](https://twitter.com/JHTScherck) recently tweeted his process on how to refresh stale content:
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Put together a quick video on how to refresh stale content using nothing more than Google Search Console and a word doc. <br><br>Check out the full video here: <a href="https://t.co/Vva4Zm4mNn">https://t.co/Vva4Zm4mNn</a> <a href="https://t.co/74Fm2oIz4c">pic.twitter.com/74Fm2oIz4c</a></p>&mdash; John-Henry Scherck (@JHTScherck) <a href="https://twitter.com/JHTScherck/status/1219713918307692544?ref_src=twsrc%5Etfw">January 21, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+I imagine this can be broken down into five distinct parts:
+
+1. Stale content selection
+2. Understanding keyword intent
+3. Actually refreshing the content
+4. Internal link optimization
+5. Publish
+
+This short guide will focus on the first aspect where we'll use [#rstats](https://twitter.com/search?q=%23rstats) to remove the manual work associated with _stale candidate selection_.
+
+<blockquote class="twitter-tweet" data-conversation="none"><p lang="en" dir="ltr">That&#39;s it! Fairly manual, but hopefully straightforward. Let me know what you think or if you have any questions.</p>&mdash; John-Henry Scherck (@JHTScherck) <a href="https://twitter.com/JHTScherck/status/1219715744545439744?ref_src=twsrc%5Etfw">January 21, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+## Load packages
+```{r eval=FALSE}
+library(tidyverse)
+library(searchConsoleR)
+
+scr_auth()
+```
+
+
+## Download data
+
+The code below will grab 100K results for the last five full weeks of data but feel free to revise as you see fit.
+```{r eval=FALSE}
+df <- as_tibble(search_analytics("https://www.christopheryee.org/",
+                                 Sys.Date() - 35, # START DATE
+                                 Sys.Date() - 3, # END DATE
+                                 c("page", "query"),
+                                 searchType = "web",
+                                 rowLimit = 1e5))
+```
+
+
+## Identify keywords
+
+This is where we'll exclude brand terms and filter only on keywords with more than 2K impressions & average position between 5 to 15.
+```{r eval=FALSE}
+keywords <- df %>% 
+  group_by(query) %>% 
+  summarize(impressions = sum(impressions),
+            position = mean(position)) %>% 
+  filter(!grepl("brand_term", query)) %>% # EXCLUDE BRAND TERMS HERE
+  arrange(dsec(impressions)) %>% 
+  filter(impressions >= 2000,
+         position >= 5 & position < 15) %>% 
+  select(query)
+```
+
+## Dedupe landing pages
+
+There may be instances where a page will have multiple keywords.
+
+We can remove duplicates here by sorting keywords with highest clicks for each page.
+
+```{r eval=FALSE}
+pages <- df %>% 
+  inner_join(keywords) %>% # JOIN OUR KEYWORDS DATASET
+  group_by(query) %>% 
+  arrange(desc(clicks)) %>% 
+  mutate(candidate = row_number()) %>% 
+  ungroup() %>% 
+  filter(candidate == 1) %>% 
+  select(page)
+```
+
+> Fun fact: I often use candidate = row_number() as a quick hack to filter the "top" or "bottom" criteria for a given dataset
+
+## Final candidates
+```{r eval=FALSE}
+df %>% 
+  inner_join(pages) %>% 
+  mutate(ctr = (clicks / impressions) * 100) %>% # STANDARDIZE CTR
+  arrange(desc(page, impressions)) %>% 
+  distinct(.)
+```
+
+From here you can then take the keywords and move on to the _understanding keyword intent_ phase.
+
+## Resources
+
+* Full script can be found on [GitHub](https://github.com/Eeysirhc/random_scripts/blob/master/content_refresh_candidates.R)
+* If you enjoyed this post, you may be interested in my [getting started with R guide using Google Search Console data](https://www.christopheryee.org/blog/getting-started-with-r-using-google-search-console-data/)
+

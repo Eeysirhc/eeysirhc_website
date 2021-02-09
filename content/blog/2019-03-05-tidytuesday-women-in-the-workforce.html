@@ -1,0 +1,55 @@
+---
+title: 'TidyTuesday: Women in the Workforce'
+author: Christopher Yee
+date: '2019-03-05'
+slug: tidytuesday-women-in-the-workforce
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 3/05/2019 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-03-05">source</a>)</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(scales)
+library(lubridate)
+
+jobs_gender &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-03-05/jobs_gender.csv&quot;)</code></pre>
+</div>
+<div id="clean-plot-data" class="section level2">
+<h2>Clean &amp; plot data</h2>
+<pre class="r"><code>jobs_gender %&gt;%
+  filter(year == &#39;2016&#39;) %&gt;%
+  mutate(male_diff = ((((total_earnings_male/total_earnings)-1)*workers_male)/total_workers),
+         female_diff = (((total_earnings_female/total_earnings)-1)*workers_female)/total_workers) %&gt;%
+  ggplot() +
+  geom_jitter(aes(total_earnings, female_diff), 
+              color = &#39;salmon&#39;,
+              alpha = 0.5,
+              size = 2.5) +
+  geom_jitter(aes(total_earnings, male_diff), 
+              color = &#39;steelblue&#39;,
+              alpha = 0.5, 
+              size = 2.5) +
+  geom_hline(yintercept = 0, color = &#39;grey54&#39;, lty = &#39;dashed&#39;) +
+  facet_wrap(~major_category) +
+  scale_x_continuous(labels = dollar_format(),
+                     limits = c(0,200000)) +
+  scale_y_continuous(labels = percent_format(round(1)),
+                     limits = c(-0.3,0.3)) +
+  labs(x = &quot;Average Median Earnings&quot;,
+       y = &quot;Difference from Average&quot;,
+       caption = &quot;Graphic: @eeysirhc\nSource: Bureau of Labor Statistics&quot;,
+       title = &quot;2016 Earnings Differences (Weighted) by Job Sector&quot;,
+       subtitle = &quot;Blue = Male; Red = Female&quot;) +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.subtitle = element_text(size = 12),
+        legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2019-03-05-tidytuesday-women-in-the-workforce_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>

@@ -1,0 +1,84 @@
+---
+title: Hello, can we stop using pie charts?
+author: Christopher Yee
+date: '2019-02-22'
+slug: hello-can-we-stop-using-pie-charts
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+I came across this tweet and its corresponding graph a few days ago:
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Did you know? 🧐<br><br>1‐word keywords account for only 2.8% of all the keywords people search for in the United States. <a href="https://t.co/GXdfttn3jk">pic.twitter.com/GXdfttn3jk</a></p>&mdash; Tim Soulo (@timsoulo) <a href="https://twitter.com/timsoulo/status/1098628434484514816?ref_src=twsrc%5Etfw">February 21, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+I love ahrefs and all but it's 2019 - **WHY ARE WE STILL USING PIE CHARTS?!** 
+
+I'll spare my opinion since there is already a ton of literature out but here's a few to get started:
+
++ [The Five Stages of Grief Over the Death of Pie Charts](https://uxplanet.org/the-five-stages-of-grief-over-the-death-of-pie-charts-effb54894fee)
++ [Think before you pie chart](https://medium.com/geckoboard-under-the-hood/think-before-you-pie-chart-and-more-effective-ways-to-visualize-your-data-862ea3456b26)
++ [Death to pie charts](http://www.storytellingwithdata.com/blog/2011/07/death-to-pie-charts)
++ [When should you use a pie chart? Almost never](https://qz.com/1259746/when-should-you-use-a-pie-chart-according-to-experts-almost-never/)
++ [Save the pies for dessert](https://www.perceptualedge.com/articles/visual_business_intelligence/save_the_pies_for_dessert.pdf)
+
+In any case, I decided this would be the best time to try out the  [xkcd](https://xkcd.com/) [R package](http://xkcd.r-forge.r-project.org/) and reconstruct the chart into something more sensible for human beings to interpret.
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(xkcd)
+library(scales)
+library(extrafont)
+```
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+# data source: https://twitter.com/timsoulo/status/1098628434484514816
+words <- c("1 word", "2 words", "3 words", "4 words", "5 or more words")
+percent <- c(.028, .108, .219, .228, .417)
+
+data <- as_tibble(cbind(words, percent))
+data <- data %>%
+  mutate(percent = as.double(percent))
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+xrange <- range(c(0.50,2,3,4,5.50))
+yrange <- range(c(0.01, 0.50))
+
+ratioxy <- diff(xrange)/diff(yrange)
+
+mapping <- aes(x, y, scale, ratioxy, angleofspine,
+anglerighthumerus, anglelefthumerus,
+anglerightradius, angleleftradius,
+anglerightleg, angleleftleg, angleofneck)
+
+dataman <- data.frame(x= c(1.3), y=c(0.3),
+scale = 0.04,
+ratioxy = ratioxy,
+angleofspine =  -pi/2 ,
+anglerighthumerus = c(-pi/6),
+anglelefthumerus = c(-pi/2-pi/6),
+anglerightradius = c(pi/5),
+angleleftradius = c(pi/6),
+anglerightleg = 3*pi/2 - pi/12,
+angleleftleg = 3*pi/2 + pi/12,
+angleofneck = runif(1, 3*pi/2-pi/10, 3*pi/2+pi/10))
+
+data %>%
+  ggplot() +
+  geom_col(aes(reorder(words, percent), percent, fill = words), 
+           alpha = 0.6) +
+  theme_xkcd() +
+  labs(x = NULL, 
+       y = "Percent",
+       title = "Keyword length distribution for searches in the US",
+       subtitle = "Total keywords = 1.4 billion",
+       caption = "Source: ahrefs") +
+  theme(legend.position = 'none') +
+  xkcdaxis(xrange, yrange) +
+  xkcdman(mapping, dataman) +
+  annotate("text", x = 2, y = 0.33,
+           label = "so. much. bettah.", family = "xkcd") 
+```

@@ -1,0 +1,59 @@
+---
+title: 'TidyTuesday: Animal Crossing'
+author: Christopher Yee
+date: '2020-05-06'
+slug: tidytuesday-animal-crossing
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+Data from [#tidytuesday](https://twitter.com/hashtag/tidytuesday) week of 2020-05-05 ([source](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-05-05/readme.md))
+
+
+## Load packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggfortify)
+```
+
+## Download data
+```{r message=FALSE, warning=FALSE}
+villagers_raw <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-05/villagers.csv')
+```
+
+## Process data
+```{r message=FALSE, warning=FALSE}
+villagers <- villagers_raw %>% 
+  select(gender, species, personality) %>% 
+  mutate(species = str_to_title(species)) %>%
+  group_by(gender, species, personality) %>% 
+  summarize(n = n()) %>% 
+  mutate(pct_total = n / sum(n)) %>% 
+  ungroup() 
+```
+
+
+## Visualize data
+```{r message=FALSE, warning=FALSE, fig.height=12, fig.width=20}
+villagers %>% 
+  ggplot(aes(personality, pct_total, fill = gender, color = gender, group = gender)) +
+  geom_polygon(alpha = 0.5) +
+  geom_point() +
+  coord_polar() +
+  facet_wrap(~species) +
+  labs(x = NULL, y = NULL, color = NULL, fill = NULL, 
+       title = "Animal Crossing: villager personality traits by species & gender",
+       caption = "by: @eeysirhc\nsource:VillagerDB") +
+  theme_bw() +
+  theme(legend.position = 'top',
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+```
+
+
+## Moment of zen
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr"><a href="https://twitter.com/hashtag/tidytuesday?src=hash&amp;ref_src=twsrc%5Etfw">#tidytuesday</a> about <a href="https://twitter.com/hashtag/AnimalCrossing?src=hash&amp;ref_src=twsrc%5Etfw">#AnimalCrossing</a> villager personality traits for species x gender<br><br>Crankiest neighbor? male kangaroo<br>Most normal? female octopus<a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> code: <a href="https://t.co/j9bU36DG3r">https://t.co/j9bU36DG3r</a> <a href="https://twitter.com/hashtag/tardytuesday?src=hash&amp;ref_src=twsrc%5Etfw">#tardytuesday</a> <a href="https://t.co/uNTZtVhuz3">pic.twitter.com/uNTZtVhuz3</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1257939908062138368?ref_src=twsrc%5Etfw">May 6, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+

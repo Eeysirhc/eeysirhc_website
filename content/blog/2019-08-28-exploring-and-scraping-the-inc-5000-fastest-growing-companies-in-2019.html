@@ -1,0 +1,595 @@
+---
+title: '[Updated] Top Industries from Inc.5000 Companies'
+author: Christopher Yee
+date: '2020-01-07'
+slug: top-industries-from-inc-5000-fastest-growing-companies-in-2019
+categories:
+  - Data Visualization
+---
+
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="changelog" class="section level2">
+<h2>Changelog</h2>
+<ul>
+<li>Originally published on <em>September 10th, 2019</em></li>
+<li>Built a <a href="https://eeysirhc.shinyapps.io/inc5000_companies/">Shiny app for this</a></li>
+<li>Full code can be found on <a href="https://github.com/Eeysirhc/inc5000_companies">GitHub</a></li>
+</ul>
+<hr>
+<p>One of my favorite online marketers, (the) <a href="https://twitter.com/ViperChill">Glen Allsopp</a>, tweeted the following:</p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+Over the past few weeks I've went through every site in the Inc. 5000. My mind has been blown multiple times. Don't click if you're easily distracted. Enjoy! <a href="https://t.co/mHVK8rvb9X">https://t.co/mHVK8rvb9X</a> <a href="https://t.co/BoEb3qQ7LZ">pic.twitter.com/BoEb3qQ7LZ</a>
+</p>
+— Glen Allsopp (<span class="citation">@ViperChill</span>) <a href="https://twitter.com/ViperChill/status/1166324614877679617?ref_src=twsrc%5Etfw">August 27, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>The public spreadsheet contains four fields:</p>
+<ul>
+<li>Inc.com URL</li>
+<li>URLs (company website)</li>
+<li>Revenue</li>
+<li>3-Year-Growth</li>
+</ul>
+<p>Although helpful I thought it would be interesting to explore the additional variables found on each company’s INC profile page.</p>
+<p>Thus, I fired up R and scaped the list of URLs to answer the question: <em>which industries were surveyed the most and how much revenue did they generate in 2019?</em></p>
+</div>
+<div id="tldr" class="section level2">
+<h2>tl;dr</h2>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"visdat":{"5283278dd3cb":["function () ","plotlyVisDat"]},"cur_data":"5283278dd3cb","attrs":{"5283278dd3cb":{"x":{},"y":{},"mode":"scatter","hoverinfo":"text","text":{},"showlegend":false,"color":{},"size":10,"colors":"Set1","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"xaxis":{"domain":[0,1],"automargin":true,"title":"% of Total Companies","tickformat":"%"},"yaxis":{"domain":[0,1],"automargin":true,"title":"% of Total Revenue","tickformat":"%"},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[0.0975658419792498],"y":[0.0382595258255716],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Advertising & Marketing <br><b>Total Companies:<\/b>  489 <br><b>Total Revenue ($Bn):<\/b>  9.0369","showlegend":false,"type":"scatter","name":"Advertising & Marketing","marker":{"color":"rgba(228,26,28,1)","size":[55],"sizemode":"area","line":{"color":"rgba(228,26,28,1)"}},"textfont":{"color":"rgba(228,26,28,1)","size":55},"error_y":{"color":"rgba(228,26,28,1)","width":55},"error_x":{"color":"rgba(228,26,28,1)","width":55},"line":{"color":"rgba(228,26,28,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0977653631284916],"y":[0.0591824724809484],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Business Products & Services <br><b>Total Companies:<\/b>  490 <br><b>Total Revenue ($Bn):<\/b>  13.9789","showlegend":false,"type":"scatter","name":"Business Products & Services","marker":{"color":"rgba(198,77,77,1)","size":[55],"sizemode":"area","line":{"color":"rgba(198,77,77,1)"}},"textfont":{"color":"rgba(198,77,77,1)","size":55},"error_y":{"color":"rgba(198,77,77,1)","width":55},"error_x":{"color":"rgba(198,77,77,1)","width":55},"line":{"color":"rgba(198,77,77,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00638467677573823],"y":[0.00422396274343776],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Computer Hardware <br><b>Total Companies:<\/b>  32 <br><b>Total Revenue ($Bn):<\/b>  0.9977","showlegend":false,"type":"scatter","name":"Computer Hardware","marker":{"color":"rgba(159,103,124,1)","size":[55],"sizemode":"area","line":{"color":"rgba(159,103,124,1)"}},"textfont":{"color":"rgba(159,103,124,1)","size":55},"error_y":{"color":"rgba(159,103,124,1)","width":55},"error_x":{"color":"rgba(159,103,124,1)","width":55},"line":{"color":"rgba(159,103,124,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0706304868316042],"y":[0.0864961896697714],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Construction <br><b>Total Companies:<\/b>  354 <br><b>Total Revenue ($Bn):<\/b>  20.4304","showlegend":false,"type":"scatter","name":"Construction","marker":{"color":"rgba(90,122,172,1)","size":[55],"sizemode":"area","line":{"color":"rgba(90,122,172,1)"}},"textfont":{"color":"rgba(90,122,172,1)","size":55},"error_y":{"color":"rgba(90,122,172,1)","width":55},"error_x":{"color":"rgba(90,122,172,1)","width":55},"line":{"color":"rgba(90,122,172,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0644453312051077],"y":[0.0983268416596105],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Consumer Products & Services <br><b>Total Companies:<\/b>  323 <br><b>Total Revenue ($Bn):<\/b>  23.2248","showlegend":false,"type":"scatter","name":"Consumer Products & Services","marker":{"color":"rgba(74,137,160,1)","size":[55],"sizemode":"area","line":{"color":"rgba(74,137,160,1)"}},"textfont":{"color":"rgba(74,137,160,1)","size":55},"error_y":{"color":"rgba(74,137,160,1)","width":55},"error_x":{"color":"rgba(74,137,160,1)","width":55},"line":{"color":"rgba(74,137,160,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0137669592976856],"y":[0.00614521591871296],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Education <br><b>Total Companies:<\/b>  69 <br><b>Total Revenue ($Bn):<\/b>  1.4515","showlegend":false,"type":"scatter","name":"Education","marker":{"color":"rgba(83,152,128,1)","size":[55],"sizemode":"area","line":{"color":"rgba(83,152,128,1)"}},"textfont":{"color":"rgba(83,152,128,1)","size":55},"error_y":{"color":"rgba(83,152,128,1)","width":55},"error_x":{"color":"rgba(83,152,128,1)","width":55},"line":{"color":"rgba(83,152,128,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0153631284916201],"y":[0.0264822184589331],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Energy <br><b>Total Companies:<\/b>  77 <br><b>Total Revenue ($Bn):<\/b>  6.2551","showlegend":false,"type":"scatter","name":"Energy","marker":{"color":"rgba(82,167,94,1)","size":[55],"sizemode":"area","line":{"color":"rgba(82,167,94,1)"}},"textfont":{"color":"rgba(82,167,94,1)","size":55},"error_y":{"color":"rgba(82,167,94,1)","width":55},"error_x":{"color":"rgba(82,167,94,1)","width":55},"line":{"color":"rgba(82,167,94,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0161612130885874],"y":[0.011301016088061],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Engineering <br><b>Total Companies:<\/b>  81 <br><b>Total Revenue ($Bn):<\/b>  2.6693","showlegend":false,"type":"scatter","name":"Engineering","marker":{"color":"rgba(99,162,91,1)","size":[55],"sizemode":"area","line":{"color":"rgba(99,162,91,1)"}},"textfont":{"color":"rgba(99,162,91,1)","size":55},"error_y":{"color":"rgba(99,162,91,1)","width":55},"error_x":{"color":"rgba(99,162,91,1)","width":55},"line":{"color":"rgba(99,162,91,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00857940941739824],"y":[0.00409737510584251],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Environmental Services <br><b>Total Companies:<\/b>  43 <br><b>Total Revenue ($Bn):<\/b>  0.9678","showlegend":false,"type":"scatter","name":"Environmental Services","marker":{"color":"rgba(127,135,119,1)","size":[55],"sizemode":"area","line":{"color":"rgba(127,135,119,1)"}},"textfont":{"color":"rgba(127,135,119,1)","size":55},"error_y":{"color":"rgba(127,135,119,1)","width":55},"error_x":{"color":"rgba(127,135,119,1)","width":55},"line":{"color":"rgba(127,135,119,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0476855546687949],"y":[0.0404953429297206],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Financial Services <br><b>Total Companies:<\/b>  239 <br><b>Total Revenue ($Bn):<\/b>  9.565","showlegend":false,"type":"scatter","name":"Financial Services","marker":{"color":"rgba(144,105,145,1)","size":[55],"sizemode":"area","line":{"color":"rgba(144,105,145,1)"}},"textfont":{"color":"rgba(144,105,145,1)","size":55},"error_y":{"color":"rgba(144,105,145,1)","width":55},"error_x":{"color":"rgba(144,105,145,1)","width":55},"line":{"color":"rgba(144,105,145,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0253391859537111],"y":[0.0214297205757832],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Food & Beverage <br><b>Total Companies:<\/b>  127 <br><b>Total Revenue ($Bn):<\/b>  5.0617","showlegend":false,"type":"scatter","name":"Food & Beverage","marker":{"color":"rgba(163,81,154,1)","size":[55],"sizemode":"area","line":{"color":"rgba(163,81,154,1)"}},"textfont":{"color":"rgba(163,81,154,1)","size":55},"error_y":{"color":"rgba(163,81,154,1)","width":55},"error_x":{"color":"rgba(163,81,154,1)","width":55},"line":{"color":"rgba(163,81,154,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0470869912210694],"y":[0.0593416596104996],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Government Services <br><b>Total Companies:<\/b>  236 <br><b>Total Revenue ($Bn):<\/b>  14.0165","showlegend":false,"type":"scatter","name":"Government Services","marker":{"color":"rgba(199,95,116,1)","size":[55],"sizemode":"area","line":{"color":"rgba(199,95,116,1)"}},"textfont":{"color":"rgba(199,95,116,1)","size":55},"error_y":{"color":"rgba(199,95,116,1)","width":55},"error_x":{"color":"rgba(199,95,116,1)","width":55},"line":{"color":"rgba(199,95,116,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0718276137270551],"y":[0.165067739204064],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Health <br><b>Total Companies:<\/b>  360 <br><b>Total Revenue ($Bn):<\/b>  38.989","showlegend":false,"type":"scatter","name":"Health","marker":{"color":"rgba(229,110,75,1)","size":[55],"sizemode":"area","line":{"color":"rgba(229,110,75,1)"}},"textfont":{"color":"rgba(229,110,75,1)","size":55},"error_y":{"color":"rgba(229,110,75,1)","width":55},"error_x":{"color":"rgba(229,110,75,1)","width":55},"line":{"color":"rgba(229,110,75,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0311252992817239],"y":[0.0484906858594411],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Human Resources <br><b>Total Companies:<\/b>  156 <br><b>Total Revenue ($Bn):<\/b>  11.4535","showlegend":false,"type":"scatter","name":"Human Resources","marker":{"color":"rgba(255,127,0,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,127,0,1)"}},"textfont":{"color":"rgba(255,127,0,1)","size":55},"error_y":{"color":"rgba(255,127,0,1)","width":55},"error_x":{"color":"rgba(255,127,0,1)","width":55},"line":{"color":"rgba(255,127,0,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0137669592976856],"y":[0.0132281964436918],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Insurance <br><b>Total Companies:<\/b>  69 <br><b>Total Revenue ($Bn):<\/b>  3.1245","showlegend":false,"type":"scatter","name":"Insurance","marker":{"color":"rgba(255,169,16,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,169,16,1)"}},"textfont":{"color":"rgba(255,169,16,1)","size":55},"error_y":{"color":"rgba(255,169,16,1)","width":55},"error_x":{"color":"rgba(255,169,16,1)","width":55},"line":{"color":"rgba(255,169,16,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0550678371907422],"y":[0.0265046570702794],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT Management <br><b>Total Companies:<\/b>  276 <br><b>Total Revenue ($Bn):<\/b>  6.2604","showlegend":false,"type":"scatter","name":"IT Management","marker":{"color":"rgba(255,208,32,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,208,32,1)"}},"textfont":{"color":"rgba(255,208,32,1)","size":55},"error_y":{"color":"rgba(255,208,32,1)","width":55},"error_x":{"color":"rgba(255,208,32,1)","width":55},"line":{"color":"rgba(255,208,32,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00897845171588188],"y":[0.00362023708721423],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT Services <br><b>Total Companies:<\/b>  45 <br><b>Total Revenue ($Bn):<\/b>  0.8551","showlegend":false,"type":"scatter","name":"IT Services","marker":{"color":"rgba(255,246,47,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,246,47,1)"}},"textfont":{"color":"rgba(255,246,47,1)","size":55},"error_y":{"color":"rgba(255,246,47,1)","width":55},"error_x":{"color":"rgba(255,246,47,1)","width":55},"line":{"color":"rgba(255,246,47,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0241420590582602],"y":[0.0107332768839966],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT System Development <br><b>Total Companies:<\/b>  121 <br><b>Total Revenue ($Bn):<\/b>  2.5352","showlegend":false,"type":"scatter","name":"IT System Development","marker":{"color":"rgba(236,215,51,1)","size":[55],"sizemode":"area","line":{"color":"rgba(236,215,51,1)"}},"textfont":{"color":"rgba(236,215,51,1)","size":55},"error_y":{"color":"rgba(236,215,51,1)","width":55},"error_x":{"color":"rgba(236,215,51,1)","width":55},"line":{"color":"rgba(236,215,51,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0367118914604948],"y":[0.0795152413209145],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Logistics & Transportation <br><b>Total Companies:<\/b>  184 <br><b>Total Revenue ($Bn):<\/b>  18.7815","showlegend":false,"type":"scatter","name":"Logistics & Transportation","marker":{"color":"rgba(209,163,48,1)","size":[55],"sizemode":"area","line":{"color":"rgba(209,163,48,1)"}},"textfont":{"color":"rgba(209,163,48,1)","size":55},"error_y":{"color":"rgba(209,163,48,1)","width":55},"error_x":{"color":"rgba(209,163,48,1)","width":55},"line":{"color":"rgba(209,163,48,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0357142857142857],"y":[0.0253776460626588],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Manufacturing <br><b>Total Companies:<\/b>  179 <br><b>Total Revenue ($Bn):<\/b>  5.9942","showlegend":false,"type":"scatter","name":"Manufacturing","marker":{"color":"rgba(181,112,43,1)","size":[55],"sizemode":"area","line":{"color":"rgba(181,112,43,1)"}},"textfont":{"color":"rgba(181,112,43,1)","size":55},"error_y":{"color":"rgba(181,112,43,1)","width":55},"error_x":{"color":"rgba(181,112,43,1)","width":55},"line":{"color":"rgba(181,112,43,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0091779728651237],"y":[0.00325402201524132],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Media <br><b>Total Companies:<\/b>  46 <br><b>Total Revenue ($Bn):<\/b>  0.7686","showlegend":false,"type":"scatter","name":"Media","marker":{"color":"rgba(179,92,64,1)","size":[55],"sizemode":"area","line":{"color":"rgba(179,92,64,1)"}},"textfont":{"color":"rgba(179,92,64,1)","size":55},"error_y":{"color":"rgba(179,92,64,1)","width":55},"error_x":{"color":"rgba(179,92,64,1)","width":55},"line":{"color":"rgba(179,92,64,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0389066241021548],"y":[0.0274983065198984],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Real Estate <br><b>Total Companies:<\/b>  195 <br><b>Total Revenue ($Bn):<\/b>  6.4951","showlegend":false,"type":"scatter","name":"Real Estate","marker":{"color":"rgba(205,105,109,1)","size":[55],"sizemode":"area","line":{"color":"rgba(205,105,109,1)"}},"textfont":{"color":"rgba(205,105,109,1)","size":55},"error_y":{"color":"rgba(205,105,109,1)","width":55},"error_x":{"color":"rgba(205,105,109,1)","width":55},"line":{"color":"rgba(205,105,109,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0325219473264166],"y":[0.0459276037256562],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Retail <br><b>Total Companies:<\/b>  163 <br><b>Total Revenue ($Bn):<\/b>  10.8481","showlegend":false,"type":"scatter","name":"Retail","marker":{"color":"rgba(230,119,155,1)","size":[55],"sizemode":"area","line":{"color":"rgba(230,119,155,1)"}},"textfont":{"color":"rgba(230,119,155,1)","size":55},"error_y":{"color":"rgba(230,119,155,1)","width":55},"error_x":{"color":"rgba(230,119,155,1)","width":55},"line":{"color":"rgba(230,119,155,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0131683958499601],"y":[0.0350918712955123],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Security <br><b>Total Companies:<\/b>  66 <br><b>Total Revenue ($Bn):<\/b>  8.2887","showlegend":false,"type":"scatter","name":"Security","marker":{"color":"rgba(240,132,188,1)","size":[55],"sizemode":"area","line":{"color":"rgba(240,132,188,1)"}},"textfont":{"color":"rgba(240,132,188,1)","size":55},"error_y":{"color":"rgba(240,132,188,1)","width":55},"error_x":{"color":"rgba(240,132,188,1)","width":55},"line":{"color":"rgba(240,132,188,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0911811652035116],"y":[0.0392849280270957],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Software <br><b>Total Companies:<\/b>  457 <br><b>Total Revenue ($Bn):<\/b>  9.2791","showlegend":false,"type":"scatter","name":"Software","marker":{"color":"rgba(212,141,176,1)","size":[55],"sizemode":"area","line":{"color":"rgba(212,141,176,1)"}},"textfont":{"color":"rgba(212,141,176,1)","size":55},"error_y":{"color":"rgba(212,141,176,1)","width":55},"error_x":{"color":"rgba(212,141,176,1)","width":55},"line":{"color":"rgba(212,141,176,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0157621707901038],"y":[0.0139889923793395],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Telecommunications <br><b>Total Companies:<\/b>  79 <br><b>Total Revenue ($Bn):<\/b>  3.3042","showlegend":false,"type":"scatter","name":"Telecommunications","marker":{"color":"rgba(184,148,165,1)","size":[55],"sizemode":"area","line":{"color":"rgba(184,148,165,1)"}},"textfont":{"color":"rgba(184,148,165,1)","size":55},"error_y":{"color":"rgba(184,148,165,1)","width":55},"error_x":{"color":"rgba(184,148,165,1)","width":55},"line":{"color":"rgba(184,148,165,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0111731843575419],"y":[0.0066350550381033],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Travel & Hospitality <br><b>Total Companies:<\/b>  56 <br><b>Total Revenue ($Bn):<\/b>  1.5672","showlegend":false,"type":"scatter","name":"Travel & Hospitality","marker":{"color":"rgba(153,153,153,1)","size":[55],"sizemode":"area","line":{"color":"rgba(153,153,153,1)"}},"textfont":{"color":"rgba(153,153,153,1)","size":55},"error_y":{"color":"rgba(153,153,153,1)","width":55},"error_x":{"color":"rgba(153,153,153,1)","width":55},"line":{"color":"rgba(153,153,153,1)","width":55},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(rvest) # SIMPLE WEB SCRAPING</code></pre>
+</div>
+<div id="get-urls-from-csv" class="section level2">
+<h2>Get URLs from CSV</h2>
+<pre class="r"><code>inc5000 &lt;- read_csv(&quot;inc5000_fastest_growing_companies.csv&quot;) %&gt;% 
+  rename(urls = `Inc.com URL`,
+         website = URLs)</code></pre>
+</div>
+<div id="base-r-format" class="section level2">
+<h2>Base R format</h2>
+<p>We temporarily need to move out of the tidyverse and leverage base R for the next step.</p>
+<pre class="r"><code>company_urls &lt;- inc5000$urls </code></pre>
+</div>
+<div id="loop-function" class="section level2">
+<h2>Loop function</h2>
+<p>A for loop is required to gather our data with the following order of operations:</p>
+<ul>
+<li>Take URL from list</li>
+<li>Crawl the page</li>
+<li>Extract the page elements we want</li>
+<li>Store into data frame</li>
+<li>Rinse and repeat from step 1</li>
+</ul>
+<pre class="r"><code># INITIALIZE DATA FRAME
+company_raw &lt;- data.frame()
+
+for (page_url in company_urls){
+  print(page_url)
+  
+  # RETRIEVE INC5000 PROFILE PAGE
+  page &lt;- read_html(page_url)
+  
+  # PARSE REVENUE
+  revenue_millions &lt;- page %&gt;% 
+    html_nodes(xpath = &#39;//*/section[1]/div[3]/dl[1]/dd&#39;) %&gt;% 
+    html_text() %&gt;% 
+    str_replace(&quot; Million&quot;, &quot;&quot;) %&gt;% # STRIP &#39;MILLIONS&#39; FROM DATA VALUE
+    str_replace(&quot;\\$&quot;, &quot;&quot;) # STRIP $ SIGN FROM DATA VALUE
+
+  # PARSE INDUSTRY
+  industry &lt;- page %&gt;% 
+    html_nodes(xpath = &#39;//*/section[1]/div[3]/dl[3]/dd&#39;) %&gt;% 
+    html_text()
+
+ # PARSE YEAR FOUNDED
+  year_founded &lt;- page %&gt;% 
+    html_nodes(xpath = &#39;//*/section[1]/div[3]/dl[5]/dd&#39;) %&gt;% 
+    html_text()
+  
+  # PARSE EMPLOYEE COUNT
+  employees &lt;- page %&gt;% 
+    html_nodes(xpath = &#39;//*/section[1]/div[3]/dl[6]/dd&#39;) %&gt;% 
+    html_text()
+
+  # TEMP TO STORE LOOP DATA
+  temp_df &lt;- data.frame(page_url, revenue_millions, industry, year_founded, employees)
+  
+  # COMBINE TEMP WITH ALL DATA
+  company_raw &lt;- rbind(company_raw, temp_df) 
+}</code></pre>
+</div>
+<div id="data-cleaning" class="section level2">
+<h2>Data cleaning</h2>
+<p>Ideally, we want to separate our data collection from our data processing but I did not anticipate “billions” to show up in the <em>parse revenue</em> step of our loop.</p>
+<p>We will leave it as is though to illustrate the ease with which we can clean data in R, specifically the tidyverse.</p>
+<pre class="r"><code># BRING BACK TO TIDYVERSE
+company_data &lt;- company_raw %&gt;% 
+  as_tibble() 
+
+# EXTRACT &#39;BILLION&#39; VALUES AND CONVERT TO MILLIONS
+billions &lt;- company_data %&gt;% 
+  filter(grepl(&quot; Billion&quot;, revenue_millions)) %&gt;% 
+  mutate(revenue_millions = str_replace(revenue_millions, &quot; Billion&quot;, &quot;&quot;),
+         revenue_millions = as.numeric(as.character(revenue_millions)),
+         revenue_millions = revenue_millions*1000)
+
+# CONVERT &#39;MILLION&#39; VALUES TO NUMERICAL FORMAT
+company_data &lt;- company_data %&gt;% 
+  filter(!grepl(&quot; Billion&quot;, revenue_millions)) %&gt;% 
+  mutate(revenue_millions = as.numeric(as.character(revenue_millions)))
+
+# JOIN OUR SANITIZED DATASET
+company_data &lt;- rbind(company_data, billions)</code></pre>
+</div>
+<div id="summarize-data" class="section level2">
+<h2>Summarize data</h2>
+<p>With our cleaned dataset we can finally answer the question: <em>how much revenue did each industry generate in 2019 and how many companies were surveyed?</em></p>
+<pre class="r"><code>company_parsed &lt;- company_data %&gt;% 
+  group_by(industry) %&gt;% 
+  summarize(revenue_millions = sum(revenue_millions),
+            count = n()) %&gt;% 
+  ungroup() %&gt;% 
+  filter(!is.na(revenue_millions)) %&gt;% 
+  mutate(pct_count = count / sum(count),
+         pct_revenue = revenue_millions / sum(revenue_millions),
+         revenue_billions = revenue_millions / 1000) </code></pre>
+<table class="table table-striped table-hover table-condensed table-responsive" style="font-size: 12px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;">
+industry
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+revenue_billions
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+count
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+pct_revenue
+</th>
+<th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;">
+pct_count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Health
+</td>
+<td style="text-align:right;">
+38.9890
+</td>
+<td style="text-align:right;">
+360
+</td>
+<td style="text-align:right;">
+0.1650677
+</td>
+<td style="text-align:right;">
+0.0718276
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Consumer Products &amp; Services
+</td>
+<td style="text-align:right;">
+23.2248
+</td>
+<td style="text-align:right;">
+323
+</td>
+<td style="text-align:right;">
+0.0983268
+</td>
+<td style="text-align:right;">
+0.0644453
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Construction
+</td>
+<td style="text-align:right;">
+20.4304
+</td>
+<td style="text-align:right;">
+354
+</td>
+<td style="text-align:right;">
+0.0864962
+</td>
+<td style="text-align:right;">
+0.0706305
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Logistics &amp; Transportation
+</td>
+<td style="text-align:right;">
+18.7815
+</td>
+<td style="text-align:right;">
+184
+</td>
+<td style="text-align:right;">
+0.0795152
+</td>
+<td style="text-align:right;">
+0.0367119
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Government Services
+</td>
+<td style="text-align:right;">
+14.0165
+</td>
+<td style="text-align:right;">
+236
+</td>
+<td style="text-align:right;">
+0.0593417
+</td>
+<td style="text-align:right;">
+0.0470870
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Business Products &amp; Services
+</td>
+<td style="text-align:right;">
+13.9789
+</td>
+<td style="text-align:right;">
+490
+</td>
+<td style="text-align:right;">
+0.0591825
+</td>
+<td style="text-align:right;">
+0.0977654
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Human Resources
+</td>
+<td style="text-align:right;">
+11.4535
+</td>
+<td style="text-align:right;">
+156
+</td>
+<td style="text-align:right;">
+0.0484907
+</td>
+<td style="text-align:right;">
+0.0311253
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Retail
+</td>
+<td style="text-align:right;">
+10.8481
+</td>
+<td style="text-align:right;">
+163
+</td>
+<td style="text-align:right;">
+0.0459276
+</td>
+<td style="text-align:right;">
+0.0325219
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Financial Services
+</td>
+<td style="text-align:right;">
+9.5650
+</td>
+<td style="text-align:right;">
+239
+</td>
+<td style="text-align:right;">
+0.0404953
+</td>
+<td style="text-align:right;">
+0.0476856
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Software
+</td>
+<td style="text-align:right;">
+9.2791
+</td>
+<td style="text-align:right;">
+457
+</td>
+<td style="text-align:right;">
+0.0392849
+</td>
+<td style="text-align:right;">
+0.0911812
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Advertising &amp; Marketing
+</td>
+<td style="text-align:right;">
+9.0369
+</td>
+<td style="text-align:right;">
+489
+</td>
+<td style="text-align:right;">
+0.0382595
+</td>
+<td style="text-align:right;">
+0.0975658
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Real Estate
+</td>
+<td style="text-align:right;">
+6.4951
+</td>
+<td style="text-align:right;">
+195
+</td>
+<td style="text-align:right;">
+0.0274983
+</td>
+<td style="text-align:right;">
+0.0389066
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IT Management
+</td>
+<td style="text-align:right;">
+6.2604
+</td>
+<td style="text-align:right;">
+276
+</td>
+<td style="text-align:right;">
+0.0265047
+</td>
+<td style="text-align:right;">
+0.0550678
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Energy
+</td>
+<td style="text-align:right;">
+6.2551
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+0.0264822
+</td>
+<td style="text-align:right;">
+0.0153631
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Manufacturing
+</td>
+<td style="text-align:right;">
+5.9942
+</td>
+<td style="text-align:right;">
+179
+</td>
+<td style="text-align:right;">
+0.0253776
+</td>
+<td style="text-align:right;">
+0.0357143
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Food &amp; Beverage
+</td>
+<td style="text-align:right;">
+5.0617
+</td>
+<td style="text-align:right;">
+127
+</td>
+<td style="text-align:right;">
+0.0214297
+</td>
+<td style="text-align:right;">
+0.0253392
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Telecommunications
+</td>
+<td style="text-align:right;">
+3.3042
+</td>
+<td style="text-align:right;">
+79
+</td>
+<td style="text-align:right;">
+0.0139890
+</td>
+<td style="text-align:right;">
+0.0157622
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Insurance
+</td>
+<td style="text-align:right;">
+3.1245
+</td>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+0.0132282
+</td>
+<td style="text-align:right;">
+0.0137670
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Engineering
+</td>
+<td style="text-align:right;">
+2.6693
+</td>
+<td style="text-align:right;">
+81
+</td>
+<td style="text-align:right;">
+0.0113010
+</td>
+<td style="text-align:right;">
+0.0161612
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IT System Development
+</td>
+<td style="text-align:right;">
+2.5352
+</td>
+<td style="text-align:right;">
+121
+</td>
+<td style="text-align:right;">
+0.0107333
+</td>
+<td style="text-align:right;">
+0.0241421
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Education
+</td>
+<td style="text-align:right;">
+1.4515
+</td>
+<td style="text-align:right;">
+69
+</td>
+<td style="text-align:right;">
+0.0061452
+</td>
+<td style="text-align:right;">
+0.0137670
+</td>
+</tr>
+</tbody>
+</table>
+<p>Unsurprisingly, the <em>Health</em> industry comes out on top with a whopping $39Bn - nearly 1.7x more than the runner up <em>Consumer Products &amp; Services</em>.</p>
+<p>In terms of companies surveyed, we have <em>Business Products &amp; Services</em> at #1 with 490 companies and a very close second for the <em>Advertising &amp; Marketing</em> industry at 489.</p>
+<div id="keeping-it-real" class="section level3">
+<h3>Keeping it real</h3>
+<blockquote class="twitter-tweet" data-conversation="none" data-lang="en">
+<p lang="en" dir="ltr">
+Rather than a signal of the US economy, it's more a sign of which types of companies care about this (paid) PR exposure. Inc 5000 is a badge to show-off at agencies and software companies. Less so in other markets. It's not surprising that Health is the real winner (in the US) 🙂
+</p>
+— Rob Kerry (<span class="citation">@robkerry</span>) <a href="https://twitter.com/robkerry/status/1171684881031671809?ref_src=twsrc%5Etfw">September 11, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+</div>
+<div id="visualize-data" class="section level2">
+<h2>Visualize data</h2>
+<p>The tabulated data above is a little difficult to interpret so we’ll plot our results instead.</p>
+<pre class="r"><code>library(ggrepel)
+
+company_parsed %&gt;% 
+  ggplot(aes(pct_count, pct_revenue, label = industry)) +
+  geom_point() +
+  geom_label_repel() +
+  geom_abline(color = &#39;salmon&#39;, lty = &#39;dashed&#39;) + 
+  scale_x_continuous(labels = scales::percent_format(round(1)),
+                     limits = c(0, .1)) +
+  scale_y_continuous(labels = scales::percent_format(round(1)),
+                     limits = c(0, .2)) +
+  labs(x = &quot;% of Total Companies&quot;, y = &quot;% of Total Revenue&quot;,
+       title = &quot;Inc.5000 Fastest Growing Private Companies of 2019&quot;,
+       subtitle = &quot;Compares the number of companies surveyed to total revenue generated per industry&quot;,
+       caption = &quot;by:@eeysirhc\nsource:@viperchill&quot;) +
+  theme_minimal()</code></pre>
+<p><img src="/blog/2019-08-28-exploring-and-scraping-the-inc-5000-fastest-growing-companies-in-2019_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+<p>We are pretty much <em>done</em> but there may be instances where we want data values to be accessible for users. Luckily, the <a href="https://plot.ly/r/">{plotly}</a> package is our answer.</p>
+</div>
+<div id="chart-interactivity" class="section level2">
+<h2>Chart interactivity</h2>
+<pre class="r"><code>library(plotly)
+
+plot_ly(data = company_parsed, 
+        x = ~pct_count, 
+        y = ~pct_revenue, 
+        mode = &quot;scatter&quot;,
+        type = &quot;scatter&quot;,
+        size = 10,
+        color = ~industry,
+        colors = &#39;Set1&#39;, 
+        hoverinfo = &quot;text&quot;,
+        text = ~paste(&quot;&lt;b&gt;Industry:&lt;/b&gt; &quot;,industry, 
+                     &quot;&lt;br&gt;&lt;b&gt;Total Companies:&lt;/b&gt; &quot;, count,
+                      &quot;&lt;br&gt;&lt;b&gt;Total Revenue ($Bn):&lt;/b&gt; &quot;, revenue_billions),
+        showlegend = FALSE) %&gt;% 
+  layout(xaxis = list(title = &quot;% of Total Companies&quot;,
+                      tickformat = &quot;%&quot;),
+         yaxis = list(title = &quot;% of Total Revenue&quot;,
+                      tickformat = &quot;%&quot;))</code></pre>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"visdat":{"52834cfc6a01":["function () ","plotlyVisDat"]},"cur_data":"52834cfc6a01","attrs":{"52834cfc6a01":{"x":{},"y":{},"mode":"scatter","hoverinfo":"text","text":{},"showlegend":false,"color":{},"size":10,"colors":"Set1","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"xaxis":{"domain":[0,1],"automargin":true,"title":"% of Total Companies","tickformat":"%"},"yaxis":{"domain":[0,1],"automargin":true,"title":"% of Total Revenue","tickformat":"%"},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[0.0975658419792498],"y":[0.0382595258255716],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Advertising & Marketing <br><b>Total Companies:<\/b>  489 <br><b>Total Revenue ($Bn):<\/b>  9.0369","showlegend":false,"type":"scatter","name":"Advertising & Marketing","marker":{"color":"rgba(228,26,28,1)","size":[55],"sizemode":"area","line":{"color":"rgba(228,26,28,1)"}},"textfont":{"color":"rgba(228,26,28,1)","size":55},"error_y":{"color":"rgba(228,26,28,1)","width":55},"error_x":{"color":"rgba(228,26,28,1)","width":55},"line":{"color":"rgba(228,26,28,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0977653631284916],"y":[0.0591824724809484],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Business Products & Services <br><b>Total Companies:<\/b>  490 <br><b>Total Revenue ($Bn):<\/b>  13.9789","showlegend":false,"type":"scatter","name":"Business Products & Services","marker":{"color":"rgba(198,77,77,1)","size":[55],"sizemode":"area","line":{"color":"rgba(198,77,77,1)"}},"textfont":{"color":"rgba(198,77,77,1)","size":55},"error_y":{"color":"rgba(198,77,77,1)","width":55},"error_x":{"color":"rgba(198,77,77,1)","width":55},"line":{"color":"rgba(198,77,77,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00638467677573823],"y":[0.00422396274343776],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Computer Hardware <br><b>Total Companies:<\/b>  32 <br><b>Total Revenue ($Bn):<\/b>  0.9977","showlegend":false,"type":"scatter","name":"Computer Hardware","marker":{"color":"rgba(159,103,124,1)","size":[55],"sizemode":"area","line":{"color":"rgba(159,103,124,1)"}},"textfont":{"color":"rgba(159,103,124,1)","size":55},"error_y":{"color":"rgba(159,103,124,1)","width":55},"error_x":{"color":"rgba(159,103,124,1)","width":55},"line":{"color":"rgba(159,103,124,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0706304868316042],"y":[0.0864961896697714],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Construction <br><b>Total Companies:<\/b>  354 <br><b>Total Revenue ($Bn):<\/b>  20.4304","showlegend":false,"type":"scatter","name":"Construction","marker":{"color":"rgba(90,122,172,1)","size":[55],"sizemode":"area","line":{"color":"rgba(90,122,172,1)"}},"textfont":{"color":"rgba(90,122,172,1)","size":55},"error_y":{"color":"rgba(90,122,172,1)","width":55},"error_x":{"color":"rgba(90,122,172,1)","width":55},"line":{"color":"rgba(90,122,172,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0644453312051077],"y":[0.0983268416596105],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Consumer Products & Services <br><b>Total Companies:<\/b>  323 <br><b>Total Revenue ($Bn):<\/b>  23.2248","showlegend":false,"type":"scatter","name":"Consumer Products & Services","marker":{"color":"rgba(74,137,160,1)","size":[55],"sizemode":"area","line":{"color":"rgba(74,137,160,1)"}},"textfont":{"color":"rgba(74,137,160,1)","size":55},"error_y":{"color":"rgba(74,137,160,1)","width":55},"error_x":{"color":"rgba(74,137,160,1)","width":55},"line":{"color":"rgba(74,137,160,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0137669592976856],"y":[0.00614521591871296],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Education <br><b>Total Companies:<\/b>  69 <br><b>Total Revenue ($Bn):<\/b>  1.4515","showlegend":false,"type":"scatter","name":"Education","marker":{"color":"rgba(83,152,128,1)","size":[55],"sizemode":"area","line":{"color":"rgba(83,152,128,1)"}},"textfont":{"color":"rgba(83,152,128,1)","size":55},"error_y":{"color":"rgba(83,152,128,1)","width":55},"error_x":{"color":"rgba(83,152,128,1)","width":55},"line":{"color":"rgba(83,152,128,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0153631284916201],"y":[0.0264822184589331],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Energy <br><b>Total Companies:<\/b>  77 <br><b>Total Revenue ($Bn):<\/b>  6.2551","showlegend":false,"type":"scatter","name":"Energy","marker":{"color":"rgba(82,167,94,1)","size":[55],"sizemode":"area","line":{"color":"rgba(82,167,94,1)"}},"textfont":{"color":"rgba(82,167,94,1)","size":55},"error_y":{"color":"rgba(82,167,94,1)","width":55},"error_x":{"color":"rgba(82,167,94,1)","width":55},"line":{"color":"rgba(82,167,94,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0161612130885874],"y":[0.011301016088061],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Engineering <br><b>Total Companies:<\/b>  81 <br><b>Total Revenue ($Bn):<\/b>  2.6693","showlegend":false,"type":"scatter","name":"Engineering","marker":{"color":"rgba(99,162,91,1)","size":[55],"sizemode":"area","line":{"color":"rgba(99,162,91,1)"}},"textfont":{"color":"rgba(99,162,91,1)","size":55},"error_y":{"color":"rgba(99,162,91,1)","width":55},"error_x":{"color":"rgba(99,162,91,1)","width":55},"line":{"color":"rgba(99,162,91,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00857940941739824],"y":[0.00409737510584251],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Environmental Services <br><b>Total Companies:<\/b>  43 <br><b>Total Revenue ($Bn):<\/b>  0.9678","showlegend":false,"type":"scatter","name":"Environmental Services","marker":{"color":"rgba(127,135,119,1)","size":[55],"sizemode":"area","line":{"color":"rgba(127,135,119,1)"}},"textfont":{"color":"rgba(127,135,119,1)","size":55},"error_y":{"color":"rgba(127,135,119,1)","width":55},"error_x":{"color":"rgba(127,135,119,1)","width":55},"line":{"color":"rgba(127,135,119,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0476855546687949],"y":[0.0404953429297206],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Financial Services <br><b>Total Companies:<\/b>  239 <br><b>Total Revenue ($Bn):<\/b>  9.565","showlegend":false,"type":"scatter","name":"Financial Services","marker":{"color":"rgba(144,105,145,1)","size":[55],"sizemode":"area","line":{"color":"rgba(144,105,145,1)"}},"textfont":{"color":"rgba(144,105,145,1)","size":55},"error_y":{"color":"rgba(144,105,145,1)","width":55},"error_x":{"color":"rgba(144,105,145,1)","width":55},"line":{"color":"rgba(144,105,145,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0253391859537111],"y":[0.0214297205757832],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Food & Beverage <br><b>Total Companies:<\/b>  127 <br><b>Total Revenue ($Bn):<\/b>  5.0617","showlegend":false,"type":"scatter","name":"Food & Beverage","marker":{"color":"rgba(163,81,154,1)","size":[55],"sizemode":"area","line":{"color":"rgba(163,81,154,1)"}},"textfont":{"color":"rgba(163,81,154,1)","size":55},"error_y":{"color":"rgba(163,81,154,1)","width":55},"error_x":{"color":"rgba(163,81,154,1)","width":55},"line":{"color":"rgba(163,81,154,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0470869912210694],"y":[0.0593416596104996],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Government Services <br><b>Total Companies:<\/b>  236 <br><b>Total Revenue ($Bn):<\/b>  14.0165","showlegend":false,"type":"scatter","name":"Government Services","marker":{"color":"rgba(199,95,116,1)","size":[55],"sizemode":"area","line":{"color":"rgba(199,95,116,1)"}},"textfont":{"color":"rgba(199,95,116,1)","size":55},"error_y":{"color":"rgba(199,95,116,1)","width":55},"error_x":{"color":"rgba(199,95,116,1)","width":55},"line":{"color":"rgba(199,95,116,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0718276137270551],"y":[0.165067739204064],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Health <br><b>Total Companies:<\/b>  360 <br><b>Total Revenue ($Bn):<\/b>  38.989","showlegend":false,"type":"scatter","name":"Health","marker":{"color":"rgba(229,110,75,1)","size":[55],"sizemode":"area","line":{"color":"rgba(229,110,75,1)"}},"textfont":{"color":"rgba(229,110,75,1)","size":55},"error_y":{"color":"rgba(229,110,75,1)","width":55},"error_x":{"color":"rgba(229,110,75,1)","width":55},"line":{"color":"rgba(229,110,75,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0311252992817239],"y":[0.0484906858594411],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Human Resources <br><b>Total Companies:<\/b>  156 <br><b>Total Revenue ($Bn):<\/b>  11.4535","showlegend":false,"type":"scatter","name":"Human Resources","marker":{"color":"rgba(255,127,0,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,127,0,1)"}},"textfont":{"color":"rgba(255,127,0,1)","size":55},"error_y":{"color":"rgba(255,127,0,1)","width":55},"error_x":{"color":"rgba(255,127,0,1)","width":55},"line":{"color":"rgba(255,127,0,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0137669592976856],"y":[0.0132281964436918],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Insurance <br><b>Total Companies:<\/b>  69 <br><b>Total Revenue ($Bn):<\/b>  3.1245","showlegend":false,"type":"scatter","name":"Insurance","marker":{"color":"rgba(255,169,16,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,169,16,1)"}},"textfont":{"color":"rgba(255,169,16,1)","size":55},"error_y":{"color":"rgba(255,169,16,1)","width":55},"error_x":{"color":"rgba(255,169,16,1)","width":55},"line":{"color":"rgba(255,169,16,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0550678371907422],"y":[0.0265046570702794],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT Management <br><b>Total Companies:<\/b>  276 <br><b>Total Revenue ($Bn):<\/b>  6.2604","showlegend":false,"type":"scatter","name":"IT Management","marker":{"color":"rgba(255,208,32,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,208,32,1)"}},"textfont":{"color":"rgba(255,208,32,1)","size":55},"error_y":{"color":"rgba(255,208,32,1)","width":55},"error_x":{"color":"rgba(255,208,32,1)","width":55},"line":{"color":"rgba(255,208,32,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.00897845171588188],"y":[0.00362023708721423],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT Services <br><b>Total Companies:<\/b>  45 <br><b>Total Revenue ($Bn):<\/b>  0.8551","showlegend":false,"type":"scatter","name":"IT Services","marker":{"color":"rgba(255,246,47,1)","size":[55],"sizemode":"area","line":{"color":"rgba(255,246,47,1)"}},"textfont":{"color":"rgba(255,246,47,1)","size":55},"error_y":{"color":"rgba(255,246,47,1)","width":55},"error_x":{"color":"rgba(255,246,47,1)","width":55},"line":{"color":"rgba(255,246,47,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0241420590582602],"y":[0.0107332768839966],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  IT System Development <br><b>Total Companies:<\/b>  121 <br><b>Total Revenue ($Bn):<\/b>  2.5352","showlegend":false,"type":"scatter","name":"IT System Development","marker":{"color":"rgba(236,215,51,1)","size":[55],"sizemode":"area","line":{"color":"rgba(236,215,51,1)"}},"textfont":{"color":"rgba(236,215,51,1)","size":55},"error_y":{"color":"rgba(236,215,51,1)","width":55},"error_x":{"color":"rgba(236,215,51,1)","width":55},"line":{"color":"rgba(236,215,51,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0367118914604948],"y":[0.0795152413209145],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Logistics & Transportation <br><b>Total Companies:<\/b>  184 <br><b>Total Revenue ($Bn):<\/b>  18.7815","showlegend":false,"type":"scatter","name":"Logistics & Transportation","marker":{"color":"rgba(209,163,48,1)","size":[55],"sizemode":"area","line":{"color":"rgba(209,163,48,1)"}},"textfont":{"color":"rgba(209,163,48,1)","size":55},"error_y":{"color":"rgba(209,163,48,1)","width":55},"error_x":{"color":"rgba(209,163,48,1)","width":55},"line":{"color":"rgba(209,163,48,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0357142857142857],"y":[0.0253776460626588],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Manufacturing <br><b>Total Companies:<\/b>  179 <br><b>Total Revenue ($Bn):<\/b>  5.9942","showlegend":false,"type":"scatter","name":"Manufacturing","marker":{"color":"rgba(181,112,43,1)","size":[55],"sizemode":"area","line":{"color":"rgba(181,112,43,1)"}},"textfont":{"color":"rgba(181,112,43,1)","size":55},"error_y":{"color":"rgba(181,112,43,1)","width":55},"error_x":{"color":"rgba(181,112,43,1)","width":55},"line":{"color":"rgba(181,112,43,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0091779728651237],"y":[0.00325402201524132],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Media <br><b>Total Companies:<\/b>  46 <br><b>Total Revenue ($Bn):<\/b>  0.7686","showlegend":false,"type":"scatter","name":"Media","marker":{"color":"rgba(179,92,64,1)","size":[55],"sizemode":"area","line":{"color":"rgba(179,92,64,1)"}},"textfont":{"color":"rgba(179,92,64,1)","size":55},"error_y":{"color":"rgba(179,92,64,1)","width":55},"error_x":{"color":"rgba(179,92,64,1)","width":55},"line":{"color":"rgba(179,92,64,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0389066241021548],"y":[0.0274983065198984],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Real Estate <br><b>Total Companies:<\/b>  195 <br><b>Total Revenue ($Bn):<\/b>  6.4951","showlegend":false,"type":"scatter","name":"Real Estate","marker":{"color":"rgba(205,105,109,1)","size":[55],"sizemode":"area","line":{"color":"rgba(205,105,109,1)"}},"textfont":{"color":"rgba(205,105,109,1)","size":55},"error_y":{"color":"rgba(205,105,109,1)","width":55},"error_x":{"color":"rgba(205,105,109,1)","width":55},"line":{"color":"rgba(205,105,109,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0325219473264166],"y":[0.0459276037256562],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Retail <br><b>Total Companies:<\/b>  163 <br><b>Total Revenue ($Bn):<\/b>  10.8481","showlegend":false,"type":"scatter","name":"Retail","marker":{"color":"rgba(230,119,155,1)","size":[55],"sizemode":"area","line":{"color":"rgba(230,119,155,1)"}},"textfont":{"color":"rgba(230,119,155,1)","size":55},"error_y":{"color":"rgba(230,119,155,1)","width":55},"error_x":{"color":"rgba(230,119,155,1)","width":55},"line":{"color":"rgba(230,119,155,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0131683958499601],"y":[0.0350918712955123],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Security <br><b>Total Companies:<\/b>  66 <br><b>Total Revenue ($Bn):<\/b>  8.2887","showlegend":false,"type":"scatter","name":"Security","marker":{"color":"rgba(240,132,188,1)","size":[55],"sizemode":"area","line":{"color":"rgba(240,132,188,1)"}},"textfont":{"color":"rgba(240,132,188,1)","size":55},"error_y":{"color":"rgba(240,132,188,1)","width":55},"error_x":{"color":"rgba(240,132,188,1)","width":55},"line":{"color":"rgba(240,132,188,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0911811652035116],"y":[0.0392849280270957],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Software <br><b>Total Companies:<\/b>  457 <br><b>Total Revenue ($Bn):<\/b>  9.2791","showlegend":false,"type":"scatter","name":"Software","marker":{"color":"rgba(212,141,176,1)","size":[55],"sizemode":"area","line":{"color":"rgba(212,141,176,1)"}},"textfont":{"color":"rgba(212,141,176,1)","size":55},"error_y":{"color":"rgba(212,141,176,1)","width":55},"error_x":{"color":"rgba(212,141,176,1)","width":55},"line":{"color":"rgba(212,141,176,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0157621707901038],"y":[0.0139889923793395],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Telecommunications <br><b>Total Companies:<\/b>  79 <br><b>Total Revenue ($Bn):<\/b>  3.3042","showlegend":false,"type":"scatter","name":"Telecommunications","marker":{"color":"rgba(184,148,165,1)","size":[55],"sizemode":"area","line":{"color":"rgba(184,148,165,1)"}},"textfont":{"color":"rgba(184,148,165,1)","size":55},"error_y":{"color":"rgba(184,148,165,1)","width":55},"error_x":{"color":"rgba(184,148,165,1)","width":55},"line":{"color":"rgba(184,148,165,1)","width":55},"xaxis":"x","yaxis":"y","frame":null},{"x":[0.0111731843575419],"y":[0.0066350550381033],"mode":"scatter","hoverinfo":"text","text":"<b>Industry:<\/b>  Travel & Hospitality <br><b>Total Companies:<\/b>  56 <br><b>Total Revenue ($Bn):<\/b>  1.5672","showlegend":false,"type":"scatter","name":"Travel & Hospitality","marker":{"color":"rgba(153,153,153,1)","size":[55],"sizemode":"area","line":{"color":"rgba(153,153,153,1)"}},"textfont":{"color":"rgba(153,153,153,1)","size":55},"error_y":{"color":"rgba(153,153,153,1)","width":55},"error_x":{"color":"rgba(153,153,153,1)","width":55},"line":{"color":"rgba(153,153,153,1)","width":55},"xaxis":"x","yaxis":"y","frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>In my next article we’ll take this a step further by building our own <a href="https://shiny.rstudio.com">Shiny app</a>. If you’re feeling adventurous then you can use some <a href="https://www.christopheryee.org/blog/tidytuesday-housing-prices/">starter code here</a> or checkout a barebones version for the <a href="https://eeysirhc.shinyapps.io/20190205-housing_prices/">US housing price index</a>.</p>
+<p>As always, if you enjoyed this or found it helpful please share over your favorite internet medium!</p>
+</div>

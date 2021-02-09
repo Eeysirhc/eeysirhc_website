@@ -1,0 +1,102 @@
+---
+title: 'TidyTuesday: Housing Prices'
+author: Christopher Yee
+date: '2019-02-05'
+slug: tidytuesday-housing-prices
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+>Instead of a static visualization I decided to build a barebones Shiny app this week. The purpose is to improve the interactivity of the final output - one of [my 2019 goals](https://www.christopheryee.org/blog/retrospective-introspection-in-2018/) to level up advanced R knowledge. You can find the [full code here](https://github.com/Eeysirhc/tidytuesday/blob/master/20190205-housing_prices/app.R).
+
+Analyzing data for #tidytuesday week of 2/5/2019 ([source](https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-02-05))
+
+```{r eval=FALSE}
+# LOAD PACKAGES
+library(tidyverse)
+library(scales)
+library(shiny)
+
+state_hpi_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-02-05/state_hpi.csv")
+```
+
+### Process the raw data
+```{r eval=FALSE}
+state_hpi <- state_hpi_raw %>%
+  group_by(state, year) %>%
+  summarize(us_avg = mean(us_avg),
+            price_index = mean(price_index)) %>%
+  mutate(pct_diff = (price_index / us_avg) - 1,
+         segment = ifelse(pct_diff > 0, 'above', 'below'),
+         segment = str_to_title(segment))
+```
+
+### Build the UI level
+* Include a drop down menu to select output data by state abbreviation
+```{r eval=FALSE}
+ui <- fluidPage(
+  "Housing Price Index: US Average vs State",
+  selectInput(inputId = "select_state",
+              label = "Choose a state",
+              c(state.abb)),
+  plotOutput("hpi1"),
+  plotOutput("hpi2")
+)
+```
+
+### Build the server level
+* Plot 1: Time series for a given state average annual housing price index compared to the US average
+* Plot 2: Time series for the percentage difference of a given state housing price index against the US average
+```{r eval=FALSE}
+server <- function(input, output, session) {
+  
+  output$hpi1 <- renderPlot({
+    state_hpi %>%
+      filter(state == input$select_state) %>%
+      group_by(year, state) %>%
+      summarize(price_index = mean(price_index),
+                us_avg = mean(us_avg)) %>% 
+      ggplot() +
+      geom_line(aes(year, price_index), size = 2, color = 'steelblue') +
+      geom_col(aes(year, us_avg), alpha = 0.3, fill = 'grey54') +
+      theme_bw() +
+      labs(x = NULL,
+           y = "Housing Price Index") + 
+      theme_bw(base_size = 15) + 
+      scale_y_continuous(limits = c(0,300)) 
+  })
+  
+  output$hpi2 <- renderPlot({
+    state_hpi %>%
+      filter(state == input$select_state) %>%
+      ggplot() + 
+      geom_col(aes(year, pct_diff, fill = segment), alpha = 0.8) +
+      geom_hline(yintercept = 0, lty = 'dashed') +
+      scale_fill_brewer(palette = 'Set1', direction = -1) +
+      scale_y_continuous(labels = percent_format(round(1))) +
+      theme_bw(base_size = 15) +
+      theme(legend.position = 'top') +
+      labs(x = NULL,
+           y = "Difference to US Average",
+           fill = NULL)
+    })  
+}
+```
+
+### Build the app level
+```{r eval=FALSE}
+shinyApp(ui, server)
+```
+
+>Check out the [final production build here](https://eeysirhc.shinyapps.io/20190205-housing_prices/)
+
+### Future versions
+Shiny was easier to use than expected and I look forward to building out this dashboard in the coming weeks. Here are some additional features I plan to include:
+
+* Geospatial data
+* Multiple facet selection
+* Break out sections for improved readability
+* Metric cards
+* Dynamic filtering for top_n values

@@ -1,0 +1,49 @@
+---
+title: 'Recreating plots in R: intro to bootstrapping'
+author: Christopher Yee
+date: '2020-06-01'
+slug: recreating-plots-in-r-intro-to-bootstrapping
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+__Objective:__ recreate and visualize the 500K sampling distribtuion of means from [this intro to bootstrapping in statistics post](https://statisticsbyjim.com/hypothesis-testing/bootstrapping/) using R.
+
+## Load libraries
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(rsample)
+```
+
+## Download data
+```{r message=FALSE, warning=FALSE}
+df <- read_csv("https://statisticsbyjim.com/wp-content/uploads/2017/04/body_fat.csv")
+```
+
+## Bootstrap resampling 500K
+```{r message=FALSE, warning=FALSE}
+df_bs <- df %>% 
+  bootstraps(times = 500000) %>% 
+  mutate(average = map_dbl(splits, ~ mean(as.data.frame(.)$`%Fat`))) 
+```
+
+
+## Visualize sampling distribution of means
+```{r message=FALSE, warning=FALSE}
+df_bs %>% 
+  ggplot(aes(average)) +
+  geom_histogram(binwidth = 0.1, alpha = 0.75, 
+                 color = 'white', fill = 'steelblue') +
+  scale_x_continuous(limits = c(25, 32)) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs(title = "Histogram of % Fat",
+       subtitle = "500K bootstrapped samples with 92 observations in each",
+       x = "Average Mean", y = "Frequency") +
+  theme_minimal()
+```
+
+
+

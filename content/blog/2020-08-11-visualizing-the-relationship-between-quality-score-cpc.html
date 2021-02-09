@@ -1,0 +1,80 @@
+---
+title: Visualizing the relationship between quality score & CPC
+author: Christopher Yee
+date: '2020-08-11'
+slug: visualizing-the-relationship-between-quality-score-cpc
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>The SEM industry has published a lot of information about the importance of improving quality score to lower average cost per click (CPC).</p>
+<p>Most of those articles, however, just share a <a href="https://www.uncommonlogic.com/wp-content/uploads/quality-score-cost-table-UCL-colors-2019-441x600.jpg">table</a> with quality score in one column and its associated % increase/decrease to average CPC in the other. Although helpful I think it misses the mark on underscoring the magnitude of how much QS can help CPC.</p>
+<p>We will do something different: the python code below will take that data and visualize the impact to average CPC for a given quality score.</p>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set_style(&quot;darkgrid&quot;)</code></pre>
+</div>
+<div id="set-qs-multipliers" class="section level2">
+<h2>Set QS multipliers</h2>
+<pre class="python"><code>multiplier = [4, 2.5, 0.67, 0.25, 0, -0.17, -0.29, -0.38, -0.44, -0.50]
+
+impact = []
+for m in multiplier:
+    data = m + 1
+    impact.append(data)</code></pre>
+</div>
+<div id="define-functions" class="section level2">
+<h2>Define functions</h2>
+<pre class="python"><code># CALCULATE AVG CPC FOR A SPECIFIC QS MULTIPLIER
+def qs_calc(cpc, cpc_impact):
+    return round(cpc * cpc_impact, 2)
+
+# LOOP THROUGH EACH QS MULTIPLIER FROM A PROVIDED CPC
+def qs_estimate(cpc):
+    estimate = []
+    for i in impact:
+        data = qs_calc(cpc, i)
+        estimate.append(data)  
+    return estimate</code></pre>
+</div>
+<div id="estimate-avg-cpc" class="section level2">
+<h2>Estimate Avg CPC</h2>
+<p>We’ll assume the account has an average cost per click of $0.50 with a standard deviation of $0.10.</p>
+<pre class="python"><code>estimate_range = []
+for i in np.random.normal(0.50, 0.10, 1000):
+    data = qs_estimate(i)
+    estimate_range.append(data)</code></pre>
+</div>
+<div id="standardize-data-frame" class="section level2">
+<h2>Standardize data frame</h2>
+<pre class="python"><code>df_range = pd.DataFrame.from_records(estimate_range).reset_index()
+df_range = pd.melt(df_range, id_vars=[&#39;index&#39;], var_name=&quot;quality_score&quot;, value_name=&quot;estimated_cpc&quot;)
+df_range.quality_score = df_range.quality_score + 1</code></pre>
+</div>
+<div id="visualize" class="section level2">
+<h2>Visualize</h2>
+<pre class="python"><code>plt.figure(figsize=(15,10))
+
+sns.boxplot(x=&#39;quality_score&#39;, y=&#39;estimated_cpc&#39;, palette=&#39;Paired&#39;, data=df_range)
+plt.xlabel(&quot;Quality Score&quot;)
+plt.ylabel(&quot;Estimated CPC&quot;)
+plt.figtext(0.9, 0.07, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show()</code></pre>
+<p><img src="/blog/2020-08-11-visualizing-the-relationship-between-quality-score-cpc_files/figure-html/unnamed-chunk-6-1.png" width="1440" /></p>
+<p>Now we have something a little more digestible:</p>
+<ul>
+<li>At $0.50, the average CPC can shoot up to $2.50 (or more) with a quality score of 1</li>
+<li>With a higher quality score we observe a slight decrease in CPC compared to the average</li>
+<li>There is a significant difference in costs if we move ads with QS &lt; 5 to improve by a level or two</li>
+</ul>
+</div>

@@ -1,0 +1,55 @@
+---
+author: Christopher Yee
+date: 2011-09-20 20:32:04+00:00
+layout: post
+slug: rank-checking-google-docs-importxml-function
+title: Rank Checking with Google Docs ImportXML Function
+categories:
+- SEO Tools
+---
+
+
+
+<blockquote>
+<em><strong>Feb 2014 Edit: The calls, functions and worksheet used in this blog post may be outdated.  If you know of a better guide please <a href="http://www.christopheryee.org/contact/">contact me</a> and I’ll send a link your way.</strong></em>
+</blockquote>
+<p>I want to share with everyone a very quick rank checking tool that I built using the ImportXML function from Google Documents. But first, a quick history lesson…</p>
+<blockquote>
+Or you can just grab the G-Doc ImportXML Rank Checker <a href="https://docs.google.com/spreadsheet/ccc?key=0Aj-KlZ43mdOydExCcUxrOS1IWFltM21IS2tFQlJhbWc&amp;hl=en_US#gid=0">here</a>.
+</blockquote>
+<div id="historical-context" class="section level2">
+<h2>Historical Context</h2>
+<p>I used to love rank checking when I first started out as an <a href="http://www.christopheryee.org/job-obtained-seo-analyst-intern/">SEO analyst</a>. I thought it was the only thing that mattered and took great pride when the keyword rankings jumped to the top of the fold on page one. However, as I matured professionally and took on more important responsibilities at CafePress<a href="http://www.christopheryee.org/contact/">*</a>, checking for keyword ranks fell to the wayside and lost its novelty as it became a time suck.</p>
+<p>I knew about the <a href="http://tools.seobook.com/firefox/rank-checker/">SEObook Rank Checker</a> but stopped using Firefox for the longest time after I switched over to Google Chrome. There was the <a href="https://chrome.google.com/webstore/detail/ofoaoaloeipdofknnaapbmdddddioklg">SEO SERP for Chrome</a> but it wasn’t very accurate and I think it also factors in personalization. I have PRO access to the SEOmoz Rank Tracker but it’s a little too slow for my taste and you can’t compare ranking data.</p>
+<p>Then one day I read the first(?) documented post about using Google Docs for SEO by <a href="http://seogadget.co.uk/playing-around-with-importxml-in-google-spreadsheets/">Richard Baxter</a>. <a href="http://www.distilled.net/blog/seo/how-to-build-agile-seo-tools-using-google-docs/">Tom Critchlow</a> followed suit a couple months later but <a href="http://www.tomanthony.co.uk/blog/seomoz-linkscape-api-with-google-docs/">Tom Anthony’s post</a> illustrated how powerful it can be for SEO when you used it in conjunction with the SEOmoz Linkscape API.</p>
+<p>I was floored just thinking of the endless possibilities. And then it hit me - this was the thing I was looking for! I needed a rank checker that wasn’t based in Firefox, had to be quick, needed to eliminate SERP personalization as much as possible and could easily copy and paste into Excel for rank comparison. Also, I am always logged into Google so why not?</p>
+<p>Thus, my <a href="https://docs.google.com/spreadsheet/ccc?key=0Aj-KlZ43mdOydExCcUxrOS1IWFltM21IS2tFQlJhbWc&amp;hl=en_US">Rank Checker with Google Docs</a> was born! It’s simple, light, effective and anyone can use it as long as you have a Google account.</p>
+</div>
+<div id="easy-as-1-2-3" class="section level2">
+<h2>Easy as 1-2-3</h2>
+<p><strong>1)</strong> To get started, <a href="https://docs.google.com/spreadsheet/ccc?key=0Aj-KlZ43mdOydExCcUxrOS1IWFltM21IS2tFQlJhbWc&amp;hl=en_US">click here</a>. Then go to FILE and MAKE A COPY otherwise you won’t be able to edit the document.</p>
+<p><strong>2)</strong> In the cell to the right of “Domain URL”, enter your target domain.</p>
+<p><img src="/images/insert-domain-url-cell.png" /></p>
+<p><strong>3)</strong> After that, populate the “Keywords” column and watch the magic unfold!</p>
+<p><img src="/images/insert-keywords-cell.png" /></p>
+<p>I would love to hear your thoughts in the comments below and if you need any help please don’t hesitate to <a href="http://www.christopheryee.org/contact/">contact me</a>!</p>
+</div>
+<div id="random-technicalgeeky-tidbits-troubleshooting" class="section level2">
+<h2>Random Technical/Geeky Tidbits &amp; Troubleshooting</h2>
+<ul>
+<li><p>I am not a programmer nor do I have any programming experience.  All I did was reverse engineer the sample documents out there provided by the various aforementioned authors.</p></li>
+<li><p>If you want to learn more, check out the amazing <a href="http://www.distilled.net/blog/distilled/guide-to-google-docs-importxml/">ImportXML Guide for Google Docs by Distilled</a></p></li>
+<li><p>If you are too lazy to read, just use the <a href="http://www.xpathbuilder.com/">XPath Builder</a></p></li>
+<li><p>I have not tried it yet but it’s possible you will be <a href="http://www.christopheryee.org/google-captcha-balls/">hit with the Google CAPTCHA</a> if you perform too many queries at once - keep it under 50 keywords per 15 minutes</p></li>
+<li><p>If you enter a keyword and “Ranking” is still displayed as “#N/A”, your rank may be higher than #20 (which is default) - if you want to increase the threshold ping me and I’ll walk you through it</p></li>
+<li><p>I searched the web but did not find anyone else writing a similar post but if you did already please let me know and I’ll be more than happy to link out (with my non-existent Domain Authority)</p></li>
+<li><p>Lastly, special thanks to <a href="http://twitter.com/TomAnthonySEO">Tom Anthony</a> for teaching me how to share a Google Doc to the public</p></li>
+</ul>
+</div>
+<div id="coming-soon" class="section level2">
+<h2>Coming Soon</h2>
+<ul>
+<li>Automated scheduled delivery</li>
+<li>Historical keyword ranking graphs</li>
+</ul>
+</div>

@@ -1,0 +1,501 @@
+---
+title: Getting Started With R Using Google Search Console Data
+author: 'Christopher Yee'
+date: '2019-05-02'
+slug: getting-started-with-r-using-google-search-console-data
+categories:
+  - Web Analytics
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<blockquote>
+<p>Follow along with the <a href="https://github.com/Eeysirhc/r_gsc_project/blob/master/r_gsc_code.Rmd">full code here</a></p>
+</blockquote>
+<p>A number of people have approached me over the years asking for materials on how to use R to draw insights from their search engine marketing data. Although I had no reservations giving away that information (with redactions) it was largely reserved for internal training courses at my previous companies.</p>
+<p>This guide is long overdue though and is meant to address a few things on my mind:</p>
+<ul>
+<li>The explosion of MOOC is great but I have never completed a single course. This is due to the fact I get bored very easily and not working with data I am personaly invested in.</li>
+<li>While we are inundated with data, certain industries (such as SEO) see a contraction from key players - most notably Google. It is unfortunate and the sands will continue to shift in that direction but we should leverage the information we already have (or create new sources).</li>
+<li>I am a firm believer that everyone should learn how to build something (online or offline). Personally, it has helped me appreciate a different way of thinking and framing problems into fairly solvable answers.</li>
+</ul>
+<p>I hope that by pulling your own dataset straight from Google Search Console and seeing the results with a few lines of code it will encourage you to dive deeper into the world of <a href="https://twitter.com/search?src=typd&amp;q=%23rstats">#rstats</a>.</p>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<div id="download-base-r" class="section level2">
+<h2>Download base R</h2>
+<p>You can <a href="https://www.r-project.org/">get that here</a>.</p>
+</div>
+<div id="download-rstudio" class="section level2">
+<h2>Download RStudio</h2>
+<p>This is the IDE (Integrated Development Environment) we’ll be using to write and execute our R code which can be <a href="https://www.rstudio.com/">downloaded here</a>.</p>
+</div>
+<div id="install-packages" class="section level2">
+<h2>Install packages</h2>
+<p>Once you’re up and running with RStudio we’ll need a few nifty packages to do a majority of the heavy lifting for us.</p>
+<pre class="r"><code>install.packages(&#39;tidyverse&#39;)           # DATA MANIPULATION AND VISUALIZATION ON STEROIDS
+install.packages(&#39;scales&#39;)              # ASSISTS WITH GRAPHICAL FORMATTING
+install.packages(&#39;lubridate&#39;)           # PACKAGE TO WRANGLE TIME SERIES DATA
+install.packages(&#39;searchConsoleR&#39;)      # INTERACT WITH GOOGLE SEARCH CONSOLE API
+devtools::install_github(&quot;dgrtwo/ebbr&quot;) # EMPIRICAL BAYES BINOMIAL ESTIMATION 
+install.packages(&#39;prophet&#39;)             # FORECASTING PACKAGE BY FACEBOOK</code></pre>
+<p><em>Side note: you don’t need to do this step again.</em></p>
+</div>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<p>Let’s fire up some of the packages we just installed.</p>
+<pre class="r"><code>library(tidyverse)
+library(searchConsoleR)
+library(scales)
+library(lubridate)</code></pre>
+</div>
+<div id="configure-your-working-directory" class="section level2">
+<h2>Configure your working directory</h2>
+<p>For those of you completely new to any type of programming language you can also run this command.</p>
+<pre class="r"><code>setwd(&quot;~/Desktop&quot;)</code></pre>
+<p>Any work you save will automatically go to your desktop so you won’t have to figure out where it all went later.</p>
+<p>We are now ready for the fun stuff!</p>
+</div>
+</div>
+<div id="get-the-data" class="section level1">
+<h1>Get the data</h1>
+<div id="authenticiation" class="section level2">
+<h2>Authenticiation</h2>
+<p>Run the command below and your browser will pop up a new window prompting for a login and access to your Google account.</p>
+<pre class="r"><code>scr_auth()</code></pre>
+</div>
+<div id="website-parameters" class="section level2">
+<h2>Website parameters</h2>
+<p>The next step is letting the API know what data we want so you’ll need to change the following parameters.</p>
+<pre class="r"><code>website &lt;- &quot;https://www.christopheryee.org/&quot;
+start &lt;- Sys.Date() - 50            # YOU CAN CHANGE THE LOOKBACK WINDOW HERE
+end &lt;- Sys.Date() - 3               # MINUS 3 DAYS TO SHIFT WINDOW ON MISSING DATES
+download_dimensions &lt;- c(&#39;date&#39;, &#39;query&#39;)
+type &lt;- c(&#39;web&#39;)</code></pre>
+<p><em>Side note: In the past you could do a full year but my big mouth tweeted about it and the next day Google added a throttle to their API.</em></p>
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+need daily GSC data for <a href="https://twitter.com/hashtag/SEO?src=hash&amp;ref_src=twsrc%5Etfw">#SEO</a> analytics? now is probably a good time as any to pick up R and write a few lines of code :)<br><br>p.s. package defaults to 5k rows per day so pulling last 365 days will net you around 1.8M rows for any given website <a href="https://t.co/QbSBRJHr4K">pic.twitter.com/QbSBRJHr4K</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1071268105542950912?ref_src=twsrc%5Etfw">December 8, 2018</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+<div id="assign-data-to-variable" class="section level2">
+<h2>Assign data to variable</h2>
+<pre class="r"><code>data &lt;- as_tibble(search_analytics(siteURL = website,
+                                   startDate = start,
+                                   endDate = end,
+                                   dimensions = download_dimensions,
+                                   searchType = type,
+                                   walk_data = &quot;byDate&quot;))</code></pre>
+</div>
+<div id="save-file-to-csv" class="section level2">
+<h2>Save file to CSV</h2>
+<p>We want to save our results to a CSV so we don’t have to worry about pinging the GSC API again.</p>
+<pre class="r"><code>data %&gt;%
+  write_csv(&quot;gsc_data_raw.csv&quot;)</code></pre>
+<p>In the event you lose your session and need to start over you can run the following command to pick up where you left off.</p>
+<pre class="r"><code>data &lt;- read_csv(&quot;gsc_data_raw.csv&quot;)</code></pre>
+</div>
+</div>
+<div id="process-the-data" class="section level1">
+<h1>Process the data</h1>
+<p>Let’s take a peek at the data to see what we are working with (I had to anonymize for client confidentiality reasons so please use your imagination here).</p>
+<pre class="r"><code>data</code></pre>
+<pre><code>## # A tibble: 240,000 x 6
+##    date       query            clicks impressions    ctr position
+##    &lt;date&gt;     &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;
+##  1 2019-03-06 keyword_id_4082   55715      136191 0.409      1.01
+##  2 2019-03-06 keyword_id_1846   11822       26945 0.439      1.01
+##  3 2019-03-06 keyword_id_464     2502       15580 0.161      2.19
+##  4 2019-03-06 keyword_id_3144    1499        3424 0.438      1   
+##  5 2019-03-06 keyword_id_6093    1262        4186 0.301      1.00
+##  6 2019-03-06 keyword_id_7183    1220        3184 0.383      1.06
+##  7 2019-03-06 keyword_id_5089    1060        2631 0.403      1.01
+##  8 2019-03-06 keyword_id_10489    910        4190 0.217      1.24
+##  9 2019-03-06 keyword_id_9977     623        1774 0.351      1.04
+## 10 2019-03-06 keyword_id_11077    596       10284 0.0580     3.80
+## # … with 239,990 more rows</code></pre>
+<div id="parse-brand-terms" class="section level2">
+<h2>Parse brand terms</h2>
+<p>Assuming all goes well, it’s very likely some of your top keywords will come from branded terms. Let’s clean this up so we don’t inadvertently skew the data in any given direction.</p>
+<pre class="r"><code>data_brand &lt;- data %&gt;%      # EDIT BELOW TO EXCLUDE YOUR OWN BRAND TERMS
+  mutate(brand = case_when(grepl(&quot;your_brand_term|brand_typo|more_brands&quot;, query) ~ &#39;brand&#39;,
+                           TRUE ~ &#39;nonbrand&#39;)) </code></pre>
+<pre><code>## # A tibble: 240,000 x 7
+##    date       query            clicks impressions    ctr position brand   
+##    &lt;date&gt;     &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;   
+##  1 2019-03-06 keyword_id_4082   55715      136191 0.409      1.01 brand   
+##  2 2019-03-06 keyword_id_1846   11822       26945 0.439      1.01 brand   
+##  3 2019-03-06 keyword_id_464     2502       15580 0.161      2.19 nonbrand
+##  4 2019-03-06 keyword_id_3144    1499        3424 0.438      1    brand   
+##  5 2019-03-06 keyword_id_6093    1262        4186 0.301      1.00 brand   
+##  6 2019-03-06 keyword_id_7183    1220        3184 0.383      1.06 brand   
+##  7 2019-03-06 keyword_id_5089    1060        2631 0.403      1.01 brand   
+##  8 2019-03-06 keyword_id_10489    910        4190 0.217      1.24 nonbrand
+##  9 2019-03-06 keyword_id_9977     623        1774 0.351      1.04 brand   
+## 10 2019-03-06 keyword_id_11077    596       10284 0.0580     3.80 nonbrand
+## # … with 239,990 more rows</code></pre>
+<p>Now that we know what is brand vs nonbrand we can visualize how clicks from organic search looks like over time.</p>
+<pre class="r"><code>data_brand %&gt;%
+  group_by(date, brand) %&gt;%
+  summarize(clicks = sum(clicks)) %&gt;%
+  ggplot() +
+  geom_line(aes(date, clicks, color = brand)) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  theme_bw() +
+  labs(x = NULL,
+       y = &#39;Clicks&#39;)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the `.groups` argument.</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+</div>
+<div id="segment-by-product" class="section level2">
+<h2>Segment by product</h2>
+<p>You can also segment by product types (or even landing pages if you grabbed that data) so let’s put everything togther in a new variable…</p>
+<pre class="r"><code>data_clean &lt;- data %&gt;%
+  mutate(product_type = case_when(grepl(&quot;shoe&quot;, query) ~ &#39;shoes&#39;,
+                             grepl(&quot;sweater&quot;, query) ~ &#39;sweaters&#39;,
+                             grepl(&quot;shirt&quot;, query) ~ &#39;shirt&#39;,
+                             grepl(&quot;pants&quot;, query) ~ &#39;pants&#39;,
+                             grepl(&quot;sock&quot;, query) ~ &#39;socks&#39;,
+                             TRUE ~ &#39;other&#39;),
+         brand = case_when(grepl(&quot;your_brand_term&quot;, query) ~ &#39;brand&#39;,
+                           TRUE ~ &#39;nonbrand&#39;)) </code></pre>
+<p>…and then plot it.</p>
+<pre class="r"><code>data_clean %&gt;%
+  group_by(date, product_type) %&gt;%
+  summarize(clicks = sum(clicks)) %&gt;%
+  filter(product_type != &#39;other&#39;) %&gt;%     # EXCLUDING &#39;OTHER&#39; TO NORMALIZE SCALE
+  ggplot() +
+  geom_line(aes(date, clicks, color = product_type)) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  theme_bw() +
+  labs(x = NULL,
+       y = &#39;Clicks&#39;)</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;date&#39;. You can override using the `.groups` argument.</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-15-1.png" width="672" /></p>
+</div>
+<div id="summarizing-data" class="section level2">
+<h2>Summarizing data</h2>
+<p>What if we just want the aggregated metrics by product type?</p>
+<pre class="r"><code>data_clean %&gt;%
+  group_by(product_type) %&gt;% 
+  summarize(clicks = sum(clicks),
+            impressions = sum(impressions),
+            position = mean(position)) %&gt;%
+  mutate(ctr = 100 * (clicks / impressions)) %&gt;%      # NORMLALIZE TO 100%
+  arrange(desc(product_type)) </code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   product_type  clicks impressions position   ctr
+##   &lt;chr&gt;          &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;
+## 1 sweaters        4141      123896     6.49  3.34
+## 2 socks            807       41758     9.32  1.93
+## 3 shoes          10755       32084     2.54 33.5 
+## 4 shirt          19870      342510     8.46  5.80
+## 5 pants          15377      378068     6.07  4.07
+## 6 other        5125347    24931729     4.52 20.6</code></pre>
+</div>
+</div>
+<div id="exploratory-data-analysis" class="section level1">
+<h1>Exploratory data analysis</h1>
+<p>Now that we have our cleaned dataset it’s recommended to explore it a little. The best way is to visualize our data and we can do this ridiculously easy with R.</p>
+<div id="understanding-the-distribution" class="section level2">
+<h2>Understanding the distribution</h2>
+<p>We can use <a href="https://en.wikipedia.org/wiki/Histogram">histograms</a> to check on the spread of our observations.</p>
+<pre class="r"><code>data_clean %&gt;%
+  ggplot() +
+  geom_histogram(aes(ctr), binwidth = 0.01) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = comma_format()) +
+  labs(x = &#39;Click-through Rate&#39;,
+       y = &#39;Count&#39;) +
+  theme_bw()</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>What immediately jumps out are the counts with CTR greater than 25%. What could be the reason for this?</p>
+<p>Luckily with a minor change to our original code we can see this is attributed to branded queries.</p>
+<pre class="r"><code>data_clean %&gt;%
+  ggplot() +
+  geom_histogram(aes(ctr, fill = brand), binwidth = 0.01) +   # ADD FILL = BRAND
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = comma_format()) +
+  labs(x = &#39;Click-through Rate&#39;,
+       y = &#39;Count&#39;) +
+  theme_bw()</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+<p>We can be more precise with the <a href="https://en.wikipedia.org/wiki/Cumulative_distribution_function">cumulative distribution function</a> to describe what percentage of branded CTR falls above or below a given threshold.</p>
+<pre class="r"><code>data_clean %&gt;%
+  ggplot() +
+  stat_ecdf(aes(ctr, color = brand)) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = &#39;Click-through Rate&#39;,
+       y = NULL) +
+  theme_bw()</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-19-1.png" width="672" /></p>
+<p>The chart above tells us for brand, 50% of the keywords have CTR of 40% or more. Conversely, 50% of nonbrand keywords have CTR less than 10%.</p>
+<p><a href="https://www.christopheryee.org/blog/for-the-love-of-data-segment/">Segmenting your data</a> in this fashion will help peel back those layers to obtain deeper insights about the data you will be working with.</p>
+</div>
+<div id="correlations" class="section level2">
+<h2>Correlations</h2>
+<p>And just for fun because why not.</p>
+<pre class="r"><code># install.packages(&quot;corrplot&quot;)
+library(corrplot)
+
+# COMPUTE
+corr_results &lt;- data_clean %&gt;%
+  select(clicks:position) %&gt;% 
+  cor()
+
+# PLOT CORRELOGRAM
+corrplot(corr_results, method = &#39;color&#39;,
+         type = &#39;upper&#39;, addCoef.col = &#39;black&#39;,
+         tl.col = &#39;black&#39;, tl.srt = 45,
+         diag = FALSE)</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-20-1.png" width="672" /></p>
+</div>
+</div>
+<div id="click-through-rate-ctr-benchmarking" class="section level1">
+<h1>Click-through rate (CTR) benchmarking</h1>
+<p>Using CTR curves to forecast search traffic is a horrible idea for a number of reasons:</p>
+<ul>
+<li>Seasonality is hidden behind aggregated data</li>
+<li>It can’t account for irregular traffic spikes</li>
+<li>You need to make a coherent decision on date windows (2 weeks vs 2 years ago)</li>
+<li>It requires the end user to have a “known” keyword list and its associated search volume data but completely falls short on all the “unknown” long-tail</li>
+</ul>
+<p>In spite of this, it still has its place in making performance comparisons between keywords or determining your search marketing opportunity.</p>
+<blockquote>
+<p>Opportunity = (Total Search Demand * Position #1 CTR) - Total Search Demand</p>
+</blockquote>
+<p>With that out of the way let’s use <a href="https://en.wikipedia.org/wiki/Box_plot">boxplots</a> to visualize CTR by position and ensure we capture as much of the original data as possible.</p>
+<pre class="r"><code># CREATE VARIABLE
+avg_ctr &lt;- data_clean %&gt;%
+  group_by(query) %&gt;%
+  summarize(clicks = sum(clicks),
+            impressions = sum(impressions),
+            position = median(position)) %&gt;%
+  mutate(page_group = 1 * (position %/% 1)) %&gt;% # CREATE NEW COLUMN TO GROUP AVG POSITIONS
+  filter(position &lt; 21) %&gt;%         # FILTER ONLY FIRST 2 PAGES
+  mutate(ctr =  100*(clicks / impressions)) %&gt;%     # NORMALIZE TO 100%
+  ungroup()
+
+# PLOT OUR RESULTS
+avg_ctr %&gt;%
+  ggplot() +
+  geom_boxplot(aes(page_group, ctr, group = page_group)) +
+  labs(x = &quot;SERP Position&quot;,
+       y = &quot;Click-through Rate (%)&quot;) +
+  theme_bw() </code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<p>We have quite a bit of statistical outliers across all SERP positions! It is very likely these 100% CTR are due to keywords driving 1 click from 1 impression. Unfortunately, this low volume data skews our averages much higher but we also don’t want to remove them.</p>
+<div id="estimating-ctr-with-empirical-bayes" class="section level2">
+<h2>Estimating CTR with empirical Bayes</h2>
+<p>One approach to handle our “small data” problem is by shrinking the CTR to get it closer to an estimated average. You can read more about <a href="http://varianceexplained.org/r/empirical_bayes_baseball/">empirical Bayes estimation here</a> (one source of inspiration over the years).</p>
+<pre class="r"><code>library(ebbr)
+
+bayes_ctr &lt;- data_clean %&gt;%
+  group_by(query) %&gt;%
+  summarize(clicks = sum(clicks),
+            impressions = sum(impressions),
+            position = median(position)) %&gt;%
+  mutate(page_group = 1 * (position %/% 1)) %&gt;%   
+  filter(position &lt; 21) %&gt;%     
+  add_ebb_estimate(clicks, impressions) %&gt;%     # APPLY EBB ESTIMATION
+  ungroup()</code></pre>
+<pre><code>## Warning: `data_frame()` is deprecated as of tibble 1.1.0.
+## Please use `tibble()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<p>So what happened?</p>
+<p>Even though <em>keyword_id_10001</em> has a raw CTR of 100% (5 clicks from 5 impressions), we moved its estimated CTR down to 66% when comparing itself with the entire dataset.</p>
+<pre><code>## # A tibble: 29,310 x 5
+##    query            clicks impressions raw_ctr fitted_ctr
+##    &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
+##  1 keyword_id_1          2           6  0.333      0.322 
+##  2 keyword_id_10        51        4190  0.0122     0.0125
+##  3 keyword_id_100        3           5  0.6        0.458 
+##  4 keyword_id_1000      14          33  0.424      0.410 
+##  5 keyword_id_10000      6          12  0.5        0.445 
+##  6 keyword_id_10001      5           5  1          0.663 
+##  7 keyword_id_10002     68          80  0.85       0.820 
+##  8 keyword_id_10003      6          13  0.462      0.420 
+##  9 keyword_id_10004     73         246  0.297      0.297 
+## 10 keyword_id_10005      1           2  0.5        0.365 
+## # … with 29,300 more rows</code></pre>
+<p>As we learn more about the keyword the shrinkage becomes less prominent and gets closer to the “true” click-through rate.</p>
+<pre><code>## # A tibble: 10 x 5
+##    query            clicks impressions raw_ctr fitted_ctr
+##    &lt;chr&gt;             &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt;
+##  1 keyword_id_31702     87         181  0.481      0.476 
+##  2 keyword_id_16358    261        1105  0.236      0.237 
+##  3 keyword_id_20596    181       10973  0.0165     0.0166
+##  4 keyword_id_9922     225         676  0.333      0.333 
+##  5 keyword_id_4147     344         999  0.344      0.344 
+##  6 keyword_id_10615     59         173  0.341      0.340 
+##  7 keyword_id_3273      67          91  0.736      0.715 
+##  8 keyword_id_3998      99         295  0.336      0.335 
+##  9 keyword_id_28468     71        1288  0.0551     0.0561
+## 10 keyword_id_1104      61         187  0.326      0.326</code></pre>
+<blockquote>
+<p>In other words, we are estimating CTR at the keyword level based on its performance rather than an aggregated version at the domain level.</p>
+</blockquote>
+<p>Now let’s compare our two datasets.</p>
+<pre class="r"><code>bayes_ctr %&gt;%
+  select(page_group, bayes_ctr = .fitted, avg_ctr = .raw) %&gt;%
+  gather(bayes_ctr:avg_ctr, key = &#39;segment&#39;, value = &#39;ctr&#39;) %&gt;%
+  ggplot() +
+  geom_boxplot(aes(page_group, ctr, fill = segment, group = page_group)) +
+  facet_grid(segment~.) +
+  scale_y_continuous(labels = percent_format()) +
+  theme_bw() +
+  labs(x = &quot;SERP Position&quot;,
+       y = &quot;Click-through Rate&quot;)</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-25-1.png" width="672" /></p>
+<p>Notice anything different? The bottom <em>bayes_ctr</em> panel has no data points sitting at the extremes of 100% CTR. We also have 0% CTR inching slightly higher to align with the position’s empirical average.</p>
+<p>Furthermore, as a result of moving closer to the estimated average, the mean CTR for position #1 is now 42.7% instead of 49.6%.</p>
+<pre class="r"><code>bayes_ctr %&gt;%
+  filter(page_group == 1) %&gt;%
+  select(avg_ctr = .raw, bayes_ctr = .fitted) %&gt;%
+  summary()</code></pre>
+<pre><code>##     avg_ctr           bayes_ctr       
+##  Min.   :0.006116   Min.   :0.006647  
+##  1st Qu.:0.333333   1st Qu.:0.322136  
+##  Median :0.492063   Median :0.413047  
+##  Mean   :0.495679   Mean   :0.426594  
+##  3rd Qu.:0.615385   3rd Qu.:0.512752  
+##  Max.   :1.000000   Max.   :0.928946</code></pre>
+<p>But wait - there’s more!</p>
+<p>With R we can also visualize the same chart above with the addition of breaking it down by the segments we created earlier.</p>
+<p>For example, this is what it would look like for some of our product types.</p>
+<pre class="r"><code># APPLY EBB ESTIMATE
+bayes_product &lt;- data_clean %&gt;%
+  group_by(query, product_type) %&gt;%
+  summarize(clicks = sum(clicks),
+            impressions = sum(impressions),
+            position = median(position)) %&gt;%
+  mutate(page_group = 1 * (position %/% 1)) %&gt;%   
+  filter(position &lt; 21) %&gt;%     
+  add_ebb_estimate(clicks, impressions) %&gt;%
+  ungroup()</code></pre>
+<pre><code>## `summarise()` has grouped output by &#39;query&#39;. You can override using the `.groups` argument.</code></pre>
+<pre class="r"><code># VISUALIZE RESULTS
+bayes_product %&gt;%
+  select(page_group, product_type, bayes_ctr = .fitted, avg_ctr = .raw) %&gt;%
+  gather(bayes_ctr:avg_ctr, key = &#39;segment&#39;, value = &#39;ctr&#39;) %&gt;%
+  filter(product_type != &#39;socks&#39;, product_type != &#39;shoes&#39;, product_type != &#39;other&#39;) %&gt;%
+  ggplot() +
+  geom_boxplot(aes(page_group, ctr, fill = segment, group = page_group)) +
+  facet_grid(product_type~segment) +
+  scale_y_continuous(labels = percent_format()) +
+  theme_bw() +
+  labs(x = &quot;SERP Position&quot;,
+       y = &quot;Click-through Rate&quot;)</code></pre>
+<p><img src="/blog/2019-05-01-getting-started-with-r-using-google-search-console-data_files/figure-html/unnamed-chunk-27-1.png" width="672" /></p>
+</div>
+<div id="combining-results" class="section level2">
+<h2>Combining results</h2>
+<p>The last step is merging our estimated CTR by position to our keyword level data.</p>
+<pre class="r"><code># CREATE INDEX
+bayes_index &lt;- bayes_ctr %&gt;%
+  select(page_group, bayes_ctr = .fitted, avg_ctr = .raw) %&gt;%
+  group_by(page_group) %&gt;%
+  summarize(bayes_benchamrk = mean(bayes_ctr))
+
+# JOIN DATAFRAMES
+bayes_ctr %&gt;%
+  select(query:impressions, page_group, avg_ctr = .raw, bayes_ctr =.fitted) %&gt;%
+  left_join(bayes_index)</code></pre>
+<pre><code>## # A tibble: 29,310 x 7
+##    query         clicks impressions page_group avg_ctr bayes_ctr bayes_benchamrk
+##    &lt;chr&gt;          &lt;dbl&gt;       &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;           &lt;dbl&gt;
+##  1 keyword_id_1       2           6          7  0.333     0.322            0.208
+##  2 keyword_id_10     51        4190          4  0.0122    0.0125           0.226
+##  3 keyword_id_1…      3           5          1  0.6       0.458            0.427
+##  4 keyword_id_1…     14          33          2  0.424     0.410            0.270
+##  5 keyword_id_1…      6          12          1  0.5       0.445            0.427
+##  6 keyword_id_1…      5           5          1  1         0.663            0.427
+##  7 keyword_id_1…     68          80          1  0.85      0.820            0.427
+##  8 keyword_id_1…      6          13          2  0.462     0.420            0.270
+##  9 keyword_id_1…     73         246          1  0.297     0.297            0.427
+## 10 keyword_id_1…      1           2          1  0.5       0.365            0.427
+## # … with 29,300 more rows</code></pre>
+<p>We now have the final dataset to use and determine if a keyword is above or below a given performance threshold.</p>
+</div>
+</div>
+<div id="forecasting-search-traffic" class="section level1">
+<h1>Forecasting search traffic</h1>
+<p>Predicting the future is <strong>hard</strong>. There is an entire field of academic research out there focused on this specific topic.</p>
+<p>However, this guide I will demonstrate one out-of-the-box method with R using <a href="https://facebook.github.io/prophet/">Prophet, Facebook’s forecasting package</a>.</p>
+<p>I leave it up to you, the reader, to decide if this is the right approach for your business and how to fine tune the parameters of the model (disclaimer: I use it in various capacities).</p>
+<blockquote>
+<p>Note: you should have more than 365 days of click data for this section</p>
+</blockquote>
+<p>For illustrative purposes though we’ll use our existing (limited) dataset and attempt to forecast <em>nonbrand</em> organic search traffic.</p>
+<div id="clean-and-parse-data" class="section level2">
+<h2>Clean and parse data</h2>
+<pre class="r"><code>library(prophet)
+
+data_time_series &lt;- data_clean %&gt;%
+  filter(brand == &#39;nonbrand&#39;) %&gt;%
+  select(ds = date, 
+         y = clicks) %&gt;%    # RENAME COLUMNS AS REQUIRED BY PROPHET
+  group_by(ds) %&gt;%
+  summarize(y = sum(y))</code></pre>
+</div>
+<div id="build-forecasting-model" class="section level2">
+<h2>Build forecasting model</h2>
+<pre class="r"><code>m &lt;- prophet(data_time_series)
+future &lt;- make_future_dataframe(m, periods = 30)  # CHANGE PREDICTION WINDOW HERE
+forecast &lt;- predict(m, future)
+
+plot(m, forecast)   # DEFAULT VISUALIZATION</code></pre>
+<p><img src="/images/gsc-prophet-raw.png" /></p>
+<p>That chart is pretty nasty so let’s clean this up a bit before we decide to share it with others.</p>
+</div>
+<div id="combine-with-original-data" class="section level2">
+<h2>Combine with original data</h2>
+<pre class="r"><code>forecast &lt;- forecast %&gt;% as.tibble()    # TRANSFORM INTO TIDY FORMAT
+
+forecast$ds &lt;- ymd(forecast$ds)     # CHANGE TO TIME SERIES FORMAT
+
+forecast_clean &lt;- forecast %&gt;%
+  select(ds, yhat, yhat_upper, yhat_lower) %&gt;%
+  left_join(data_time_series) %&gt;%
+  rename(date = ds, 
+         actual = y,
+         forecast = yhat,
+         forecast_low = yhat_lower,
+         forecast_high = yhat_upper)    # RENAMING FOR HUMAN INTERPRETATION</code></pre>
+</div>
+<div id="plot-forecast" class="section level2">
+<h2>Plot forecast</h2>
+<pre class="r"><code>forecast_clean %&gt;%
+  ggplot() +
+  geom_point(aes(date, actual), color = &#39;steelblue&#39;) +
+  geom_line(aes(date, actual), color = &#39;steelblue&#39;) +
+  geom_ribbon(aes(date, ymin = forecast_low, ymax = forecast_high), 
+              fill = &#39;salmon&#39;, alpha = 0.2) +
+  scale_y_continuous(labels = comma_format()) +
+  expand_limits(y = 0) + 
+  labs(x = NULL,
+       y = &quot;Organic Search Traffic&quot;) +
+  theme_bw()</code></pre>
+<p><img src="/images/gsc-prophet-forecast.png" /></p>
+</div>
+</div>
+<div id="wrapping-up" class="section level1">
+<h1>Wrapping up</h1>
+<p>In this quick start guide I attempted to showcase an end-to-end pipeline using R and the various functions associated with the language. We were able to fetch, parse, explore, visualize, model, and ultimately communicate these results.</p>
+<p>By interacting with your own dataset from Google Search Console I hope it has piqued your interest in R in some way, shape or form. Please don’t hesitate to use this as a foundation for future knowledge.</p>
+<p>Feedback is always appreciated and I would love to see what you come up with!</p>
+</div>
+<div id="acknowledgements" class="section level1">
+<h1>Acknowledgements</h1>
+<ul>
+<li><a href="http://code.markedmondson.me/">Mark Edmonson</a> for <a href="https://cran.r-project.org/web/packages/searchConsoleR/index.html">{searchConsoleR}</a></li>
+<li><a href="http://varianceexplained.org/about/">David Robinson</a> for <a href="https://github.com/dgrtwo/ebbr">{ebbr}</a></li>
+</ul>
+</div>

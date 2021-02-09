@@ -1,0 +1,291 @@
+---
+title: Deciphering Hopper's Data Puzzle
+author: Christopher Yee
+date: '2020-02-07'
+slug: deciphering-hoppers-data-puzzle
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+I like to browse company career pages once in awhile to see what positions they have open. In my opinion, this provides a glimpse into what they are investing in for the next few years.
+
+[Hopper](https://www.hopper.com/) is one company which stands out but the reason I am writing this is a puzzle they included in the job description:
+
+> At Hopper, every dataset tells a story. 
+Do you have what it takes to decipher the clues? bit.ly/2q6U8dq
+
+Let's see if we can try to solve this riddle!
+
+## Load data
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+
+puzzle <- read.csv("https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/hopper_data_puzzle.csv", header=FALSE) %>% as_tibble()
+```
+
+## Exploratory analysis
+
+Let's do a quick spot check of our data by pulling out a random sample:
+```{r warning=FALSE, message=FALSE}
+puzzle %>% 
+  sample_n(10) %>% 
+  knitr::kable()
+```
+
+This is a tough one - no labeled column headers with a total of 1,024 rows.
+
+I am wondering if there is any correlation between our two variables?
+```{r warning=FALSE, message=FALSE}
+cor(puzzle)
+```
+
+So, there is an inverse relationship but it is quite weak.
+
+With a lack of information, at this point I want to see if we can identify any visual relationships.
+
+```{r warning=FALSE, message=FALSE}
+puzzle %>% 
+  ggplot(aes(V1, V2)) +
+  geom_point(alpha = 0.1, color = 'steelblue', size = 3) +
+  theme_minimal(base_size = 10)
+```
+
+It appears we have some data points grouped together but what catches my eye is around _V1(0.40),V2(2.10)_ - it has a concentration of points indicated by its relatively higher gradient.
+
+```{r warning=FALSE, message=FALSE}
+puzzle %>% 
+  ggplot(aes(V1, V2)) +
+  geom_point(alpha = 0.1, color = 'steelblue', size = 3) +
+  geom_point(x = 0.397, y = 2.11, color = 'red', pch = 1, size = 10) +
+  theme_minimal(base_size = 10)
+```
+
+How many times does that specific point show up in our data?
+
+```{r warning=FALSE, message=FALSE}
+puzzle %>% 
+  group_by(V1, V2) %>% 
+  count(sort = TRUE) %>% 
+  ungroup() %>% 
+  mutate(pct_total = 100 * (n / sum(n)))
+```
+
+Approximately 10% of the total dataset - I wonder why? Are they duplicates? Bad data? 
+
+For now, let's put that aside and incorporate some structure to our messy data.
+
+## KNN Clustering
+
+I prefer to keep things simple so let's use a common unsupervised machine learning algorithm called [K-Nearest Neighbors](https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm).
+
+```{r warning=FALSE, message=FALSE}
+library(broom)
+
+set.seed(20200206)
+
+puzzle_knn <- kmeans(puzzle, centers = 15, nstart = 30)
+
+# SUMMARY DATA
+puzzle_knn_summary <- tidy(puzzle_knn)
+
+# JOIN BACK TO ORIGINAL DATAFRAME
+puzzle_clusters <- augment(puzzle_knn, puzzle) 
+```
+
+We can now whip everything together in a fancy [#rstats](https://twitter.com/search?q=%23rstats) plot:
+
+```{r warning=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = 'none')
+```
+
+Not too bad.
+
+It also looks like we can further segment these groups by drawing some axes to indicate a Cartesian coordinate system:
+
+```{r warning=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = 'none')
+```
+
+Finally, we don't have a lot of context but Hopper is a travel booking app so let's just go out on a limb and assume the data is % change by price to conversions.
+
+> Note: it only occurred to me after completing this the above may not be true otherwise we would see more data in the top-left quadrant (unless, of course, this was intentional)
+
+```{r warning=FALSE, message=FALSE}
+library(scales)
+
+ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = 'none') +
+  labs(x = "% Change in Price", y = "% Change in Conversions")
+```
+
+Now we are getting somewhere!
+
+## Summary
+
+* We were able to parse out 15 different performing segments from our data
+* We know there is a -0.25 correlation between our two variables
+    + For the majority of cases conversions will decrease if there is an increase in pricing
+    + Conversely, a decrease in price will lead to an increase in conversions (ex: clusters 3 and 12)
+* The bottom left quadrant where cluster 14 is located illustrates how conversions decreased for this group even if they are exposed to a price drop
+* What should be interesting to Hopper are clusters 4, 9 and 11
+    + With a price increase these cohorts exhibit higher conversions
+    + Is it the destination? A specific airline or hotel? Messaging? Or a new feature on the app?
+    + Difficult to interpret without the full context but that is where I would dive deeper to further improve the product
+
+## Statistical modeling
+
+Just for fun, let's train and build a simple machine learning model to predict future conversion behavior given the change in price.
+
+> Reminder: we are making a huge leap of faith in assuming the data is % price change to % conversion change
+
+Before feeding in our data we need to encode our clusters because the numerical values are not an indicator of performance. 
+
+For example, being in cluster 15 is not better than being in cluster 1 - these were randomly assigned from our KNN algorithm.
+
+```{r warning=FALSE, message=FALSE}
+library(caret)
+
+# ONE HOT ENCODE OUR CLUSTERS
+dummy <- dummyVars(" ~ .cluster", data = puzzle_clusters)
+df_dummy <- data.frame(predict(dummy, puzzle_clusters))
+
+# JOIN BACK TO ORIGINAL DATAFRAME
+puzzle_processed <- cbind(puzzle_clusters, df_dummy) %>% 
+  select(-.cluster) %>% 
+  as_tibble()
+```
+
+Then conduct a quick spot check on the correlation between variables:
+
+```{r warning=FALSE, message=FALSE}
+library(corrplot)
+
+corrplot(cor(puzzle_processed), method = 'color',
+         tl.col = 'black', diag = FALSE)
+```
+
+Cluster 4 with a whopping correlation coefficient of ~0.80!
+
+The final step before model training is to parse out the control vs test data:
+
+```{r warning=FALSE, message=FALSE}
+# CREATE INDEX FOR 75/25 SPLIT
+puzzle_index <- createDataPartition(puzzle_processed$V2, 
+                                    p = 0.75, list = FALSE)
+
+# TRAINING DATA
+puzzle_train <- puzzle_processed[puzzle_index, ]
+
+# TESTING DATA
+puzzle_test <- puzzle_processed[-puzzle_index, ]
+
+control <- trainControl(method = "repeatedcv", 
+                        number = 10, repeats = 10, savePredictions = TRUE)
+```
+
+At this point we can utilize various off-the-shelf machine learning algorithms like random forest, XGBoost, SVM, etc.
+
+For our use case, I'll just start with a linear and multiple linear regression.
+
+```{r warning=FALSE, message=FALSE}
+linear_model <- train(V2 ~ V1, data = puzzle_train, method = "lm", 
+             trControl = control,
+             tuneGrid = expand.grid(intercept = FALSE),
+             metric = "Rsquared")
+
+summary(linear_model)
+```
+
+R^2 value of 0.1174 is quite low.
+
+Let's try the multiple linear regression route where we incorporate all the KNN clusters we identified earlier in this post.
+
+```{r warning=FALSE, message=FALSE}
+multiple_model <- train(V2 ~ ., data = puzzle_train, method = "lm", 
+             trControl = control,
+             tuneGrid = expand.grid(intercept = FALSE),
+             metric = "Rsquared")
+
+summary(multiple_model)
+```
+
+R^2 value of 0.992!  That seems too good to be true and we may actually be overfitting somewhere.
+
+Let's verify the relative weights for the features in our model:
+
+```{r warning=FALSE, message=FALSE}
+ggplot(varImp(multiple_model)) + geom_col(fill = 'steelblue') + theme_minimal()
+```
+
+It's good to see cluster 4 is still right there at the top!
+
+To wrap things up, we'll use both models to predict values from the unseen test set and visualize in a plot.
+
+```{r warning=FALSE, message=FALSE}
+linear <- predict(linear_model, puzzle_test)
+multiple <- predict(multiple_model, puzzle_test)
+
+puzzle_test %>% 
+  select(V1, V2) %>% 
+  cbind(linear, multiple) %>% 
+  as_tibble() %>% 
+  rename(actual = V2) %>% 
+  gather(key, value, actual:multiple) %>% 
+  ggplot(aes(V1, value, color = key)) + 
+  geom_point(alpha = 0.5) + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = 'top') +
+  labs(x = "% Change in Price", y = "% Change in Conversions", color = NULL) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_color_brewer(palette = 'Set1')
+```
+
+This doesn't look half bad if I may say so myself!
+
+Although inaccurate, our linear regression model was able to capture the inverse relationship between price and conversions.
+
+The multiple regression version is definitely a step up from the former but it has room for improvement. With a little parameter tuning it's possible to further increase the overall accuracy of our model.
+
+
+## Answer
+
+_...LOL..._
+
+```{r}
+puzzle_clusters %>% 
+  ggplot(aes(V1, V2, color = .cluster)) +
+  geom_point() +
+  coord_flip() +
+  theme_minimal() + 
+  theme(legend.position = 'none')
+```
+
+

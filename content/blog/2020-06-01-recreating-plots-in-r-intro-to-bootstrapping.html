@@ -1,0 +1,43 @@
+---
+title: 'Recreating plots in R: intro to bootstrapping'
+author: Christopher Yee
+date: '2020-06-01'
+slug: recreating-plots-in-r-intro-to-bootstrapping
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p><strong>Objective:</strong> recreate and visualize the 500K sampling distribtuion of means from <a href="https://statisticsbyjim.com/hypothesis-testing/bootstrapping/">this intro to bootstrapping in statistics post</a> using R.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(rsample)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<pre class="r"><code>df &lt;- read_csv(&quot;https://statisticsbyjim.com/wp-content/uploads/2017/04/body_fat.csv&quot;)</code></pre>
+</div>
+<div id="bootstrap-resampling-500k" class="section level2">
+<h2>Bootstrap resampling 500K</h2>
+<pre class="r"><code>df_bs &lt;- df %&gt;% 
+  bootstraps(times = 500000) %&gt;% 
+  mutate(average = map_dbl(splits, ~ mean(as.data.frame(.)$`%Fat`))) </code></pre>
+</div>
+<div id="visualize-sampling-distribution-of-means" class="section level2">
+<h2>Visualize sampling distribution of means</h2>
+<pre class="r"><code>df_bs %&gt;% 
+  ggplot(aes(average)) +
+  geom_histogram(binwidth = 0.1, alpha = 0.75, 
+                 color = &#39;white&#39;, fill = &#39;steelblue&#39;) +
+  scale_x_continuous(limits = c(25, 32)) +
+  scale_y_continuous(labels = scales::comma_format()) +
+  labs(title = &quot;Histogram of % Fat&quot;,
+       subtitle = &quot;500K bootstrapped samples with 92 observations in each&quot;,
+       x = &quot;Average Mean&quot;, y = &quot;Frequency&quot;) +
+  theme_minimal()</code></pre>
+<p><img src="/blog/2020-06-01-recreating-plots-in-r-intro-to-bootstrapping_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

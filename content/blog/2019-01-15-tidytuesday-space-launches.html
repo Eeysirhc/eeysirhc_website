@@ -1,0 +1,140 @@
+---
+title: 'TidyTuesday: Space Launches'
+author: Christopher Yee
+date: '2019-01-15'
+slug: tidytuesday-space-launches
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 1/15/2019 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-01-15">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(RColorBrewer)
+library(forcats)
+library(scales)
+library(ebbr)
+
+launches_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-15/launches.csv&quot;)
+
+launches &lt;- launches_raw %&gt;%
+  filter(launch_year &gt;= &#39;1960&#39;)</code></pre>
+<div id="distribution-of-the-most-space-launches-over-time" class="section level3">
+<h3>Distribution of the most space launches over time?</h3>
+<pre class="r"><code>countries &lt;- launches %&gt;%
+  count(state_code, sort = TRUE) %&gt;%
+  filter(n &gt;= 100)
+
+launches %&gt;%
+  inner_join(countries) %&gt;%
+  # INCOMING NASTY IFELSE CODE (NEED TO REFACTOR)
+  mutate(state_code = ifelse(state_code == &#39;RU&#39;, &#39;Russia / Soviet Union&#39;,
+                             ifelse(state_code == &#39;SU&#39;, &#39;Russia / Soviet Union&#39;, 
+                                    ifelse(state_code == &#39;US&#39;, &#39;United States&#39;,
+                                           ifelse(state_code == &#39;CN&#39;, &#39;China&#39;,
+                                                  ifelse(state_code == &#39;IN&#39;, &#39;India&#39;,
+                                                         ifelse(state_code == &#39;F&#39;, &#39;France&#39;,
+                                                                ifelse(state_code == &#39;J&#39;, &#39;Japan&#39;, state_code)))))))) %&gt;%
+  ggplot() + 
+  geom_density(aes(launch_year, fill = state_code, color = state_code),
+               alpha = 0.2) +
+  theme_light() +
+  scale_color_brewer(palette = &#39;Set1&#39;) +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Distribution of space launches over time by country&quot;,
+       subtitle = &quot;Minimum of 100 launches&quot;,
+       caption = &quot;Source: The Economist&quot;,
+       fill = &quot;Country&quot;,
+       color = &quot;Country&quot;) +
+  scale_y_continuous(labels = percent_format(round(1)))</code></pre>
+<p><img src="/blog/2019-01-15-tidytuesday-space-launches_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="who-has-a-better-success-rate-private-startup-or-states" class="section level3">
+<h3>Who has a better success rate: private, startup or states ?</h3>
+<pre class="r"><code>launches %&gt;%
+  mutate(category = ifelse(category == &#39;O&#39;, 1, 0)) %&gt;%
+  select(launch_year, agency_type, category) %&gt;%
+  group_by(launch_year, agency_type) %&gt;%
+  summarize(success = sum(category),
+            total = n(),
+            rate = success / total) %&gt;%
+  ungroup() %&gt;%
+  add_ebb_estimate(success, total) %&gt;%
+  mutate(agency_type = str_to_title(agency_type)) %&gt;%
+  ggplot() +
+  geom_line(aes(launch_year, .fitted, color = agency_type), 
+            size = 1) +
+  geom_ribbon(aes(x = launch_year, ymin = .low, ymax = .high, fill = agency_type),
+              alpha = 0.1) +
+  theme_light() +
+  scale_fill_brewer(palette = &#39;Set1&#39;) +
+  scale_color_brewer(palette = &#39;Set1&#39;) +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       caption = &quot;Source: The Economist&quot;,
+       title = &quot;Success rate of space launches by type&quot;,
+       subtitle = &quot;Empirical Bayes rate @ 95% credible interval&quot;,
+       color = &quot;Type&quot;,
+       fill = &quot;Type&quot;) +
+  scale_y_continuous(labels = percent_format(round(1)),
+                     limits = c(0,1))</code></pre>
+<pre><code>## Warning: `data_frame()` is deprecated as of tibble 1.1.0.
+## Please use `tibble()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<p><img src="/blog/2019-01-15-tidytuesday-space-launches_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+</div>
+<div id="success-rate-for-each-country-by-agency-type" class="section level3">
+<h3>Success rate for each country by agency type ?</h3>
+<pre class="r"><code># APPLY EMPIRICAL BAYESIAN STATS TO DATASET
+launches_parsed &lt;- launches %&gt;%
+  mutate(category = ifelse(category == &#39;O&#39;, 1, 0),
+         agency_type = str_to_title(agency_type)) %&gt;%
+  select(launch_year, state_code, agency_type, category) %&gt;%
+  group_by(state_code, agency_type) %&gt;%
+  summarize(success = sum(category),
+         total = n(),
+         rate = success / total) %&gt;%
+  ungroup() %&gt;%
+  add_ebb_estimate(success, total) 
+
+# PLOT THE GRAPH
+launches_parsed %&gt;%  
+  filter(total &gt;= 10) %&gt;%
+  select(&quot;Empirical Bayes Rate&quot;=.fitted, 
+         &quot;Measured Rate&quot;=.raw, 
+         everything()) %&gt;%
+  gather(key, value, `Empirical Bayes Rate`:`Measured Rate`) %&gt;%
+    # INCOMING NASTY IFELSE CODE (NEED TO REFACTOR)
+  mutate(state_code = ifelse(state_code == &#39;RU&#39;, &#39;Russia&#39;,
+                             ifelse(state_code == &#39;SU&#39;, &#39;Soviet Union&#39;, 
+                                    ifelse(state_code == &#39;US&#39;, &#39;United States&#39;,
+                                           ifelse(state_code == &#39;CN&#39;, &#39;China&#39;,
+                                                  ifelse(state_code == &#39;IN&#39;, &#39;India&#39;,
+                                                         ifelse(state_code == &#39;F&#39;, &#39;France&#39;,
+                                                                ifelse(state_code == &#39;J&#39;, &#39;Japan&#39;, 
+                                                                       ifelse(state_code == &#39;IL&#39;, &#39;Israel&#39;, state_code))))))))) %&gt;%
+  ggplot() +
+  geom_point(aes(x=reorder(state_code, value), y=value, color = key), size = 4) +
+  geom_errorbar(aes(x = state_code, ymin = .low, ymax = .high), size = 0.5, color = &quot;gray50&quot;) +
+  geom_hline(data=launches_parsed, aes(yintercept = median(.fitted)), color = &#39;salmon&#39;, linetype = &#39;dashed&#39;, size = 1) +
+  coord_flip() +
+  theme_light() +
+  scale_y_continuous(labels = percent_format(round(1)),
+                     limits = c(0,1)) +
+  labs(x = &quot;&quot;,
+       title = &quot;Estimated success rate of space launches per country by type&quot;,
+       subtitle = &quot;with 95% credible interval and 10+ launches&quot;,
+       y = &quot;&quot;,
+       caption = &quot;Source: The Economist&quot;,
+       color = &quot;&quot;) +
+  scale_color_brewer(palette = &#39;Paired&#39;, direction = -1) +
+  facet_grid(agency_type~.)</code></pre>
+<p><img src="/blog/2019-01-15-tidytuesday-space-launches_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

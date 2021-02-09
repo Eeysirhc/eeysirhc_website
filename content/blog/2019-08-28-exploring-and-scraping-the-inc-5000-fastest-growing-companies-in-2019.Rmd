@@ -1,0 +1,265 @@
+---
+title: '[Updated] Top Industries from Inc.5000 Companies'
+author: Christopher Yee
+date: '2020-01-07'
+slug: top-industries-from-inc-5000-fastest-growing-companies-in-2019
+categories:
+  - Data Visualization
+---
+
+## Changelog
+
+* Originally published on _September 10th, 2019_
+* Built a [Shiny app for this](https://eeysirhc.shinyapps.io/inc5000_companies/)
+* Full code can be found on [GitHub](https://github.com/Eeysirhc/inc5000_companies)
+
+<hr>
+
+One of my favorite online marketers, (the) [Glen Allsopp](https://twitter.com/ViperChill), tweeted the following:
+
+<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Over the past few weeks I&#39;ve went through every site in the Inc. 5000. My mind has been blown multiple times. Don&#39;t click if you&#39;re easily distracted. Enjoy! <a href="https://t.co/mHVK8rvb9X">https://t.co/mHVK8rvb9X</a> <a href="https://t.co/BoEb3qQ7LZ">pic.twitter.com/BoEb3qQ7LZ</a></p>&mdash; Glen Allsopp (@ViperChill) <a href="https://twitter.com/ViperChill/status/1166324614877679617?ref_src=twsrc%5Etfw">August 27, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+The public spreadsheet contains four fields:
+
+* Inc.com URL
+* URLs (company website)
+* Revenue
+* 3-Year-Growth
+
+Although helpful I thought it would be interesting to explore the additional variables found on each company's INC profile page.
+
+Thus, I fired up R and scaped the list of URLs to answer the question: *which industries were surveyed the most and how much revenue did they generate in 2019?*
+
+## tl;dr
+
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
+##### HIDE #####
+library(tidyverse) 
+
+company_data <- read_csv("~/Development/inc5000_companies/companies_data_final.csv")
+
+company_parsed <- company_data %>% 
+  group_by(industry) %>% 
+  summarize(revenue_millions = sum(revenue_millions),
+            count = n()) %>% 
+  ungroup() %>% 
+  filter(!is.na(revenue_millions)) %>% 
+  mutate(pct_count = count / sum(count),
+         pct_revenue = revenue_millions / sum(revenue_millions),
+         revenue_billions = revenue_millions / 1000) 
+
+top_20 <- company_parsed %>% 
+  arrange(desc(pct_revenue)) %>% 
+  select(industry, revenue_billions, count, pct_revenue, pct_count) %>% 
+  top_n(20)
+##### HIDE #####
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(plotly)
+
+plot_ly(data = company_parsed, 
+        x = ~pct_count, 
+        y = ~pct_revenue, 
+        mode = "scatter",
+        type = "scatter",
+        size = 10,
+        color = ~industry,
+        colors = 'Set1', 
+        hoverinfo = "text",
+        text = ~paste("<b>Industry:</b> ",industry, 
+                     "<br><b>Total Companies:</b> ", count,
+                      "<br><b>Total Revenue ($Bn):</b> ", revenue_billions),
+        showlegend = FALSE) %>% 
+  layout(xaxis = list(title = "% of Total Companies",
+                      tickformat = "%"),
+         yaxis = list(title = "% of Total Revenue",
+                      tickformat = "%"))
+```
+
+
+## Load packages
+```{r eval=FALSE}
+library(tidyverse)
+library(rvest) # SIMPLE WEB SCRAPING
+```
+
+## Get URLs from CSV
+```{r eval=FALSE}
+inc5000 <- read_csv("inc5000_fastest_growing_companies.csv") %>% 
+  rename(urls = `Inc.com URL`,
+         website = URLs)
+```
+
+## Base R format
+We temporarily need to move out of the tidyverse and leverage base R for the next step.
+```{r eval=FALSE}
+company_urls <- inc5000$urls 
+```
+
+## Loop function
+A for loop is required to gather our data with the following order of operations:
+
+* Take URL from list
+* Crawl the page
+* Extract the page elements we want
+* Store into data frame
+* Rinse and repeat from step 1
+
+```{r eval=FALSE}
+# INITIALIZE DATA FRAME
+company_raw <- data.frame()
+
+for (page_url in company_urls){
+  print(page_url)
+  
+  # RETRIEVE INC5000 PROFILE PAGE
+  page <- read_html(page_url)
+  
+  # PARSE REVENUE
+  revenue_millions <- page %>% 
+    html_nodes(xpath = '//*/section[1]/div[3]/dl[1]/dd') %>% 
+    html_text() %>% 
+    str_replace(" Million", "") %>% # STRIP 'MILLIONS' FROM DATA VALUE
+    str_replace("\\$", "") # STRIP $ SIGN FROM DATA VALUE
+
+  # PARSE INDUSTRY
+  industry <- page %>% 
+    html_nodes(xpath = '//*/section[1]/div[3]/dl[3]/dd') %>% 
+    html_text()
+
+ # PARSE YEAR FOUNDED
+  year_founded <- page %>% 
+    html_nodes(xpath = '//*/section[1]/div[3]/dl[5]/dd') %>% 
+    html_text()
+  
+  # PARSE EMPLOYEE COUNT
+  employees <- page %>% 
+    html_nodes(xpath = '//*/section[1]/div[3]/dl[6]/dd') %>% 
+    html_text()
+
+  # TEMP TO STORE LOOP DATA
+  temp_df <- data.frame(page_url, revenue_millions, industry, year_founded, employees)
+  
+  # COMBINE TEMP WITH ALL DATA
+  company_raw <- rbind(company_raw, temp_df) 
+}
+```
+
+## Data cleaning
+Ideally, we want to separate our data collection from our data processing but I did not anticipate "billions" to show up in the *parse revenue* step of our loop.
+
+We will leave it as is though to illustrate the ease with which we can clean data in R, specifically the tidyverse.
+```{r eval=FALSE}
+# BRING BACK TO TIDYVERSE
+company_data <- company_raw %>% 
+  as_tibble() 
+
+# EXTRACT 'BILLION' VALUES AND CONVERT TO MILLIONS
+billions <- company_data %>% 
+  filter(grepl(" Billion", revenue_millions)) %>% 
+  mutate(revenue_millions = str_replace(revenue_millions, " Billion", ""),
+         revenue_millions = as.numeric(as.character(revenue_millions)),
+         revenue_millions = revenue_millions*1000)
+
+# CONVERT 'MILLION' VALUES TO NUMERICAL FORMAT
+company_data <- company_data %>% 
+  filter(!grepl(" Billion", revenue_millions)) %>% 
+  mutate(revenue_millions = as.numeric(as.character(revenue_millions)))
+
+# JOIN OUR SANITIZED DATASET
+company_data <- rbind(company_data, billions)
+```
+
+## Summarize data
+With our cleaned dataset we can finally answer the question: *how much revenue did each industry generate in 2019 and how many companies were surveyed?*
+
+```{r eval=FALSE}
+company_parsed <- company_data %>% 
+  group_by(industry) %>% 
+  summarize(revenue_millions = sum(revenue_millions),
+            count = n()) %>% 
+  ungroup() %>% 
+  filter(!is.na(revenue_millions)) %>% 
+  mutate(pct_count = count / sum(count),
+         pct_revenue = revenue_millions / sum(revenue_millions),
+         revenue_billions = revenue_millions / 1000) 
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(knitr)
+library(kableExtra)
+
+kable(top_20) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), 
+                font_size = 12, 
+                full_width = F,
+                fixed_thead = T)
+```
+
+Unsurprisingly, the *Health* industry comes out on top with a whopping $39Bn - nearly 1.7x more than the runner up *Consumer Products & Services*.
+
+In terms of companies surveyed, we have *Business Products & Services* at #1 with 490 companies and a very close second for the *Advertising & Marketing* industry at 489.
+
+### Keeping it real
+
+<blockquote class="twitter-tweet" data-conversation="none" data-lang="en"><p lang="en" dir="ltr">Rather than a signal of the US economy, it&#39;s more a sign of which types of companies care about this (paid) PR exposure. Inc 5000 is a badge to show-off at agencies and software companies. Less so in other markets. It&#39;s not surprising that Health is the real winner (in the US) 🙂</p>&mdash; Rob Kerry (@robkerry) <a href="https://twitter.com/robkerry/status/1171684881031671809?ref_src=twsrc%5Etfw">September 11, 2019</a></blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+## Visualize data
+The tabulated data above is a little difficult to interpret so we'll plot our results instead.
+
+```{r results='hide', message=FALSE, warning=FALSE, fig.width=10, fig.height=7}
+library(ggrepel)
+
+company_parsed %>% 
+  ggplot(aes(pct_count, pct_revenue, label = industry)) +
+  geom_point() +
+  geom_label_repel() +
+  geom_abline(color = 'salmon', lty = 'dashed') + 
+  scale_x_continuous(labels = scales::percent_format(round(1)),
+                     limits = c(0, .1)) +
+  scale_y_continuous(labels = scales::percent_format(round(1)),
+                     limits = c(0, .2)) +
+  labs(x = "% of Total Companies", y = "% of Total Revenue",
+       title = "Inc.5000 Fastest Growing Private Companies of 2019",
+       subtitle = "Compares the number of companies surveyed to total revenue generated per industry",
+       caption = "by:@eeysirhc\nsource:@viperchill") +
+  theme_minimal()
+```
+
+We are pretty much *done* but there may be instances where we want data values to be accessible for users. Luckily, the [{plotly}](https://plot.ly/r/) package is our answer.
+
+## Chart interactivity
+```{r message=FALSE, warning=FALSE}
+library(plotly)
+
+plot_ly(data = company_parsed, 
+        x = ~pct_count, 
+        y = ~pct_revenue, 
+        mode = "scatter",
+        type = "scatter",
+        size = 10,
+        color = ~industry,
+        colors = 'Set1', 
+        hoverinfo = "text",
+        text = ~paste("<b>Industry:</b> ",industry, 
+                     "<br><b>Total Companies:</b> ", count,
+                      "<br><b>Total Revenue ($Bn):</b> ", revenue_billions),
+        showlegend = FALSE) %>% 
+  layout(xaxis = list(title = "% of Total Companies",
+                      tickformat = "%"),
+         yaxis = list(title = "% of Total Revenue",
+                      tickformat = "%"))
+```
+
+
+## Wrapping up
+In my next article we'll take this a step further by building our own [Shiny app](https://shiny.rstudio.com). If you're feeling adventurous then you can use some [starter code here](https://www.christopheryee.org/blog/tidytuesday-housing-prices/) or checkout a barebones version for the [US housing price index](https://eeysirhc.shinyapps.io/20190205-housing_prices/).
+
+As always, if you enjoyed this or found it helpful please share over your favorite internet medium!
+

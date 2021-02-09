@@ -1,0 +1,78 @@
+---
+author: Christopher Yee
+date: 2011-09-01 07:10:25+00:00
+layout: post
+slug: new-blog-domain-new-goals
+title: New Blog (Domain), New Goals
+categories:
+- Miscellaneous
+---
+
+I've officially [transitioned my SEO blog](http://www.christopheryee.org/finally-switching-over-to-wordpress-org/) from the free wordpress.COM to the paid wordpress.ORG version. Everything went off without a hitch and I can't thank the WordPress team enough for making this process ridiculously easy. I have yet to work on the color scheme and layout although that can always come later.
+
+
+
+With that out of the way, I think it's time to set some goals for my new blog domain. I am the type of person who likes to reassess their goals every year, half-year and quarter. I admit it maybe a little extreme but it keeps me focused on my long term goals. For example, when I was first hired as an [SEO Analyst at CafePress](http://www.christopheryee.org/job-obtained-seo-analyst-intern/), I re-evaluated my job responsibilities every month. In fact, I still have them!
+
+
+<blockquote>CafePress is looking for an enthusiastic, career minded and motivated addition to its growing Search Engine Optimization (SEO) team. Although prior SEO experience is not required, you are expected to be extremely web savvy and a self-starter. Recent college graduates are highly encouraged to apply. Your primary focus will be researching competitor websites, emailing webmasters relevant to our core businesses and developing creative methods to drive visitors to our websites. We are looking for someone who is highly intelligent, ambitious, hard-working and looking to excel in the world of online marketing.
+
+> 
+> 
+	
+>   * Become company expert in SEO (search engine optimization)
+> 
+	
+>   * Build inbound links to various CafePress landing pages
+> 
+	
+>   * Research keywords for various verticals
+> 
+	
+>   * Continuous researching and testing of SEO methods to maximize ROI
+> 
+	
+>   * Learn and identify new link building strategies
+> 
+
+</blockquote>
+
+
+In case you were wondering, these were all completed within the first couple of months - and then some.
+
+Given my border line obsession to succeed, I find it only appropriate to list out my new and improved goals for this blog. These come in no particular order of importance so try not to read too much in the listing order.
+
+
+
+	
+  * Write AT LEAST one blog post a month
+
+	
+  * Blog only because I WANT to and not because I HAVE to
+
+	
+  * Each blog post MUST be unique where I offer my personal opinion
+
+	
+  * Each blog post MUST be valuable to the point it compels a reader to DO something
+
+	
+  * Share, comment and/or review some of my favorite blog posts in the industry
+
+	
+  * Share, comment and/or review my favorite [SEO tools](http://www.christopheryee.org/category/seo-tools/)
+
+	
+  * Create the ultimate SEO resource guide
+
+	
+  * Interact with the SEO community
+
+	
+  * Include AT LEAST one image per post so it doesn't bleed the reader's eyes
+
+	
+  * Write more articles focused on providing data and success metrics
+
+
+Now that I've shared a little [more about me](http://www.christopheryee.org/about/), what about yourself? What goals have you set for your blog and how often do you re-evaluate them? You can either leave a comment below or let me know over [Twitter](http://twitter.com/eeysirhc)!

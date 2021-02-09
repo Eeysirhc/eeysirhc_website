@@ -1,0 +1,49 @@
+---
+title: 10 Lessons Learned from 10 Years of Search Marketing
+author: Christopher Yee
+date: '2020-12-31'
+slug: 10-lessons-learned-from-10-years-of-search-marketing
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+July 2020 marked the 10 year anniversary for my blog.
+
+If you asked me a decade ago what I would be blogging about now my answer would be SEO. I never would have guessed it would shift to data science and data visualization topics.
+
+To end this chaotic year on a high note I want to share the top 10 things I learned over the course of my career in search engine marketing. I hope someone will find this useful regardless of industry and tenure in their field.
+
+1. **Listen**: the most undervalued and underrated skill in the job market
+
+2. **Bias for action**: this keeps momentum going to find out what works or doesn't work
+
+3. **[Deep work](https://www.christopheryee.org/blog/on-deep-work/)**: learn how to focus because you do not need any more productivity hacks/tools
+
+4. **Show don't tell**: always easier to convince others when the work is 70% completed
+
+5. **Stay humble**: never stop learning and always be the student
+
+6. **Start small**: stay scrappy to test things out even if it is not perfect
+
+7. **Know what you are optimizing for**: Time? Fame? Fortune?
+
+8. **Be a storyteller**: this inspires change in others
+
+9. **[A picture is worth a thousand words](https://www.christopheryee.org/categories/tidytuesday/)**
+
+10. **Life is a series of opportunity costs**: you got to where you are today by not choosing hundreds of other perfectly viable options
+
+I have been fortunate enough to meet a lot of amazing and helpful people along the way. My wish is that I can do the same for others.
+
+Cheers to 2021 and beyond!
+
+
+
+## You may also like
+
+* [21 Lessons Learned: One Year of SEO](https://www.christopheryee.org/blog/lessons-learned-one-year-search-engine-optimization/)
+
+
+

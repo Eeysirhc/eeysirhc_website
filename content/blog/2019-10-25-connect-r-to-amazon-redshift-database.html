@@ -1,0 +1,105 @@
+---
+title: Connect R to Amazon Redshift Database
+author: Christopher Yee
+date: '2019-10-24'
+slug: connect-r-to-amazon-redshift-database
+categories:
+  - Data Engineering
+---
+
+
+
+<p>This is a quick technical post for anyone who needs full <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">CRUD</a> capabilities to retrieve their data from a Redshift table, manipulate data in <a href="https://twitter.com/search?q=%23rstats">#rstats</a> and sending it all back up again.</p>
+<div id="dependencies" class="section level2">
+<h2>Dependencies</h2>
+<div id="load-libraries" class="section level3">
+<h3>Load libraries</h3>
+<pre class="r"><code>library(tidyverse)
+
+library(RPostgreSQL) # INTERACT WITH REDSHIFT DATABASE
+library(glue) # FORMAT AND INTERPOLATE STRINGS</code></pre>
+</div>
+<div id="amazon-s3" class="section level3">
+<h3>Amazon S3</h3>
+<p>For this data pipeline to work you’ll also need the <a href="https://aws.amazon.com/cli/">AWS command line interface</a> installed.</p>
+<pre class="r"><code># RUN THESE COMMANDS INSIDE TERMINAL
+brew install awscli
+aws configure
+
+# ANSWER QUESTIONS
+access / secret / zone</code></pre>
+</div>
+</div>
+<div id="read-data" class="section level2">
+<h2>Read data</h2>
+<div id="set-connection" class="section level3">
+<h3>Set connection</h3>
+<p>You’ll need to replace with your own database credentials below:</p>
+<pre class="r"><code>conn &lt;- dbConnect(dbDriver(&quot;PostgreSQL&quot;),
+                  dbname = &quot;your_dbname&quot;,
+                  host = &quot;your_host&quot;,
+                  port = 12345
+                  user = &quot;your_username&quot;,
+                  password = &quot;your_password&quot;)</code></pre>
+</div>
+<div id="pull-data" class="section level3">
+<h3>Pull data</h3>
+<p>This section is where you run your SQL queries and drop the results into the tidyverse <a href="https://tibble.tidyverse.org">tibble</a> format:</p>
+<pre class="r"><code>df &lt;- as_tibble(
+  dbGetQuery(
+    conn, 
+    
+    &quot;SELECT * FROM table WHERE id = 12345&quot;
+    
+    ))</code></pre>
+</div>
+</div>
+<div id="perform-magic" class="section level2">
+<h2>Perform magic</h2>
+<p>Do your data science stuff.</p>
+</div>
+<div id="optional-create-table" class="section level2">
+<h2>Optional: create table</h2>
+<p>For a brand new table you can run the following command and I like to take a sample for faster processing:</p>
+<pre class="r"><code>df_sample &lt;- df %&gt;% 
+  head()
+
+dbWriteTable(conn, name = c(&quot;schema&quot;, &quot;table_name&quot;),
+             value = df_sample,
+             row.names = FALSE,
+             append = TRUE)</code></pre>
+<p>You might get an error message but validate it by checking your database… the table should be there.</p>
+</div>
+<div id="upload-data" class="section level2">
+<h2>Upload data</h2>
+<p>It’s all downhill from here.</p>
+<div id="write-data-to-csv" class="section level3">
+<h3>Write data to CSV</h3>
+<pre class="r"><code>df %&gt;% 
+  write_csv(&quot;df_results.csv&quot;)</code></pre>
+</div>
+<div id="migrate-csv-file-to-s3-bucket" class="section level3">
+<h3>Migrate CSV file to S3 bucket</h3>
+<pre class="r"><code>system(&quot;aws s3 cp df_results.csv s3://file_path/df_results.csv&quot;)</code></pre>
+<p>Fun fact: the <em>system</em> command tells R to access your terminal functions.</p>
+</div>
+<div id="copy-from-s3-to-redshift-database" class="section level3">
+<h3>Copy from S3 to Redshift database</h3>
+<pre class="r"><code>load_s3_redshift &lt;- glue_sql(&quot;COPY schema.table_name
+                             FROM &#39;s3://file_path/df_results.csv&#39;
+                             access_key_id &#39;ABCDEFGH&#39;
+                             secret_access_key &#39;12345&#39; csv IGNOREHEADER 1&quot;)
+
+dbSendStatement(conn, load_s3_redsfhit)</code></pre>
+</div>
+</div>
+<div id="optional-delete-data" class="section level2">
+<h2>Optional: delete data</h2>
+<pre class="r"><code>dbSendStatement(conn, 
+                &quot;DELETE FROM schema.table_name WHERE id = 12345&quot;)</code></pre>
+</div>
+<div id="cut-connection" class="section level2">
+<h2>Cut connection</h2>
+<p>Don’t forget!</p>
+<pre class="r"><code>dbDisconnect(conn)</code></pre>
+</div>

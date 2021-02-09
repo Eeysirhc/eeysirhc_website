@@ -1,0 +1,89 @@
+---
+title: On Deep Work
+author: Christopher Yee
+date: '2020-08-22'
+slug: on-deep-work
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+Ask my wife anything about me and she'll be the first to testify that I have more books than clothing (lol).
+
+One book that dramatically changed my life and highly recommend reading is ["Deep Work" by Cal Newport](https://www.amazon.com/Deep-Work-Focused-Success-Distracted/dp/1455586692).
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">Stuck at home, bored of Netflix/Hulu/Disney+ and need a reprieve from the onslaught of <a href="https://twitter.com/hashtag/coronavirus?src=hash&amp;ref_src=twsrc%5Etfw">#coronavirus</a> news?<br><br>Here are my top 20 favorite non-business books (out of 250+) I recommend to get your mind off things <a href="https://t.co/cC93iEaOFQ">pic.twitter.com/cC93iEaOFQ</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1239266561979846656?ref_src=twsrc%5Etfw">March 15, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+<br>
+
+Newport's thesis can be summed up in a couple sentences:
+
+> The ability to perform deep work is becoming increasingly _rare_ at exactly the same time it is becoming increasingly _valuable_ in our economy. As a consequence, the few who cultivate this skill, and then make it the core of their working life, will thrive.
+
+He builds the case on why developing this deep work philosophy is valuable, rare, and meaningful in the "Intelligent Machine Age":
+
+* Too many distractions
+* More connected than ever before
+* Competing globally
+* There are only a few winners
+
+To achieve success in the modern knowledge economy, the individual needs to master difficult subjects in a short amount of time while producing high quality work. Newport formulates this into an equation:
+
+> __High-Quality Work Produced = (Time Spent) * (Intensity of Focus)__
+
+Despite its simplicity, I think this formula operates similar to a loss function where over/under investment in either factors are penalized. Here is what that graph might look like:
+
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(tidyverse)
+
+productivity <- function(x) -(x^2) + 1
+
+ggplot(data = data.frame(x = 0), mapping = aes(x = x)) +
+  stat_function(fun = productivity) +
+  xlim(-10,10) + ylim(-100,3) +
+  labs(x = "Time Spent * Intensity of Focus", y = "High-Quality Work Produced",
+       title = "High-Quality Work: function of time spent & intensity of focus",
+       subtitle = "\"Deep Work\" by Cal Newport", caption = "by: @eeysirhc") +
+  geom_point(aes(x = -9, y = -80), size = 4, color = 'salmon') + 
+  annotate("text", -7.5, -80, label = 'Too Little', color = 'salmon') +
+  geom_point(aes(x = 8, y = -63), size = 4, color = 'steelblue') + 
+  annotate("text", 9.5, -63, label = 'Too Much', color = 'steelblue') +
+  geom_point(aes(x = 0, y = 1), size = 4, color = 'seagreen') + 
+  annotate("text", 1.5, 2.5, label = 'Just Right', color = 'seagreen') +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
+```
+
+This visualization makes a lot of sense to me. 
+
+Not enough time and focus? It means the final output might oversimplify a very complex topic. Spent too much time and effort? Work quality decays because we get stuck in analysis paralysis mode.
+
+Thus, to deliver exceptional work the goal is to significantly increase concentration levels while being cognizant on how much time we sink into the project.
+
+## Make it happen
+
+How can someone intensify their focus in the age of unceasing distractions?
+
+Below are a few starting points which have worked for me but I recommend a gradual shift rather than going cold turkey over night:
+
+* Schedule time blocks on calendar dedicated to deep work 
+* Actually turn off the computer at the end of the work day
+* Put cell phone on vibrate and leave it in a different room
+* Log off slack and other social media apps
+* Close email and turn off any desktop notifications during deep work
+
+In fact, I am such a fan of this that __I will purchase a copy of the book for you__ if you are unable to do so - no questions asked.
+
+Please DM me on [Twitter](https://twitter.com/Eeysirhc) or [LinkedIn](https://www.linkedin.com/in/seochrisyee/) but this offer stands until stated otherwise and is eligible only for US mailing addresses.
+
+## References
+* [Imperfect action is better than perfect inaction](https://qualityandinnovation.com/2019/03/02/imperfect-action-is-better-than-perfect-inaction-what-harry-truman-can-teach-us-about-loss-functions-with-an-intro-to-ggplot/)
+
+
+
+
+

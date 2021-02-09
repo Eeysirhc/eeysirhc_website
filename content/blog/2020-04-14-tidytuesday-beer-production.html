@@ -1,0 +1,102 @@
+---
+title: 'TidyTuesday: Beer Production'
+author: Christopher Yee
+date: '2020-04-14'
+slug: tidytuesday-beer-production
+categories:
+  - TidyTuesday
+---
+
+
+
+<p>Data from <a href="https://twitter.com/search?q=%23tidytuesday">#tidytuesday</a> week of 2020-03-31 (<a href="https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-03-31/readme.md">source</a>)</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(gganimate)
+library(gifski)</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<pre class="r"><code>beer_states_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-03-31/beer_states.csv&quot;)</code></pre>
+</div>
+<div id="clean-data" class="section level2">
+<h2>Clean data</h2>
+<pre class="r"><code>beer_total &lt;- beer_states_raw %&gt;% 
+  
+  # FILL NULL VALUES WITH 0
+  replace(., is.na(.), 0) %&gt;% 
+  
+  # REMOVE LINE ITEM FOR &#39;TOTAL&#39;
+  filter(state != &#39;total&#39;) %&gt;% 
+  
+  # COMPUTE TOTAL BARRELS PER YEAR BY STATE  
+  group_by(year, state) %&gt;% 
+  summarize(total_barrels = sum(barrels)) %&gt;% 
+  
+  ungroup() </code></pre>
+</div>
+<div id="create-rankings" class="section level2">
+<h2>Create rankings</h2>
+<pre class="r"><code>beer_final &lt;- beer_total %&gt;% 
+  
+  group_by(year) %&gt;% 
+  mutate(
+    
+    # CALCULATE RANKINGS BY TOTAL BARRELS PRODUCED EACH YEAR
+    rank = min_rank(-total_barrels) * 1.0,
+    
+    # STATE TOTAL DIVIDE BY STATE RANKED #1 PER YEAR
+    produced = total_barrels / total_barrels[rank == 1],
+    
+    # CLEANED TEXT LABEL
+    produced_label = paste0(&quot; &quot;, round(total_barrels / 1e6, 2), &quot; M&quot;)) %&gt;% 
+  
+  group_by(state) %&gt;% 
+  
+  # SELECT TOP 20
+  filter(rank &lt;= 20) %&gt;% 
+  
+  ungroup()</code></pre>
+</div>
+<div id="animate-bar-chart" class="section level2">
+<h2>Animate bar chart</h2>
+<pre class="r"><code>p &lt;- beer_final %&gt;% 
+  ggplot(aes(rank, produced, fill = state)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(rank, y = 0, label = state, hjust = 1.5)) +
+  geom_text(aes(rank, y = produced, label = produced_label, hjust = 0)) +
+  coord_flip() +
+  scale_x_reverse() +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  transition_time(year) +
+  labs(title = &quot;US Beer Production by State&quot;,
+       subtitle = &quot;Barrels produced each year: {round(frame_time)}&quot;,
+       caption = &quot;by: @eeysirhc\nsource: Alcohol and Tobacco Tax and Trade Bureau&quot;,
+       x = NULL, y = NULL) 
+
+animate(p, nframes = 300, fps = 12,
+        width = 1000, height = 800, renderer = gifski_renderer())</code></pre>
+<p><img src="/blog/2020-04-14-tidytuesday-beer-production_files/figure-html/unnamed-chunk-5-1.gif" /><!-- --></p>
+</div>
+<div id="save-.gif" class="section level2">
+<h2>Save .gif</h2>
+<p>Last but not least, don’t forget to save the file to your working directory:</p>
+<pre class="r"><code>anim_save(&quot;toast.gif&quot;)</code></pre>
+</div>
+<div id="acknowledgements" class="section level2">
+<h2>Acknowledgements</h2>
+<ul>
+<li><a href="https://twitter.com/thomasp85">Thomas Lin Pedersen</a> for the <a href="https://github.com/thomasp85/gganimate">{gganimate} package</a></li>
+<li>The contributors to this <a href="https://stackoverflow.com/questions/53162821/animated-sorted-bar-chart-with-bars-overtaking-each-other/53163549">StackOverflow answer</a></li>
+</ul>
+</div>
+<div id="related" class="section level2">
+<h2>Related</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/tidytuesday-milk-production/">TidyTuesday: Milk Production</a></li>
+<li><a href="https://www.christopheryee.org/blog/tardythursday-college-tuition-diversity-pay/">TardyThursday: College Tuition, Diversity &amp; Pay</a></li>
+</ul>
+</div>

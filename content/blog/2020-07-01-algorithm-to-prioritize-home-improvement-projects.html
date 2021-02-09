@@ -1,0 +1,440 @@
+---
+title: Algorithm to prioritize home improvement projects
+author: Christopher Yee
+date: '2020-07-02'
+slug: algorithm-to-prioritize-home-improvement-projects
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<p>I moved to Los Angeles with my wife in October 2019 where we had a list of home improvement projects we wanted to complete or things to purchase.</p>
+<p>The problem we faced was disagreement on where to start since we had to juggle costs and compromise on what was most important at the time.</p>
+<p>For example, if we focused too much on lower ticket purchases we would delay projects that had potential to improve our home value.</p>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;">
+Project
+</th>
+<th style="text-align:right;font-weight: bold;">
+Price
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+New roof
+</td>
+<td style="text-align:right;">
+10000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landscape front yard
+</td>
+<td style="text-align:right;">
+10000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Remove kitchen wall
+</td>
+<td style="text-align:right;">
+10000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Renovate brick walls
+</td>
+<td style="text-align:right;">
+5000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TV
+</td>
+<td style="text-align:right;">
+3000
+</td>
+</tr>
+</tbody>
+</table>
+<p>Conversely, if we emphasized projects which increased home value then we would miss out on buying basic quality of life improvements.</p>
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;">
+Project
+</th>
+<th style="text-align:right;font-weight: bold;">
+Price
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Security stick for living room door
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Flood lights around house
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Restroom mirror
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fireplace cover
+</td>
+<td style="text-align:right;">
+100
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Physical security system (locks, gates, etc.)
+</td>
+<td style="text-align:right;">
+200
+</td>
+</tr>
+</tbody>
+</table>
+<p>Our goal was to get through all of these as fast as possible without sacrificing importance but also being mindful of the costs involved.</p>
+<p>What came out of our discussions was a simple algorithm in an Excel spreadsheet which calculated priorities and incorporated both factors:</p>
+<blockquote>
+<p><strong>Priority = Importance^2 / log10(Price)</strong></p>
+</blockquote>
+<ul>
+<li><em>Importance</em>: with 1 being the lowest, we place this variable on an exponential curve so each incremental level indicates greater prominence</li>
+<li><em>Price</em>: to make various price points easier to work with ($1 vs $1,000) we normalize them on a log10 scale</li>
+</ul>
+<p>In my opinion, this is an elegant solution to our use case because 1) we keep the cost variable constant for each item and 2) it centers our debates around importance and how to rank (or re-rank) things in our list.</p>
+<p>But, does it work?</p>
+Let’s look at a sample where we’ve filled out Price and Importance:
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;">
+Project
+</th>
+<th style="text-align:right;font-weight: bold;">
+Price
+</th>
+<th style="text-align:right;font-weight: bold;">
+Importance
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+New roof
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landscape front yard
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Remove kitchen wall
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Renovate brick walls
+</td>
+<td style="text-align:right;">
+5000
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TV
+</td>
+<td style="text-align:right;">
+3000
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fridge
+</td>
+<td style="text-align:right;">
+2898
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Massage Chair
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Skylight in guest bathroom
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fix AC system
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Couch
+</td>
+<td style="text-align:right;">
+800
+</td>
+<td style="text-align:right;">
+9
+</td>
+</tr>
+</tbody>
+</table>
+Now let’s compute the Priority score for each:
+<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;font-weight: bold;">
+Project
+</th>
+<th style="text-align:right;font-weight: bold;">
+Price
+</th>
+<th style="text-align:right;font-weight: bold;">
+Importance
+</th>
+<th style="text-align:right;font-weight: bold;">
+Priority
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Couch
+</td>
+<td style="text-align:right;">
+800
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+27.90
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+New roof
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+20.25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fridge
+</td>
+<td style="text-align:right;">
+2898
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+18.49
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TV
+</td>
+<td style="text-align:right;">
+3000
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+18.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Skylight in guest bathroom
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+16.33
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Landscape front yard
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+12.25
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Remove kitchen wall
+</td>
+<td style="text-align:right;">
+10000
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+9.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Fix AC system
+</td>
+<td style="text-align:right;">
+1000
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Massage Chair
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2.73
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Renovate brick walls
+</td>
+<td style="text-align:right;">
+5000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.27
+</td>
+</tr>
+</tbody>
+</table>
+<p>Notable mentions…</p>
+<ul>
+<li>High cost and low importance: our “renovate brick walls” with $5k in price was dropped to the bottom of our list with a Priority score of 0.27</li>
+<li>Low cost and high importance: we <strong>really</strong> needed a couch when we moved in so it’s good to see that made it as our top priority</li>
+<li>Tie breaker: the projects with the same $10k in price have been prioritized appropriately</li>
+</ul>
+<p>If you found this remotely useful/interesting then please don’t hesitate to share with others!</p>
+<div id="moment-of-zen" class="section level2">
+<h2>Moment of zen</h2>
+<p>Contour plot to visualize the outcome of our <em>function(price, importance)</em>:</p>
+<p>
+<p><img src="/blog/2020-07-01-algorithm-to-prioritize-home-improvement-projects_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+</div>

@@ -1,0 +1,51 @@
+---
+author: Christopher Yee
+date: 2012-05-14 05:16:02+00:00
+layout: post
+slug: bulk-url-checker-curl
+title: Bulk URL Checker with cURL
+categories:
+- SEO Tools
+---
+
+I discovered the [Search Commander's URL tool](http://www.searchcommander.com/seo-tools/bulk-url-checker/) awhile back when I needed a scalable solution to check the HTTP status for a large list of URLs.  It worked as intended but when I tried it with 1k+ URLs I pretty much broke the checker and took down the page along with it.  Thus, in my pursuit to [learn programming](http://www.christopheryee.org/learning-program-code-seo/) I said to myself, "how come I can't build my own?"
+
+If you're a Mac user you can use this right away since [cURL](http://curl.haxx.se/) is already built into your Terminal.  For Windows users you'll first need to [download Cygwin](http://cygwin.com/install.html) with the cURL package.
+
+
+
+Without further delay, here is the string for the command line with _INPUT_LIST.TXT_ being your list of target URLs to check:
+
+    
+    xargs curl -sw "%{url_effective}\t %{http_code}\t %{redirect_url}\\n" < INPUT_LIST.TXT
+
+
+Once you hit enter you should see something like this (but with your own data):
+
+![](/images/curl-url-check.png)
+
+The first column is your target URL, the second is the HTTP status and the third is the destination of the link if there was a redirect.  Want to save your results?  Just add "**> OUTPUT_LIST.TXT**" to the end of the string.
+
+The only caveat is if the page returns a HTTP 200 OK response, it'll print the URLs source code on your screen.  The solution around this is entering the following code after every website in your _INPUT_LIST.TXT_ file:
+
+
+<blockquote>http://www.website.com -o /dev/null</blockquote>
+
+
+This should be pretty easy to do with a simple _=CONCATENATE_ function in Excel.  Although if you know of a way to programmatically insert this please [let me know](http://www.christopheryee.org/contact/).
+
+Now go ahead and give it a whirl - leave any questions, suggestions or concerns in the comments section below!
+
+
+<blockquote>***** READER COMMENT ***
+**_Just in response to what Alistair said, a "for loop" is not required you can just do this:_
+
+_xargs curl -so /dev/null -w “%{url_effective}\t %{http_code}\t %{redirect_url}\\n”_
+
+_xargs is a lot faster than line-by-line processing in a bash for loop, and it also gives you parallel execution for free with -P, which can be very handy when bulk checking a really big list of URLs. e.g. To fire 100 requests in parallel:_
+
+_xargs -P 100 curl -so /dev/null -w “%{url_effective}\t %{http_code}\t %{redirect_url}\\n”_
+
+_Also, the tip to use -I to get rid of the response body. This changes the request method from GET to HEAD which indeed means there will be no response body, but it is worth noting that depending on the server, the headers may actually be different._
+
+_If you are testing a huge number of large files and don't want to download the entire body, a ranged GET request is another option. e.g. To get only the first 64 bytes add -r 0-64 to the curl command line. The response status would then be 206 (instead of 200) on success.** **_</blockquote>

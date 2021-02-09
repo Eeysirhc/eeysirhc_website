@@ -1,0 +1,209 @@
+---
+title: On Business Value vs Technical Knowledge
+author: Christopher Yee
+date: '2020-06-15'
+slug: on-business-value-vs-technical-knowledge
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+The purpose of this article is to elaborate and visualize (surprise!) my comment I left over on Reddit: [Professional data scientists: did you overcome the feeling of never knowing enough? If so, how?](https://www.reddit.com/r/datascience/comments/gwt750/professional_data_scientists_did_you_overcome_the/)
+
+I think this concept can be applied to any field - not just data science.
+
+> My personal advice that has worked for me to quell any “insecurities” is frame your mindset in terms of business value vs technical knowledge.
+> 
+> Providing business value and getting things into production or persuading others to act on your analyses should be your top priority. This should always be your North Star. How to get the ship moving in at least the right direction.
+> 
+> Technical knowledge comes from a mix of experience, experimentation, personal development and constant iteration. Find a problem, suggest a solution, deploy, look at the data then iterate or pivot. Be comfortable with the fact that you will never know everything. Most companies won’t need to be on the bleeding edge of data science.
+
+__Business value__ sounds nebulous but I see it as all activities that directly influence the trajectory of an organization. This could either be a new feature release, getting multiple stakeholder buy-in to align on the product roadmap for the next few years, or even working on changing the internal culture.
+
+__Technical knowledge__, on the other hand, are the tools of the trade for a specific domain, company or position. For example, a plumber is expected to know how to use a cup plunger, flange plunger or drain snake. A software engineer would need to know how to write to different coding languages and technologies that exist out there.
+
+We can plot the relationship between these two variables with _business value_ on the x-axis and _technical knowledge_ sitting on the y-axis.
+
+```{r error=FALSE, message=FALSE, echo=FALSE}
+library(ggplot2)
+
+# STANDARD PLOT VARIABLE
+s_plot <- ggplot() +
+  scale_x_continuous(limits = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0.00, color = 'grey75') +
+  geom_vline(xintercept = 0.00, color = 'grey75') +
+  labs(x = "Business Value", y = "Technical Knowledge") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+
+s_plot
+```
+
+Indeed, someone further along the right side of the _business value_ continuum contributes relatively more than someone to the left. On the _technical knowledge_ axis, ascending vertically indicates an increasing competency in the field.
+
+To illustrate this we can use an outlandish example of a newborn baby - zero business value and technical knowledge so they would be placed on the bottom left side.
+
+<br>
+```{r error=FALSE, message=FALSE, echo=FALSE}
+s_plot +
+  annotate("text", 0.10, 0.02, label = 'Newborn Baby', color = '#009E73') 
+```
+
+Taking our plumber example from earlier, an apprentice might offer minimal value but they are still learning the ropes so he or she would place slightly higher than our newborn baby.
+
+<br>
+```{r error=FALSE, message=FALSE, echo=FALSE}
+s_plot +
+  annotate("text", 0.10, 0.02, label = 'Newborn Baby', color = '#009E73') +
+  annotate("text", 0.30, 0.51, label = 'Apprentice Plumber', color = '#D55E00') 
+```
+
+For the master plumber, with years of experience they'd be able to diagnose the problem and determine which tool would be the best for unclogging a specific toilet issue: plunger or snake?
+
+<br>
+```{r error=FALSE, message=FALSE, echo=FALSE}
+s_plot +
+  annotate("text", 0.10, 0.02, label = 'Newborn Baby', color = '#009E73') +
+  annotate("text", 0.30, 0.51, label = 'Apprentice Plumber', color = '#D55E00') +
+  annotate("text", 0.90, 0.90, label = 'Master Plumber', color = '#56B4E9') 
+```
+
+To reinforce this concept we can split up the grid and identify four distinct quadrants:
+
+<br>
+```{r error=FALSE, message=FALSE, echo=FALSE}
+s_plot +
+  
+  annotate("text", x = 0.25, y = 0.75, label = "Technical Proficiency") +  
+  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0.5, ymax = 1,
+           alpha = 0.2, fill = 'yellow') +
+  
+  annotate("text", x = 0.75, y = 0.75, label = "Subject Matter Expert") +
+  annotate("rect", xmin = 0.5, xmax = 1, ymin = 0.5, ymax = 1,
+           alpha = 0.2, fill = 'green') +
+  
+  annotate("text", x = 0.75, y = 0.25, label = "Business Proficiency") +
+  annotate("rect", xmin = 0.5, xmax = 1, ymin = 0, ymax = 0.5,
+           alpha = 0.2, fill = 'steelblue') +  
+  
+  annotate("text", x = 0.25, y = 0.25, label = "Learning Phase") +
+  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 0.5,
+           alpha = 0.2, fill = 'salmon') 
+```
+
+So, which one is more important? That depends on which side of the equation you sit on.
+
+## Organizations
+
+It comes down to the immediate needs of the hiring manager.
+
+For instance, a company looking for an enterprise sales representative might need someone to close leads as fast as possible so they would put more weight on candidates with higher _business proficiency_.
+
+Conversely, a web analytics firm is likely to focus on the _technical proficiencies_ of a potential hire if they need to automate their internal processes.
+
+In both cases they will aim for _subject matter experts_ but when it comes to a "one or the other" hiring decision they will fallback to what they need the most.
+
+## Individual Employees
+
+The truth of the matter is __most__ companies hire people to add value to the business rather than having them work on projects purely for academic pursuits.
+
+Thus, it doesn't matter where someone initially sits on this matrix but after securing the job the goal is to progress further to the right hand side of the _business value_ continuum.
+
+> Providing business value and getting things into production or persuading others to act on your analyses should be your top priority. This should always be your North Star. How to get the ship moving in at least the right direction.
+
+With time and experience most folks will see themselves gradually shift upward into the _subject matter experts_ territory - this is where you eventually want to be.
+
+### Imposter Syndrome
+
+I want to briefly touch on this topic since a fellow Reddit user left this response:
+
+> Among many other compelling reasons, the framework in which you bifurcate biz value vs tech knowledge was oddly comforting.
+
+It is understandable why we have this growing phenomena because it seems like every other day there is a newer, better or faster way of doing something.
+
+Unfortunately, this means we ( _You_ ) put focus and compare our relative standing versus others ( _P#_ ) only on the technical expertise spectrum:
+
+```{r error=FALSE, message=FALSE, echo=FALSE}
+ggplot() +
+  scale_x_continuous(limits = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0.50, color = 'grey75') +
+  
+  annotate("text", x = 0.51, y = 0.55, label = "You") +  
+  geom_point(aes(x = 0.51, y = 0.5), size = 3) +
+  
+  annotate("text", x = 0.85, y = 0.55, label = "P1") +  
+  geom_point(aes(x = 0.85, y = 0.5), size = 3) +
+  
+  annotate("text", x = 0.90, y = 0.55, label = "P2") +  
+  geom_point(aes(x = 0.90, y = 0.5), size = 3) +
+  
+  annotate("text", x = 0.20, y = 0.55, label = "P3") +  
+  geom_point(aes(x = 0.20, y = 0.5), size = 3) +
+  
+  labs(x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+```
+
+Looking at this from a single dimension can be detrimental because it feels as though you're lagging behind a rapidly changing landscape. 
+
+This is where the framework comes in: definitely learn about the new stuff so you don't get complacent but have an unrelenting drive to produce business value.
+
+For all we know the placement of social influencers might even look something like this:
+
+```{r error=FALSE, message=FALSE, echo=FALSE}
+ggplot() +
+  scale_x_continuous(limits = c(0, 1)) +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0.00, color = 'grey75') +
+  geom_vline(xintercept = 0.00, color = 'grey75') +
+  
+  annotate("text", x = 0.95, y = 0.56, label = "You") +  
+  geom_point(aes(x = 0.95, y = 0.51), size = 3) +
+  
+  annotate("text", x = 0.05, y = 0.90, label = "P1") + 
+  geom_point(aes(x = 0.05, y = 0.85), size = 3) +
+  
+  annotate("text", x = 0.35, y = 0.95, label = "P2") + 
+  geom_point(aes(x = 0.35, y = 0.90), size = 3) +
+  
+  annotate("text", x = 0.51, y = 0.25, label = "P3") + 
+  geom_point(aes(x = 0.51, y = 0.20), size = 3) +
+  
+  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0.5, ymax = 1,
+           alpha = 0.2, fill = 'yellow') +
+  annotate("rect", xmin = 0.5, xmax = 1, ymin = 0.5, ymax = 1,
+           alpha = 0.2, fill = 'green') +
+  annotate("rect", xmin = 0.5, xmax = 1, ymin = 0, ymax = 0.5,
+           alpha = 0.2, fill = 'steelblue') +  
+  annotate("rect", xmin = 0, xmax = 0.5, ymin = 0, ymax = 0.5,
+           alpha = 0.2, fill = 'salmon') +
+  
+  labs(x = "Business Value", y = "Technical Knowledge") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+```
+
+If that doesn't work then remind yourself where the money comes from to pay your bills. ;)
+
+
+
+

@@ -1,0 +1,66 @@
+---
+title: Script to track global Coronavirus pandemic cases
+author: Christopher Yee
+date: '2020-03-16'
+slug: script-to-track-global-coronavirus-pandemic-cases
+categories:
+  - Miscellaneous
+---
+
+The coronavirus (a.k.a. COVID-19) is taking the world by storm with the World Health Organization officially [characterizing the situation as a pandemic](https://www.who.int/dg/speeches/detail/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020).
+
+I'm not an infectious disease expert but I couldn't resist and write a quick [#rstats](https://twitter.com/search?q=%23rstats) script to visualize the total number of cases by country. 
+
+Feel free to use and modify for your own needs:
+
+```{r eval=FALSE}
+# LOAD PACKAGES
+library(tidyverse)
+library(scales)
+library(gghighlight)
+
+# DOWNLOAD DATA
+df <- read_csv("https://covid.ourworldindata.org/data/ecdc/full_data.csv")
+
+# PARSE DATA
+df_parsed <- df %>% 
+  filter(total_cases >= 100) %>% # MINIMUM 100 CASES
+  group_by(location) %>% 
+  mutate(n = n(),
+         day_index = row_number()) %>%  
+  ungroup() %>% 
+  filter(n >= 25, # MINIMUM 25 DAYS
+         !location %in% c('World', 'International')) # EXCLUDE
+
+# GRAPH
+df_parsed %>% 
+  ggplot(aes(day_index, total_cases, color = location, fill = location)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  labs(title = "COVID-19: cumulative daily new cases by country (log scale)",
+     x = "Days since 100th reported case",
+     y = NULL, fill = NULL, color = NULL, 
+     caption = "by: @eeysirhc\nSource: Our World in Data") +
+  facet_wrap(~location, ncol = 4) +
+  expand_limits(x = 70) +
+  theme_minimal() +
+  theme(legend.position = 'none')
+```
+
+![](/images/coronavirus-cases.png)
+
+## Moment of zen
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">same data, different view<br><br>anyways, please stay healthy and wash them hands! <a href="https://t.co/Wx7Wa0gEkC">pic.twitter.com/Wx7Wa0gEkC</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1237469322601095168?ref_src=twsrc%5Etfw">March 10, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+
+## Related
+
+* [Script to track COVID-19 cases in the US](https://www.christopheryee.org/blog/script-to-track-covid-19-cases-in-the-us/)
+
+
+
+

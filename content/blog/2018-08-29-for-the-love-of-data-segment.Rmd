@@ -1,0 +1,54 @@
+---
+author: Christopher Yee
+date: 2018-08-29 05:29:44+00:00
+layout: post
+slug: for-the-love-of-data-segment
+title: For the Love of Data, Segment!
+categories:
+- Data Visualization
+---
+
+Aggregated data is misleading.
+
+Let's read that again: **aggregated data is misleading**.
+
+Why? Because the homogenized set buries the meaningful insights away.
+
+For example, I recently came across a competitive SEO analysis that examined the relationship between the number of ranking organic keywords to the estimated traffic from organic search for a handful of websites.  In my opinion, this is a great start to understand the opportunity size of a market and how a given business stacks up against its competitors.
+
+In that deliverable the visualized data turned out to look something like the one below (not the same websites but using for illustrative purposes):
+
+![](/images/domain.png)
+
+The report would go on to declare Coursera (again not the actual industry) the primary SEO competitor and spent the remainder of the report breaking down what they are doing well, not so well, and spit out a list of "action items."
+
+
+
+Not only is this misleading to the consumer but it's just lazy analysis.  It's your job as a professional to understand the business, peel back those data layers and provide the expert opinion on what the data is communicating.
+
+For this particular example, I broke the data set down by page type: Home, Catalog (list of courses) and Courses (individual course).  We now have a more comprehensive view and appreciation for how each website is doing and where they need to focus their efforts:
+
+![](/images/page.png)
+
+
+
+ 	
+  * **Coursera vs Codeacademy: **in the original chart, there was a considerable gap between Coursera and Codeacademy.  With the additional layer, it reveals they are actually at each other's neck when it comes to the homepage.  And since it's the homepage, we will assume it's mostly branded search traffic and can even be leveraged as a proxy metric for competitive brand health
+
+ 	
+  * **Udacity: **sufficient brand equity (Home) and holding up relatively well on their Courses page type but not sure what's going on with their Catalog pages.  This is where someone can dig deeper and would be unbeknownst to us if we relied on the original chart
+
+ 	
+  * **Skillshare: **doing a decent job expanding its overall footprint (Catalog) and there is an opportunity here to surpass its competitors if they can move up the search results for this page type. Unlike the homepage (branded) or Courses page, a chasm doesn't exist between itself and its competitors
+
+
+Of course, this is just the tip of the iceberg and I'm confident we'll get a clearer picture for each business if we include a topical layer to it all.
+
+**This is why segmenting your data is so important.**
+
+When analyzing data, you need to drill down by device, location, new vs returning, product category, etc.  It doesn't matter which - just pick one and follow the proverbial yellow brick road.
+
+And to bring it all home: aggregated data is misleading, so segment it!
+
+_Note: this is not an exhaustive analysis so I'm aware of all the holes in the data
+Note #2: data from [ahrefs.com](https://ahrefs.com/)_

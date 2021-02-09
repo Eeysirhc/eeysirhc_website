@@ -1,0 +1,74 @@
+---
+title: "TidyTuesday: NYC Restaurant Inspections"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+author: Christopher Yee
+date: 2018-12-11 09:03:14+00:00
+layout: post
+slug: tidytuesday-nyc-restaurant-inspections
+categories:
+- TidyTuesday
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 12/11/2018 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-12-11">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+library(lubridate)
+library(ebbr)
+
+nyc_restaurants_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-12-11/nyc_restaurants.csv&quot;)
+
+nyc_restaurants &lt;- nyc_restaurants_raw %&gt;%
+  filter(inspection_date != &#39;01/01/1900&#39;) </code></pre>
+<div id="what-is-the-rate-of-a-inspection-grades-by-cuisine-type" class="section level3">
+<h3>What is the rate of “A” inspection grades by cuisine type?</h3>
+<p>First step is to compute the relevant statistics</p>
+<pre class="r"><code>cuisine_grades &lt;- nyc_restaurants %&gt;%
+  select(cuisine_description, grade) %&gt;%
+  na.omit() %&gt;%
+  group_by(cuisine_description) %&gt;%
+  count(grade) %&gt;%
+  mutate(total = sum(n),
+         pct_total = n/total) %&gt;%
+  ungroup()</code></pre>
+<p>Next we apply empirical Bayesian estimation and filter the top 20 results</p>
+<pre class="r"><code>ebb_cuisine_grades &lt;- cuisine_grades %&gt;%
+  add_ebb_estimate(n, total) %&gt;%
+  filter(grade == &quot;A&quot;) %&gt;%
+  arrange(desc(.fitted)) %&gt;%
+  filter(n &gt;= 100) %&gt;%
+  head(20) </code></pre>
+<pre><code>## Warning: `data_frame()` is deprecated as of tibble 1.1.0.
+## Please use `tibble()` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.</code></pre>
+<p>Plot the graph to compare raw vs Bayesian shrinkage</p>
+<pre class="r"><code>ebb_cuisine_grades %&gt;%
+  select(cuisine_description, 
+         &quot;Empirical Bayes Rate&quot;=.fitted, 
+         &quot;Measured Rate&quot;=.raw, .low, .high) %&gt;%
+  gather(key, value, -cuisine_description, -.low, -.high) %&gt;%
+  ggplot() + 
+  geom_point(aes(reorder(cuisine_description, value), value, color = key), 
+             size = 3) +
+  geom_errorbar(aes(ymin = .low, ymax = .high, x=cuisine_description), 
+                color = &quot;gray50&quot;) +
+  scale_y_continuous(labels = percent_format(round(1))) +
+  coord_flip() +
+  theme_minimal() +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Rate of NYC restaurant inspections with a final grade of \&#39;A\&#39;&quot;,
+       subtitle = &quot;95% credible intervals with a minimum of 100 inspections&quot;,
+       caption = &quot;Source: NYC Open Data&quot;) +
+  scale_color_brewer(palette = &#39;Set1&#39;, 
+                     direction = -1) +
+  theme(legend.title=element_blank())</code></pre>
+<p><img src="/blog/2018-12-11-nyc_restaurants_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

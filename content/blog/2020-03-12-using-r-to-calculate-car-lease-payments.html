@@ -1,0 +1,256 @@
+---
+title: Using R to calculate car lease payments
+author: Christopher Yee
+date: '2020-03-12'
+slug: using-r-to-calculate-car-lease-payments
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>Purchasing a car is a significant time and financial commitment.</p>
+<p>There is so much at stake that the required song and dance with the sales manager don’t alleviate any fears about over paying. Thus, it is difficult to determine the equilibirum point at which the dealer will accept your offer versus how much you are willing to pay.</p>
+<p>I decided to write this for a few reasons:</p>
+<ul>
+<li>I am in the market for a new car</li>
+<li>Rather than doing actual car shopping I thought it would be more fun to procrastinate</li>
+<li>Online calculators are quite clunky when you want to compare and contrast monthly payments</li>
+<li>Hopefully, this will help others make more informed car buying decisions (TBD on Shiny app)</li>
+</ul>
+<p><em>Note: this guide will focus only on leasing and not the auto financing aspect of it</em></p>
+<div id="lease-payment-calculations" class="section level1">
+<h1>Lease payment calculations</h1>
+<p>Our variables are split in two categories:</p>
+<ul>
+<li>What you know
+<ul>
+<li>MSRP (or sticker price)</li>
+<li>Lease term (months)</li>
+<li>Down payment</li>
+<li>Local sales tax</li>
+</ul></li>
+<li>What the dealer knows
+<ul>
+<li>Sales price (how much they will discount off MSRP)</li>
+<li>Residual</li>
+<li>Money factor (or APR)</li>
+<li>Rebates, incentives and credits</li>
+<li>Fees</li>
+<li>Trade-in value</li>
+</ul></li>
+</ul>
+<blockquote>
+<p>re: money factor &amp; APR <br>
+To find the money factor from APR divide by 2,400 <br>
+To find the APR from money factor multiply by 2,400</p>
+</blockquote>
+<p>Here is the formula to calculate our monthly lease payments:</p>
+<p><strong>monthly_payment</strong> = <em>[depreciation_fee + finance_fee] * sales_tax</em></p>
+<p>However, to plug in those numbers a lot of math has to happen beforehand but you can read the full <a href="https://www.edmunds.com/car-leasing/calculate-your-own-lease-payment.html">definitions here</a> on Edmunds.</p>
+<p>We’ll lay them all out below for reference:</p>
+<p><strong>capitalized_costs</strong> = <em>[sales_price + fees] - down_payment - trade_in - rebate</em></p>
+<p><strong>residual_value</strong> = <em>msrp * residual</em></p>
+<p><strong>depreciation_fee</strong> = <em>[capitalized_costs - residual_value] / lease_term</em></p>
+<p><strong>finance_fee</strong> = <em>[capitalized_costs + residual_value] * money_factor</em></p>
+<p>With the formalities out of the way we can now get to coding up our solution in <a href="https://twitter.com/search?q=%23rstats">#rstats</a>.</p>
+</div>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<pre class="r"><code>library(tidyverse)
+library(scales)</code></pre>
+</div>
+<div id="creating-our-function" class="section level1">
+<h1>Creating our function</h1>
+<p>R will do the heavy lifting for us and since we wrote down the entire formula it will be easy to build that function.</p>
+<pre class="r"><code>lease_calculation &lt;- function(msrp, sales_price, residual, money_factor, rebate,
+                              fees, term, down_payment, trade_in, tax){
+  # CAPITALIZED COSTS
+  capcosts &lt;- (sales_price + fees) - down_payment - trade_in - rebate 
+  
+  # RESIDUAL VALUE
+  residual_value &lt;- msrp * residual
+  
+  # DEPRECIATION FEE
+  depreciation_fee &lt;- (capcosts - residual_value) / term
+  
+  # FINANCE FEE
+  finance_fee &lt;- (capcosts + residual_value) * money_factor
+  
+  # TOTAL MONTHLY PAYMENT
+  monthly_payment &lt;- (depreciation_fee + finance_fee) * (1 + (tax / 100))
+  
+  # ROUND TO TWO DECIMAL PLACES
+  round(monthly_payment, 2)
+}</code></pre>
+<p>Now we can plug in the values from the Edmunds example:</p>
+<pre class="r"><code>payment &lt;- lease_calculation(msrp = 23000, 
+                  sales_price = 21000, 
+                  residual = 0.57, 
+                  money_factor = 0.00125, 
+                  rebate = 500,
+                  fees = 1200,
+                  term = 36, 
+                  down_payment = 1700, 
+                  trade_in = 0, 
+                  tax = 10.25)
+
+cat(paste0(&quot;Monthly lease payment: $&quot;, payment))</code></pre>
+<pre><code>## Monthly lease payment: $256.64</code></pre>
+<p>Awesome - this is working as intended!</p>
+<p><em>Note: if you are lucky enough to not live in a state requires rolling the sales taxes into your monthly payment then feel free to set tax=0</em></p>
+</div>
+<div id="comparing-offers" class="section level1">
+<h1>Comparing offers</h1>
+<p>Single point estimates are great but we may want to simulate multiple lease offers so we know what negotation levers are at our disposal to stay within budget.</p>
+<pre class="r"><code>lease_comparison &lt;- function(msrp, sales_price, residual, money_factor, rebate,
+                             fees, term, down_payment, trade_in, tax){
+  
+  capcosts &lt;- (sales_price + fees) - down_payment - trade_in - rebate 
+  residual_value &lt;- msrp * residual
+  depreciation_fee &lt;- (capcosts - residual_value) / term
+  finance_fee &lt;- (capcosts + residual_value) * money_factor
+  sales_tax &lt;- (depreciation_fee + finance_fee) * tax
+  monthly_payment &lt;- (depreciation_fee + finance_fee) * (1 + (tax / 100))
+  
+  # NEW CODE: JOIN SALES PRICE AND MONTHLY PAYMENT
+  as_tibble(cbind(sales_price, monthly_payment))
+}</code></pre>
+<p>Let’s use our updated <strong>lease_comparison</strong> function and assume we are looking to lease a brand new BMW M4.</p>
+<p>A fully loaded one has an MSRP of about $85,000, residual is typically 60%, APR in January 2020 was about 3.288%, dealers typically throw in a few hundred dollars to ease the pain and the sales tax where I live is 9.5%.</p>
+<p>We’ll lay out three different scenarios where everything is equal with the exception of our down payment.</p>
+<pre class="r"><code>down5k &lt;- lease_comparison(msrp = 85000, 
+                  sales_price = 78200, # 8% DISCOUNT OFF STICKER
+                  residual = 0.60, 
+                  money_factor = 0.00137, 
+                  rebate = 500, 
+                  fees = 0,
+                  term = 36, 
+                  down_payment = 5000, 
+                  trade_in = 0, 
+                  tax = 9.5) %&gt;% 
+  mutate(offer = &#39;5k_down_payment&#39;)
+
+down2k &lt;- lease_comparison(msrp = 85000, 
+                  sales_price = 78200, 
+                  residual = 0.60, 
+                  money_factor = 0.00137, 
+                  rebate = 500, 
+                  fees = 0,
+                  term = 36, 
+                  down_payment = 2000, 
+                  trade_in = 0, 
+                  tax = 9.5) %&gt;% 
+  mutate(offer = &#39;2k_down_payment&#39;)
+
+down0 &lt;- lease_comparison(msrp = 85000, 
+                  sales_price = 78200, 
+                  residual = 0.60, 
+                  money_factor = 0.00137, 
+                  rebate = 500, 
+                  fees = 0,
+                  term = 36, 
+                  down_payment = 0, 
+                  trade_in = 0, 
+                  tax = 9.5) %&gt;% 
+  mutate(offer = &#39;no_down_payment&#39;)
+
+rbind(down5k, down2k, down0)</code></pre>
+<pre><code>## # A tibble: 3 x 3
+##   sales_price monthly_payment offer          
+##         &lt;dbl&gt;           &lt;dbl&gt; &lt;chr&gt;          
+## 1       78200            846. 5k_down_payment
+## 2       78200            941. 2k_down_payment
+## 3       78200           1005. no_down_payment</code></pre>
+<p>As expected a higher down payment leads to a lower monthly payment.</p>
+<p>This is just OK and I think we can do better.</p>
+</div>
+<div id="visualizing-uncertainty" class="section level1">
+<h1>Visualizing uncertainty</h1>
+<p>Online car lease calculators only provide estimates and there will always be things we don’t know what we don’t know.</p>
+<p>We might get an output of $900 but when we get to the sales floor the total monthly payment at signing could go up or down for a number of reasons.</p>
+<p>To plan ahead, we can incorporate some of this uncertainty and visualize what the range of possible values might be given our inputs.</p>
+<pre class="r"><code>set.seed(20200312)
+
+lease_rnorm &lt;- function(n, price, offer){
+  
+  # ASSUME GAUSSIAN DISTRIBUTION
+  rnorm(n, price, 6) %&gt;% # ASSIGNED STANDARD DEVIATION OF 6
+    as_tibble() %&gt;% 
+    mutate(offer = offer)
+}
+
+# GENERATE 10K SAMPLES FOR EACH SCENARIO
+down5k_sim &lt;- lease_rnorm(1e4, down5k$monthly_payment, down5k$offer)
+down2k_sim &lt;- lease_rnorm(1e4, down2k$monthly_payment, down2k$offer)
+down0_sim &lt;- lease_rnorm(1e4, down0$monthly_payment, down0$offer)
+
+# COMBINE DATA FRAMES
+final_sim &lt;- rbind(down5k_sim, down2k_sim, down0_sim)
+
+# PLOT CHART
+final_sim %&gt;% 
+  ggplot(aes(value, fill = offer)) +
+  geom_histogram(alpha = 0.8, binwidth = 0.5) +
+  scale_x_continuous(labels = dollar_format(),
+                     limits = c(800, 1100)) +
+  labs(y = NULL, x = &quot;monthly_payment&quot;) +
+  facet_grid(offer ~ .) +
+  theme_bw() +
+  theme(legend.position = &#39;none&#39;,
+        axis.text.y = element_blank())</code></pre>
+<p><img src="/blog/2020-03-12-using-r-to-calculate-car-lease-payments_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>So, what are we looking at? We’ll zoom in on the <em>no_down_payment</em> option:</p>
+<pre class="r"><code>summary(down0_sim)</code></pre>
+<pre><code>##      value           offer          
+##  Min.   : 982.7   Length:10000      
+##  1st Qu.:1001.3   Class :character  
+##  Median :1005.3   Mode  :character  
+##  Mean   :1005.2                     
+##  3rd Qu.:1009.2                     
+##  Max.   :1028.5</code></pre>
+<p>We know the calculator returned a monthly payment of $1,005. However, when we include some uncertainty in our estimate we can expect a minimum of $983 to a maximum monthly payment of $1,039.</p>
+<div id="extracting-probabilities" class="section level2">
+<h2>Extracting probabilities</h2>
+<p>Since we now know the range of possible monthly payment values, we can also use it to figure out the probability of negotiating for a lower price.</p>
+<p>The plot below illustrates the probability distribution of monthly lease payments for our <em>2k_down_payment</em> option:</p>
+<pre class="r"><code>ggplot(data.frame(x = c(800, 1100)), aes(x)) +
+  stat_function(args = c(mean = mean(down2k_sim$value), sd = 6),
+                aes(color = &#39;steelblue&#39;),
+                fun = pnorm, 
+                n = 1e4, 
+                size = 1) +
+  geom_vline(xintercept = mean(down2k_sim$value), lty = 2) + # ESTIMATED MONTHLY
+  theme_bw() +
+  scale_x_continuous(labels = dollar_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  labs(x = NULL, y = NULL)</code></pre>
+<p><img src="/blog/2020-03-12-using-r-to-calculate-car-lease-payments_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>The estimated monthly payment is $941 which coincides with a 50% chance we will actually receive that offer from the dealership.</p>
+<p>We should always be aggressive in these negotations so let’s figure out: what is the maximum monthly payment if I want to walk away with a 20% chance of getting the deal that I want?</p>
+<pre class="r"><code>qnorm(.20, mean(down2k_sim$value), 6)</code></pre>
+<pre><code>## [1] 936.2743</code></pre>
+<p>At $936 that is about $180 saved over the course of the 3-year lease - not bad and in my opinion it’s worth asking for it.</p>
+<p>If we are on a tight budget and can only do $930 per month then we can easily calculate those probabilities:</p>
+<pre class="r"><code>pnorm(930, mean(down2k_sim$value), 6) * 100</code></pre>
+<pre><code>## [1] 2.955695</code></pre>
+<p>What this means is based on the values we set earlier ($2k down payment, 8% off sticker, etc.) there is a ~3% chance we’ll be able to walk away with a monthly payment of $930 instead of the original estimate of $941.</p>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>We learned how the payments are calculated, the levers at our disposal to influence the monthly lease payment as well as compare and visualize multiple offers.</p>
+<p>Shopping for a car can be stressful but I hope this guide on using R can calm down any jitters you may have for a future decision.</p>
+</div>
+<div id="resources" class="section level2">
+<h2>Resources</h2>
+<p>If you enjoyed this article, you may like a few other guides I wrote in the past:</p>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/getting-started-with-r-using-google-search-console-data/">Getting started with R using Google Search Console data</a></li>
+<li><a href="https://www.christopheryee.org/blog/exploring-page-speed-with-data-simulation/">Simulating data to explore page speed performance</a></li>
+<li><a href="https://www.christopheryee.org/blog/r-functions-for-data-simulation-sampling-and-visualization/">R functions for simulation, sampling &amp; visualization</a></li>
+<li><a href="https://www.christopheryee.org/blog/calculating-estimating-annual-salaries-with-r/">Calculating &amp; estimating annual salaries with R</a></li>
+</ul>
+</div>
+</div>

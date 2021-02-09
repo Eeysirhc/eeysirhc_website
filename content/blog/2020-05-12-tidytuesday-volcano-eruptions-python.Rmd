@@ -1,0 +1,59 @@
+---
+title: 'TidyTuesday: Volcano Eruptions (python)'
+author: Christopher Yee
+date: '2020-05-12'
+slug: tidytuesday-volcano-eruptions-python
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+Data from [#tidytuesday](https://twitter.com/hashtag/tidytuesday) week of 2020-05-12 ([source](https://github.com/rfordatascience/tidytuesday/tree/master/data/2020/2020-05-12)) but plotting in python.
+
+## Load modules
+
+```{python message=FALSE, warning=FALSE}
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+```
+
+## Download and parse data
+
+```{python message=FALSE, warning=FALSE}
+volcano_raw = pd.read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv")
+
+volcano = volcano_raw[['primary_volcano_type', 'elevation']].sort_values(by='elevation', ascending=False)
+```
+
+## Visualize dataset
+
+```{python message=FALSE, warning=FALSE, fig.height=12, fig.width=20}
+sns.set(style="darkgrid")
+plt.figure(figsize=(20,15))
+
+p = sns.boxplot(x=volcano.elevation, y=volcano.primary_volcano_type)
+p = sns.swarmplot(x=volcano.elevation, y=volcano.primary_volcano_type, color=".35")
+
+plt.xlabel("Elevation")
+plt.ylabel("")
+plt.title("What is the average elevation by volcano type?",
+          x=0.01, horizontalalignment="left", fontsize=20)
+plt.figtext(0.9, 0.08, "by: @eeysirhc", horizontalalignment="right")
+plt.figtext(0.9, 0.07, "Source: The Smithsonian Institute", horizontalalignment="right")
+
+plt.show()
+```
+
+## Improvements
+
+* Find and replace similar volcano categories such as _stratovolcano_ which is the same as _stratovolcano(es)_
+
+
+## Related
+
+* [TardyThursday: College Tuition, Diversity & Pay](https://www.christopheryee.org/blog/tardythursday-college-tuition-diversity-pay/)
+* [Makeover Monday: Women in the Workforce](https://www.christopheryee.org/blog/makeovermonday-women-in-the-workforce/)
+
+

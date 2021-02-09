@@ -1,0 +1,51 @@
+---
+author: Christopher Yee
+date: 2012-03-10 22:40:39+00:00
+layout: post
+slug: certified-with-google-analytics
+title: Certified with Google Analytics
+categories:
+- Web Analytics
+---
+
+After delaying the [Google Analytics Individual Qualification exam](http://google.starttest.com/) for an entire year, I finally decided to get it over with and I passed!  Here's a screenshot of the certification PDF they sent me.
+
+![GAIQ Certificate](/images/gaiq-certificate.png)
+
+Below is my score card for the GAIQ test results.
+
+![GAIQ Results](/images/gaiq-results.png)
+
+In retrospect, I should've used the remaining 45 minutes to double check my answers and boost up my score but my over-confidence convinced me otherwise.  At least now I know I should read up on E-commerce Tracking - probably got dinged for the technical Javascript implementation questions.
+
+
+
+I thought the exam was pretty easy but my exposure to Google Analytics may greatly differ from your own experiences.  For example, I've been using Google's web analytics platform nearly everyday for the past 2 years (including weekends) so I was already familiar with the core concepts.  The only sections where I really had to focus on getting things right was properly installing the tracking code in its various forms and the advanced administrative functions.
+
+I pretty much crammed everything the night before but here are the steps I took to pass the test:
+
+
+
+	
+  1. Watch all the [Conversion University](http://www.google.com/intl/en/analytics/iq.html?) videos once.
+
+	
+  2. Anything I didn't understand I would watch them a second time.
+
+	
+  3. Took notes about how metrics are calculated, definitions and the benefits & shortcomings the training modules listed.
+
+	
+  4. When I was ready to take the test, I had one of my GA accounts open, my written notes, the GAIQ videos and the [Analytics Help articles](http://support.google.com/googleanalytics/?hl=en).
+
+	
+  5. I breezed through all the questions I was 100% positive about and wrote down the topical questions that required me to think more than 30 seconds.
+
+	
+  6. By the time I had finished all the easy answers, there was still an hour left to research the answers to the remaining questions.
+
+	
+  7. Win.
+
+
+Best of luck to you but trust me - you won't even have to break a sweat. =]

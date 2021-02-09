@@ -1,0 +1,13 @@
+---
+author: Christopher Yee
+date: 2011-06-26 04:19:23+00:00
+layout: post
+slug: google-captcha-balls
+title: 'Google Captcha: Balls'
+categories:
+- Miscellaneous
+---
+
+I ran my [SEObook Rank Checker](http://tools.seobook.com/firefox/rank-checker/) the other day for one of my clients Google keywords rankings when I came upon the Captcha image below.  They may be the world's best search engine at the moment but they still have a lot of work to do....lol.
+
+![google captcha - balls](/images/google-captcha.png)

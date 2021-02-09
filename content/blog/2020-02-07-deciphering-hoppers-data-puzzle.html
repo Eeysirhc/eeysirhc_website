@@ -1,0 +1,343 @@
+---
+title: Deciphering Hopper's Data Puzzle
+author: Christopher Yee
+date: '2020-02-07'
+slug: deciphering-hoppers-data-puzzle
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>I like to browse company career pages once in awhile to see what positions they have open. In my opinion, this provides a glimpse into what they are investing in for the next few years.</p>
+<p><a href="https://www.hopper.com/">Hopper</a> is one company which stands out but the reason I am writing this is a puzzle they included in the job description:</p>
+<blockquote>
+<p>At Hopper, every dataset tells a story.
+Do you have what it takes to decipher the clues? bit.ly/2q6U8dq</p>
+</blockquote>
+<p>Let’s see if we can try to solve this riddle!</p>
+<div id="load-data" class="section level2">
+<h2>Load data</h2>
+<pre class="r"><code>library(tidyverse)
+
+puzzle &lt;- read.csv(&quot;https://raw.githubusercontent.com/Eeysirhc/random_datasets/master/hopper_data_puzzle.csv&quot;, header=FALSE) %&gt;% as_tibble()</code></pre>
+</div>
+<div id="exploratory-analysis" class="section level2">
+<h2>Exploratory analysis</h2>
+<p>Let’s do a quick spot check of our data by pulling out a random sample:</p>
+<pre class="r"><code>puzzle %&gt;% 
+  sample_n(10) %&gt;% 
+  knitr::kable()</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right">V1</th>
+<th align="right">V2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.7751583</td>
+<td align="right">0.1542435</td>
+</tr>
+<tr class="even">
+<td align="right">0.5861845</td>
+<td align="right">2.2767995</td>
+</tr>
+<tr class="odd">
+<td align="right">0.4620096</td>
+<td align="right">0.8691373</td>
+</tr>
+<tr class="even">
+<td align="right">0.9149191</td>
+<td align="right">0.2936743</td>
+</tr>
+<tr class="odd">
+<td align="right">0.7342932</td>
+<td align="right">-1.2255946</td>
+</tr>
+<tr class="even">
+<td align="right">0.5656839</td>
+<td align="right">-1.7397774</td>
+</tr>
+<tr class="odd">
+<td align="right">0.7964042</td>
+<td align="right">0.1523343</td>
+</tr>
+<tr class="even">
+<td align="right">0.7746243</td>
+<td align="right">-1.7503209</td>
+</tr>
+<tr class="odd">
+<td align="right">0.3971497</td>
+<td align="right">2.1136286</td>
+</tr>
+<tr class="even">
+<td align="right">-0.0598545</td>
+<td align="right">0.6470721</td>
+</tr>
+</tbody>
+</table>
+<p>This is a tough one - no labeled column headers with a total of 1,024 rows.</p>
+<p>I am wondering if there is any correlation between our two variables?</p>
+<pre class="r"><code>cor(puzzle)</code></pre>
+<pre><code>##            V1         V2
+## V1  1.0000000 -0.2477049
+## V2 -0.2477049  1.0000000</code></pre>
+<p>So, there is an inverse relationship but it is quite weak.</p>
+<p>With a lack of information, at this point I want to see if we can identify any visual relationships.</p>
+<pre class="r"><code>puzzle %&gt;% 
+  ggplot(aes(V1, V2)) +
+  geom_point(alpha = 0.1, color = &#39;steelblue&#39;, size = 3) +
+  theme_minimal(base_size = 10)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>It appears we have some data points grouped together but what catches my eye is around <em>V1(0.40),V2(2.10)</em> - it has a concentration of points indicated by its relatively higher gradient.</p>
+<pre class="r"><code>puzzle %&gt;% 
+  ggplot(aes(V1, V2)) +
+  geom_point(alpha = 0.1, color = &#39;steelblue&#39;, size = 3) +
+  geom_point(x = 0.397, y = 2.11, color = &#39;red&#39;, pch = 1, size = 10) +
+  theme_minimal(base_size = 10)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>How many times does that specific point show up in our data?</p>
+<pre class="r"><code>puzzle %&gt;% 
+  group_by(V1, V2) %&gt;% 
+  count(sort = TRUE) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(pct_total = 100 * (n / sum(n)))</code></pre>
+<pre><code>## # A tibble: 912 x 4
+##         V1      V2     n pct_total
+##      &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt;
+##  1  0.397   2.11     101     9.86 
+##  2 -0.388   1.99       2     0.195
+##  3 -0.0659 -0.673      2     0.195
+##  4  0.0618 -1.33       2     0.195
+##  5  0.637  -1.44       2     0.195
+##  6  0.690   0.0478     2     0.195
+##  7  0.714   0.249      2     0.195
+##  8  0.715   0.503      2     0.195
+##  9  0.720  -0.152      2     0.195
+## 10  0.745   0.409      2     0.195
+## # … with 902 more rows</code></pre>
+<p>Approximately 10% of the total dataset - I wonder why? Are they duplicates? Bad data?</p>
+<p>For now, let’s put that aside and incorporate some structure to our messy data.</p>
+</div>
+<div id="knn-clustering" class="section level2">
+<h2>KNN Clustering</h2>
+<p>I prefer to keep things simple so let’s use a common unsupervised machine learning algorithm called <a href="https://en.wikipedia.org/wiki/K-nearest_neighbors_algorithm">K-Nearest Neighbors</a>.</p>
+<pre class="r"><code>library(broom)
+
+set.seed(20200206)
+
+puzzle_knn &lt;- kmeans(puzzle, centers = 15, nstart = 30)
+
+# SUMMARY DATA
+puzzle_knn_summary &lt;- tidy(puzzle_knn)
+
+# JOIN BACK TO ORIGINAL DATAFRAME
+puzzle_clusters &lt;- augment(puzzle_knn, puzzle) </code></pre>
+<p>We can now whip everything together in a fancy <a href="https://twitter.com/search?q=%23rstats">#rstats</a> plot:</p>
+<pre class="r"><code>ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>Not too bad.</p>
+<p>It also looks like we can further segment these groups by drawing some axes to indicate a Cartesian coordinate system:</p>
+<pre class="r"><code>ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>Finally, we don’t have a lot of context but Hopper is a travel booking app so let’s just go out on a limb and assume the data is % change by price to conversions.</p>
+<blockquote>
+<p>Note: it only occurred to me after completing this the above may not be true otherwise we would see more data in the top-left quadrant (unless, of course, this was intentional)</p>
+</blockquote>
+<pre class="r"><code>library(scales)
+
+ggplot() +
+  geom_point(data = puzzle_clusters, aes(V1, V2, color = .cluster), 
+             alpha = 0.1, size = 3) +
+  geom_text(data = puzzle_knn_summary, aes(V1, V2, color = cluster, label = cluster), 
+            size = 8, hjust = -1) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = &#39;none&#39;) +
+  labs(x = &quot;% Change in Price&quot;, y = &quot;% Change in Conversions&quot;)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Now we are getting somewhere!</p>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<ul>
+<li>We were able to parse out 15 different performing segments from our data</li>
+<li>We know there is a -0.25 correlation between our two variables
+<ul>
+<li>For the majority of cases conversions will decrease if there is an increase in pricing</li>
+<li>Conversely, a decrease in price will lead to an increase in conversions (ex: clusters 3 and 12)</li>
+</ul></li>
+<li>The bottom left quadrant where cluster 14 is located illustrates how conversions decreased for this group even if they are exposed to a price drop</li>
+<li>What should be interesting to Hopper are clusters 4, 9 and 11
+<ul>
+<li>With a price increase these cohorts exhibit higher conversions</li>
+<li>Is it the destination? A specific airline or hotel? Messaging? Or a new feature on the app?</li>
+<li>Difficult to interpret without the full context but that is where I would dive deeper to further improve the product</li>
+</ul></li>
+</ul>
+</div>
+<div id="statistical-modeling" class="section level2">
+<h2>Statistical modeling</h2>
+<p>Just for fun, let’s train and build a simple machine learning model to predict future conversion behavior given the change in price.</p>
+<blockquote>
+<p>Reminder: we are making a huge leap of faith in assuming the data is % price change to % conversion change</p>
+</blockquote>
+<p>Before feeding in our data we need to encode our clusters because the numerical values are not an indicator of performance.</p>
+<p>For example, being in cluster 15 is not better than being in cluster 1 - these were randomly assigned from our KNN algorithm.</p>
+<pre class="r"><code>library(caret)
+
+# ONE HOT ENCODE OUR CLUSTERS
+dummy &lt;- dummyVars(&quot; ~ .cluster&quot;, data = puzzle_clusters)
+df_dummy &lt;- data.frame(predict(dummy, puzzle_clusters))
+
+# JOIN BACK TO ORIGINAL DATAFRAME
+puzzle_processed &lt;- cbind(puzzle_clusters, df_dummy) %&gt;% 
+  select(-.cluster) %&gt;% 
+  as_tibble()</code></pre>
+<p>Then conduct a quick spot check on the correlation between variables:</p>
+<pre class="r"><code>library(corrplot)
+
+corrplot(cor(puzzle_processed), method = &#39;color&#39;,
+         tl.col = &#39;black&#39;, diag = FALSE)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<p>Cluster 4 with a whopping correlation coefficient of ~0.80!</p>
+<p>The final step before model training is to parse out the control vs test data:</p>
+<pre class="r"><code># CREATE INDEX FOR 75/25 SPLIT
+puzzle_index &lt;- createDataPartition(puzzle_processed$V2, 
+                                    p = 0.75, list = FALSE)
+
+# TRAINING DATA
+puzzle_train &lt;- puzzle_processed[puzzle_index, ]
+
+# TESTING DATA
+puzzle_test &lt;- puzzle_processed[-puzzle_index, ]
+
+control &lt;- trainControl(method = &quot;repeatedcv&quot;, 
+                        number = 10, repeats = 10, savePredictions = TRUE)</code></pre>
+<p>At this point we can utilize various off-the-shelf machine learning algorithms like random forest, XGBoost, SVM, etc.</p>
+<p>For our use case, I’ll just start with a linear and multiple linear regression.</p>
+<pre class="r"><code>linear_model &lt;- train(V2 ~ V1, data = puzzle_train, method = &quot;lm&quot;, 
+             trControl = control,
+             tuneGrid = expand.grid(intercept = FALSE),
+             metric = &quot;Rsquared&quot;)
+
+summary(linear_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = .outcome ~ 0 + ., data = dat)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -2.9058 -1.1396 -0.7366  1.1874  3.1421 
+## 
+## Coefficients:
+##    Estimate Std. Error t value Pr(&gt;|t|)    
+## V1 -0.89630    0.08533   -10.5   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1.457 on 767 degrees of freedom
+## Multiple R-squared:  0.1258, Adjusted R-squared:  0.1246 
+## F-statistic: 110.3 on 1 and 767 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>R^2 value of 0.1174 is quite low.</p>
+<p>Let’s try the multiple linear regression route where we incorporate all the KNN clusters we identified earlier in this post.</p>
+<pre class="r"><code>multiple_model &lt;- train(V2 ~ ., data = puzzle_train, method = &quot;lm&quot;, 
+             trControl = control,
+             tuneGrid = expand.grid(intercept = FALSE),
+             metric = &quot;Rsquared&quot;)
+
+summary(multiple_model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = .outcome ~ 0 + ., data = dat)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -0.64841 -0.08383 -0.01160  0.08305  0.44917 
+## 
+## Coefficients:
+##               Estimate Std. Error t value Pr(&gt;|t|)    
+## V1           0.0004141  0.0362785   0.011  0.99090    
+## .cluster.1  -1.3406857  0.0278300 -48.174  &lt; 2e-16 ***
+## .cluster.2  -0.0960933  0.0347745  -2.763  0.00586 ** 
+## .cluster.3   2.6726441  0.0449253  59.491  &lt; 2e-16 ***
+## .cluster.4   2.1250598  0.0200804 105.828  &lt; 2e-16 ***
+## .cluster.5   0.4284229  0.0350870  12.210  &lt; 2e-16 ***
+## .cluster.6  -1.2387135  0.0203136 -60.979  &lt; 2e-16 ***
+## .cluster.7  -2.0055076  0.0304859 -65.785  &lt; 2e-16 ***
+## .cluster.8  -1.5791816  0.0297159 -53.143  &lt; 2e-16 ***
+## .cluster.9   1.0336609  0.0334047  30.944  &lt; 2e-16 ***
+## .cluster.10  0.0353526  0.0349705   1.011  0.31238    
+## .cluster.11  1.6348023  0.0284861  57.389  &lt; 2e-16 ***
+## .cluster.12  0.5577467  0.0390217  14.293  &lt; 2e-16 ***
+## .cluster.13 -2.7031648  0.0425496 -63.530  &lt; 2e-16 ***
+## .cluster.14 -0.9317604  0.0278197 -33.493  &lt; 2e-16 ***
+## .cluster.15 -1.7249327  0.0260267 -66.276  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.1424 on 752 degrees of freedom
+## Multiple R-squared:  0.9918, Adjusted R-squared:  0.9916 
+## F-statistic:  5692 on 16 and 752 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>R^2 value of 0.992! That seems too good to be true and we may actually be overfitting somewhere.</p>
+<p>Let’s verify the relative weights for the features in our model:</p>
+<pre class="r"><code>ggplot(varImp(multiple_model)) + geom_col(fill = &#39;steelblue&#39;) + theme_minimal()</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-16-1.png" width="672" /></p>
+<p>It’s good to see cluster 4 is still right there at the top!</p>
+<p>To wrap things up, we’ll use both models to predict values from the unseen test set and visualize in a plot.</p>
+<pre class="r"><code>linear &lt;- predict(linear_model, puzzle_test)
+multiple &lt;- predict(multiple_model, puzzle_test)
+
+puzzle_test %&gt;% 
+  select(V1, V2) %&gt;% 
+  cbind(linear, multiple) %&gt;% 
+  as_tibble() %&gt;% 
+  rename(actual = V2) %&gt;% 
+  gather(key, value, actual:multiple) %&gt;% 
+  ggplot(aes(V1, value, color = key)) + 
+  geom_point(alpha = 0.5) + 
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0) +
+  theme_minimal(base_size = 10) +
+  theme(legend.position = &#39;top&#39;) +
+  labs(x = &quot;% Change in Price&quot;, y = &quot;% Change in Conversions&quot;, color = NULL) +
+  scale_x_continuous(labels = percent_format()) +
+  scale_y_continuous(labels = percent_format()) +
+  scale_color_brewer(palette = &#39;Set1&#39;)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-17-1.png" width="672" /></p>
+<p>This doesn’t look half bad if I may say so myself!</p>
+<p>Although inaccurate, our linear regression model was able to capture the inverse relationship between price and conversions.</p>
+<p>The multiple regression version is definitely a step up from the former but it has room for improvement. With a little parameter tuning it’s possible to further increase the overall accuracy of our model.</p>
+</div>
+<div id="answer" class="section level2">
+<h2>Answer</h2>
+<p><em>…LOL…</em></p>
+<pre class="r"><code>puzzle_clusters %&gt;% 
+  ggplot(aes(V1, V2, color = .cluster)) +
+  geom_point() +
+  coord_flip() +
+  theme_minimal() + 
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/blog/2020-02-07-deciphering-hoppers-data-puzzle_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
+</div>

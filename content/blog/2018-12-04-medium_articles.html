@@ -1,0 +1,97 @@
+---
+title: "TidyTuesday: Medium Article Metadata"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+author: Christopher Yee
+date: 2018-12-04 09:03:14+00:00
+layout: post
+slug: tidytuesday-medium-article-metadata
+categories:
+- TidyTuesday
+---
+
+
+
+<p>Analyzing data for #tidytuesday week of 12/4/2018 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-12-04">source</a>)</p>
+<pre class="r"><code># LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+library(tidytext)
+library(stringr)
+
+articles_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-12-04/medium_datasci.csv&quot;)
+
+articles &lt;- articles_raw</code></pre>
+<div id="who-are-the-top-10-authors-in-terms-of-total-articles-published" class="section level3">
+<h3>Who are the top 10 authors in terms of total articles published?</h3>
+<pre class="r"><code>top_authors &lt;- articles %&gt;%
+  select(author) %&gt;%
+  group_by(author) %&gt;%
+  count() %&gt;%
+  arrange(desc(n)) %&gt;%
+  na.omit() %&gt;%
+  head(10)
+
+top_authors %&gt;%
+  ggplot() + 
+  geom_col(aes(reorder(author, n), n), 
+           fill = &quot;darkslategray4&quot;,
+           alpha = 0.8) + 
+  coord_flip() +
+  theme_bw() +
+  labs(x = &quot;&quot;,
+       y = &quot;&quot;,
+       title = &quot;Top 10 authors on Medium in terms of total articles published&quot;)</code></pre>
+<p><img src="/blog/2018-12-04-medium_articles_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+</div>
+<div id="are-there-differences-in-words-used-between-the-titles-and-subtitles" class="section level3">
+<h3>Are there differences in words used between the titles and subtitles?</h3>
+<p>Clean up data before we text mine the top 10 authors</p>
+<pre class="r"><code>data(stop_words)
+
+tidy_authors &lt;-
+  articles %&gt;%
+  inner_join(top_authors) %&gt;%
+  select(title, subtitle, author) %&gt;%
+  na.omit() %&gt;%
+  mutate(text = paste(title, &quot; &quot;, subtitle)) %&gt;%
+  select(author, text) %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  anti_join(stop_words)</code></pre>
+<p>Calculate proportions and plot graph</p>
+<pre class="r"><code>tidy_authors %&gt;%
+  group_by(author) %&gt;%
+  mutate(word = str_extract(word, &quot;[a-z&#39;]+&quot;)) %&gt;%
+  count(word, sort = TRUE) %&gt;%
+  mutate(proportion = n / sum(n)) %&gt;%
+  select(-n) %&gt;%
+  spread(author, proportion) %&gt;% 
+  gather(author, proportion, `AI Hawk`:`Synced`) %&gt;%
+  ggplot(aes(x=proportion, y=`Yves Mulkers`, color = abs(`Yves Mulkers` - proportion))) +
+  geom_jitter(alpha = 0.1, 
+              size = 0.5, 
+              width = 0.25, 
+              height = 0.25) +
+  geom_text(aes(label = word), 
+            check_overlap = TRUE, 
+            vjust = 1, 
+            hjust = 1) +
+  geom_abline(color = &quot;darkslategray4&quot;, 
+              linetype = 2) +
+  scale_color_gradient(limits = c(0, 0.01), 
+                       low = &quot;salmon&quot;, 
+                       high = &quot;blue&quot;) +
+  scale_x_log10(labels = percent_format(round(1))) +
+  scale_y_log10(labels = percent_format(round(1))) +
+  labs(y = &quot;Yves Mulkers&quot;,
+       x = &quot;&quot;,
+       title = &quot;Comparing the word frequencies for the top 10 authors on Medium&quot;,
+       subtitle = &quot; \&quot;Top 10\&quot; defined as the total number of articles published&quot;) +
+  theme_bw() +
+  theme(legend.position = &quot;none&quot;) +
+  facet_wrap(~author, ncol = 3)</code></pre>
+<p><img src="/blog/2018-12-04-medium_articles_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+</div>

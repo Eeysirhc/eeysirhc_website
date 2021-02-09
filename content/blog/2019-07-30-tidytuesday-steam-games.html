@@ -1,0 +1,95 @@
+---
+title: 'TidyTuesday: Steam Games'
+author: Christopher Yee
+date: '2019-07-30'
+slug: tidytuesday-steam-games
+categories:
+  - TidyTuesday
+---
+
+
+
+<p>Data from #tidytuesday week of 2019-07-30 (<a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2019/2019-07-30">source</a>)</p>
+<div id="load-r-packages" class="section level3">
+<h3>Load R packages</h3>
+<pre class="r"><code>library(tidyverse)
+library(RColorBrewer)
+library(scales)</code></pre>
+</div>
+<div id="download-data" class="section level3">
+<h3>Download data</h3>
+<pre class="r"><code>steam_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-07-30/video_games.csv&quot;) </code></pre>
+</div>
+<div id="parse-data" class="section level3">
+<h3>Parse data</h3>
+<pre class="r"><code>steam_games &lt;- steam_raw %&gt;% 
+  
+  # VARIABLE FOR AGE OF GAME
+  mutate(release_year = substring(release_date, 8, 12), # EXTRACT YEAR
+         release_year = as.numeric(str_trim(release_year)), 
+         release_year = case_when(release_year == 5 ~ 2015, # INCORRECT DATA POINT
+                          TRUE ~ release_year),
+         age = 2019 - release_year) %&gt;% 
+  
+  # VARIABLE FOR MIN/MAX NUMBER OF OWNERS
+  mutate(max_owners = str_trim(word(owners, 2, sep = &quot;\\..&quot;)),
+         max_owners = as.numeric(str_replace_all(max_owners, &quot;,&quot;, &quot;&quot;)),
+         min_owners = str_trim(word(owners, 1, sep = &quot;\\..&quot;)),
+         min_owners = as.numeric(str_replace_all(min_owners, &quot;,&quot;, &quot;&quot;))) %&gt;% 
+  
+  # REMOVE VALUES WITH INCONSISTENT RELEASE_DATE FORMAT (n=37)
+  filter(age &lt; 15) %&gt;% 
+  
+  # FILTER OUT STUDIO SOFTWARE
+  filter(price &lt; 150)</code></pre>
+</div>
+<div id="visualize-data" class="section level3">
+<h3>Visualize data</h3>
+<p>Question: how many people still play games that are <em>X</em> years old (on Steam) ?</p>
+<pre class="r"><code>steam_games %&gt;% 
+  select(age) %&gt;% 
+  ggplot() +
+  geom_histogram(aes(as.factor(age)), 
+                 binwidth = 1, 
+                 stat = &#39;count&#39;,
+                 fill = &#39;steelblue&#39;,
+                 alpha = 0.8) +
+  scale_y_continuous(labels = comma_format()) +
+  labs(x = &quot;Years Since Release&quot;,
+       y = NULL,
+       title = &quot;Count of active games on Steam since release&quot;,
+       caption = &quot;by: @eeysirhc\nsource: Steam Spy&quot;) +
+  theme_light()</code></pre>
+<p><img src="/blog/2019-07-30-tidytuesday-steam-games_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>Question: What is the distrubtion of game ownership for the top publishers ?</p>
+<pre class="r"><code>steam_games %&gt;% 
+  select(-number, -release_date) %&gt;% 
+  mutate(max_owners = as.factor(max_owners / 1000000)) %&gt;% 
+  group_by(publisher) %&gt;% 
+  mutate(n = n()) %&gt;% 
+  ungroup() %&gt;% 
+  filter(n &gt;= 80, publisher != &#39;NA&#39;) %&gt;%
+  mutate(publisher = paste0(publisher, &quot; (&quot;, n, &quot;)&quot;),
+         publisher = reorder(publisher, desc(n))) %&gt;% 
+  ggplot(aes(publisher, max_owners, color = publisher)) +
+  geom_jitter(show.legend = FALSE, size = 3, alpha = 0.5) +
+  scale_color_brewer(palette = &#39;RdBu&#39;) +
+  theme_light() +
+  labs(x = NULL,
+       y = &quot;Estimated Game Ownership per Million&quot;,
+       title = &quot;Distribution of ownership for top game publishers&quot;,
+       subtitle = &quot;(n) indicates total titles released&quot;,
+       caption = &quot;by: @eeysirhc\nsource: Steam Spy&quot;) +
+  theme(panel.background = element_rect(fill = &#39;grey95&#39;),
+        plot.background = element_rect(fill = &#39;grey95&#39;),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_text(angle = 45, hjust = 1)) </code></pre>
+<p><img src="/blog/2019-07-30-tidytuesday-steam-games_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>Interesting takeaways</p>
+<ul>
+<li><strong>Mass Market</strong>: whether it is their distribution network or brand name, publishers such as <em>Ubisoft (117)</em> and <em>Square Enix (85)</em> manage to consistently break into the 1M+ user base categories.</li>
+<li><strong>Some Hits Mostly Miss</strong>: majority of the top publishers will fall in this category like <em>Strategy First (126)</em> or <em>Degica (81)</em> where a few game titles will break 50K or 100K users but majority will fall in the 20K bucket.</li>
+<li><strong>Niche Market</strong>: publishers like <em>Big Fish Games (n=265)</em> and <em>Choice of Games (n=92)</em> have a lot of titles under their belts where each game acquires no more than 20K users. It is possible they do not want to compete against major publishers like Ubisoft or SEGA but instead choose to churn out games which cater to a super niche audience.</li>
+</ul>
+</div>

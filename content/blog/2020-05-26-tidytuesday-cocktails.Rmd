@@ -1,0 +1,179 @@
+---
+title: 'TidyTuesday: Cocktails'
+author: Christopher Yee
+date: '2020-05-26'
+slug: tidytuesday-cocktails
+categories:
+  - TidyTuesday
+editor_options: 
+  chunk_output_type: console
+---
+
+Data from [#tidytuesday](https://twitter.com/hashtag/tidytuesday) week of 2020-05-26 ([source](https://github.com/rfordatascience/tidytuesday/blob/master/data/2020/2020-05-26/readme.md))
+
+> If you are looking for the R script then you can [find it here](https://github.com/Eeysirhc/tidytuesday/blob/master/20200526-cocktails/cocktails.R)
+
+## Load packages
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(FactoMineR)
+```
+
+
+## Download data
+```{r message=FALSE, warning=FALSE}
+bc_raw <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-26/boston_cocktails.csv') 
+```
+
+## Data processing
+
+### Standardize cases
+```{r message=FALSE, warning=FALSE}
+bc_raw %>% 
+  count(ingredient, sort = TRUE) %>% 
+  filter(str_detect(ingredient, "red pepper sauce"))
+```
+
+Let's fix that by making all ingredient values to lower case:
+```{r message=FALSE, warning=FALSE}
+bc <- bc_raw %>% 
+  mutate(ingredient = str_to_lower(ingredient)) %>% 
+  distinct() %>% 
+  select(name, ingredient)
+```
+
+And to make sure it works...
+```{r message=FALSE, warning=FALSE}
+bc %>% 
+  count(ingredient, sort = TRUE) %>% 
+  filter(str_detect(ingredient, "red pepper sauce"))
+```
+
+
+### Fix untidy data
+
+To follow "tidy" principles, we need one row per observation. 
+```{r message=FALSE, warning=FALSE}
+bc %>% 
+  filter(str_detect(ingredient, ",")) 
+```
+
+We can reformat this by separating the commas then adding a new row for each cocktail per ingredient.
+
+```{r message=FALSE, warning=FALSE}
+# CLEAN DATAFRAME
+bc_tidy <- bc %>% 
+  filter(!str_detect(ingredient, ","))
+
+# EXTRACT UNTIDY DATA THEN CLEAN
+bc_untidy <- bc %>% 
+  filter(str_detect(ingredient, ",")) %>% 
+  mutate(ingredient = str_split(ingredient, ", ")) %>% 
+  unnest(ingredient)
+
+# COMBINE BOTH DATAFRAMES
+bc_clean <- rbind(bc_tidy, bc_untidy) %>% 
+  distinct()
+
+bc_untidy
+```
+
+### Reduce cardinality
+
+Our dataset has more than 550 unique ingredients so let's trim that down to the ingredients that are used in ten or more cocktails.
+
+```{r message=FALSE, warning=FALSE}
+bc_clean %>% 
+  distinct(ingredient) %>% 
+  count()
+
+n_ingredients <- bc_clean %>% 
+  count(ingredient, sort = TRUE) %>% 
+  filter(n > 10)
+```
+
+
+### Normalize ingredients
+
+Similar to our case statement section above, let's make sure our ingredients are consolidated to the same format.
+
+```{r message=FALSE, warning=FALSE}
+df <- bc_clean %>% 
+  inner_join(n_ingredients) %>% 
+  select(-n) %>% 
+  mutate(ingredient = str_replace_all(ingredient, "-", "_"),
+         ingredient = str_replace_all(ingredient, " ", "_"),
+         ingredient = str_replace_all(ingredient, "old_mr._boston_", ""),
+         ingredient = str_replace_all(ingredient, "old_thompson_", "")) 
+```
+
+## Multiple Correspondence Analysis (MCA)
+
+Our dataset is mostly categorical so [MCA](https://en.wikipedia.org/wiki/Multiple_correspondence_analysis) can help identify and highlight any underlying structures.
+
+### Format data for MCA
+```{r message=FALSE, warning=FALSE}
+df_mca_processed <- df %>% 
+  mutate(value = 1) %>%
+  pivot_wider(names_from = ingredient) %>% 
+  replace(is.na(.), 0) %>% 
+  select(-name) %>%
+  mutate_if(is.double, as.factor)
+
+mca_results <- MCA(df_mca_processed, graph = FALSE)
+```
+
+
+### Shape data to tidy structure
+```{r message=FALSE, warning=FALSE}
+mca_df <- data.frame(mca_results$var$coord)
+
+mca_final <- rownames_to_column(mca_df, var = "rowname") %>% 
+  as_tibble() %>% 
+  filter(str_detect(rowname, "_1")) %>% 
+  mutate(variable = str_replace_all(rowname, "_1", "")) %>% 
+  select(variable, everything(), -rowname) %>% 
+  mutate(highlight = case_when(str_detect(variable, "gin") ~ "gin",
+                               str_detect(variable, "rum") ~ "rum",
+                               str_detect(variable, "vodka") ~ "vodka",
+                               str_detect(variable, "whiskey") ~ "whiskey",
+                               str_detect(variable, "brandy") ~ "brandy",
+                               str_detect(variable, "bourbon") ~ "bourbon",
+                               str_detect(variable, "tequila") ~ "tequila"))
+```
+
+
+### Final plot
+
+```{r message=FALSE, warning=FALSE, fig.height=12, fig.width=20}
+mca_final %>% 
+  ggplot(aes(x = Dim.1, y = Dim.2, label = variable, color = highlight)) +
+  geom_density2d(color = "gray90") +
+  geom_point(show.legend = FALSE) +
+  geom_text_repel(show.legend = FALSE) +
+  labs(x = "D1", y = "D2", 
+       title = "Multiple correspondence analysis (MCA) on the most common cocktail ingredients",
+       subtitle = "Closer points suggest they are typically mixed together",
+       caption  = "by: @eeysirhc\nsource: Mr. Boston Bartender's Guide") +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.y = element_blank(),
+        axis.text.x = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank()) 
+```
+
+
+
+## Future work
+
+* [Part 2](https://www.christopheryee.org/blog/tidytuesday-cocktails-pt-2/): cocktail recommendation system based on the input of favorite drink
+* Calculate and use dissimilarity to recommend a drink to someone based on what they dislike
+
+## References
+
+* [Multiple correspondence analysis in R](https://rpubs.com/gaston/MCA)
+
+
+
+

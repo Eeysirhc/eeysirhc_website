@@ -1,0 +1,64 @@
+---
+title: Script to track global Coronavirus pandemic cases
+author: Christopher Yee
+date: '2020-03-16'
+slug: script-to-track-global-coronavirus-pandemic-cases
+categories:
+  - Miscellaneous
+---
+
+
+
+<p>The coronavirus (a.k.a. COVID-19) is taking the world by storm with the World Health Organization officially <a href="https://www.who.int/dg/speeches/detail/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020">characterizing the situation as a pandemic</a>.</p>
+<p>I’m not an infectious disease expert but I couldn’t resist and write a quick <a href="https://twitter.com/search?q=%23rstats">#rstats</a> script to visualize the total number of cases by country.</p>
+<p>Feel free to use and modify for your own needs:</p>
+<pre class="r"><code># LOAD PACKAGES
+library(tidyverse)
+library(scales)
+library(gghighlight)
+
+# DOWNLOAD DATA
+df &lt;- read_csv(&quot;https://covid.ourworldindata.org/data/ecdc/full_data.csv&quot;)
+
+# PARSE DATA
+df_parsed &lt;- df %&gt;% 
+  filter(total_cases &gt;= 100) %&gt;% # MINIMUM 100 CASES
+  group_by(location) %&gt;% 
+  mutate(n = n(),
+         day_index = row_number()) %&gt;%  
+  ungroup() %&gt;% 
+  filter(n &gt;= 25, # MINIMUM 25 DAYS
+         !location %in% c(&#39;World&#39;, &#39;International&#39;)) # EXCLUDE
+
+# GRAPH
+df_parsed %&gt;% 
+  ggplot(aes(day_index, total_cases, color = location, fill = location)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  labs(title = &quot;COVID-19: cumulative daily new cases by country (log scale)&quot;,
+     x = &quot;Days since 100th reported case&quot;,
+     y = NULL, fill = NULL, color = NULL, 
+     caption = &quot;by: @eeysirhc\nSource: Our World in Data&quot;) +
+  facet_wrap(~location, ncol = 4) +
+  expand_limits(x = 70) +
+  theme_minimal() +
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="/images/coronavirus-cases.png" /></p>
+<div id="moment-of-zen" class="section level2">
+<h2>Moment of zen</h2>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+same data, different view<br><br>anyways, please stay healthy and wash them hands! <a href="https://t.co/Wx7Wa0gEkC">pic.twitter.com/Wx7Wa0gEkC</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1237469322601095168?ref_src=twsrc%5Etfw">March 10, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+<div id="related" class="section level2">
+<h2>Related</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/script-to-track-covid-19-cases-in-the-us/">Script to track COVID-19 cases in the US</a></li>
+</ul>
+</div>

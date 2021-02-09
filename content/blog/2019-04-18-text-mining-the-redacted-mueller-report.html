@@ -1,0 +1,126 @@
+---
+title: Text Mining the Redacted Mueller Report
+author: Christopher Yee
+date: '2019-04-18'
+slug: text-mining-the-redacted-mueller-report
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>After two politically-charged years, Robert Mueller finally concluded his <a href="https://en.wikipedia.org/wiki/Special_Counsel_investigation_(2017%E2%80%932019)">investigation</a> on Russian interference with the 2016 presidential elections.</p>
+<p>The outcome was a 440+ page report on their findings - the perfect candidate for some text mining.</p>
+<p><strong>Side note:</strong> the idea for this post came when my attempts to extract the PDF text proved unsuccessful because it was <a href="https://lawandcrime.com/politics/seriously-department-of-justice-posted-unsearchable-version-of-mueller-report/">locked in an unsearchable version</a>.</p>
+As a consequence of that I did a little tweet mining instead:
+<blockquote class="twitter-tweet" data-lang="en">
+<p lang="en" dir="ltr">
+too busy to read all 400+ pages of the <a href="https://twitter.com/hashtag/muellerreport?src=hash&amp;ref_src=twsrc%5Etfw">#muellerreport</a> but apparently not busy enough to do some text/tweet mining with <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a><br><br>according to this network graph though I should definitely check out page 290 <a href="https://t.co/RPiahsrg9A">pic.twitter.com/RPiahsrg9A</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1118944390448156673?ref_src=twsrc%5Etfw">April 18, 2019</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>Forutnately there are people much smarter than me and were able to produce a <a href="https://github.com/gadenbuie/mueller-report">user-friendly format</a> of the redacted report.</p>
+<div id="get-the-data" class="section level2">
+<h2>Get the data</h2>
+<pre class="r"><code>library(tidyverse)
+library(tidytext)
+
+mueller_report_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/gadenbuie/mueller-report/master/mueller_report.csv&quot;)
+
+mueller_report &lt;- mueller_report_raw</code></pre>
+</div>
+<div id="clean-the-data" class="section level2">
+<h2>Clean the data</h2>
+<pre class="r"><code># REMOVE NON-CHAR AND NON-NUMBERS
+mueller_report$text &lt;- str_replace_all(mueller_report$text,&quot;[^a-zA-Z\\s]&quot;, &quot; &quot;)
+
+# CONVERT TO LOWER CASE
+mueller_report$text &lt;- str_to_lower(mueller_report$text)
+
+# REMOVE EXTRA WHITE SPACE
+mueller_report$text &lt;- str_replace_all(mueller_report$text,&quot;[\\s]+&quot;, &quot; &quot;)</code></pre>
+</div>
+<div id="calculate-and-plot-tf-idf-for-every-40-pages" class="section level2">
+<h2>Calculate and plot TF-IDF for every 40 pages</h2>
+<ul>
+<li>Why <a href="https://www.christopheryee.org/blog/tf-idf-explained-with-help-from-us-presidents/">Term Frequency - Inverse Document Frequency</a>?</li>
+</ul>
+<pre class="r"><code>data(stop_words)
+
+mueller_report %&gt;%
+  mutate(page_group = 39 * (page %/% 39)+ 1,   # CREATE GROUPS PER 40 PAGES
+         page_group = as.factor(page_group)) %&gt;%
+  group_by(page_group) %&gt;% 
+  unnest_tokens(word, text) %&gt;% 
+  anti_join(stop_words) %&gt;%
+  count(word, sort = TRUE) %&gt;%
+  bind_tf_idf(word, page_group, n) %&gt;%
+  arrange(desc(tf_idf)) %&gt;%
+  group_by(page_group) %&gt;%
+  top_n(10) %&gt;%   
+  ungroup() %&gt;%
+  mutate(word = reorder(word, tf_idf)) %&gt;%
+  ggplot() +
+  geom_col(aes(word, tf_idf),
+           show.legend = FALSE,
+           fill = &#39;steelblue&#39;) + 
+  facet_wrap(~page_group, ncol = 3, scales = &quot;free&quot;) +
+  coord_flip() +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank()) +
+  labs(x = NULL,
+       y = NULL,
+       title = &quot;Redacted Mueller Report: top keywords per 40 pages based on TF-IDF&quot;,
+       caption = &quot;Author: @eeysirhc&quot;)</code></pre>
+<p><img src="/images/mueller-tfidf.png" /></p>
+<p>Following each page group gives an idea of the history, events and conclusions from the Mueller report.</p>
+</div>
+<div id="create-the-document-term-matrix-for-topic-modeling" class="section level2">
+<h2>Create the document term matrix for topic modeling</h2>
+<pre class="r"><code>library(topicmodels)
+
+desc_dtm &lt;- mueller_report %&gt;%
+  group_by(page) %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  anti_join(stop_words) %&gt;%
+  count(word, sort = TRUE) %&gt;%
+  cast_dtm(page, word, n)
+
+desc_lda &lt;- LDA(desc_dtm, k = 12, control = list(seed = 1234))   # 12 WAS BEST FIT AFTER I TRIED 9 AND 24
+
+top_terms &lt;- tidy(desc_lda) %&gt;%
+  group_by(topic) %&gt;%
+  top_n(10, beta) %&gt;%
+  ungroup() %&gt;%
+  arrange(topic, -beta)</code></pre>
+</div>
+<div id="process-and-plot-the-lda-topic-models" class="section level2">
+<h2>Process and plot the LDA topic models</h2>
+<pre class="r"><code>top_terms %&gt;%
+  mutate(term = reorder(term, beta)) %&gt;%
+  group_by(topic, term) %&gt;%    
+  arrange(desc(beta)) %&gt;%  
+  ungroup() %&gt;%
+  mutate(term = factor(paste(term, topic, sep = &quot;__&quot;), 
+                       levels = rev(paste(term, topic, sep = &quot;__&quot;)))) %&gt;%
+  ggplot(aes(term, beta)) +
+  geom_col(show.legend = FALSE, fill = &#39;seagreen&#39;, alpha = 0.8) +
+  coord_flip() +
+  scale_x_discrete(labels = function(x) gsub(&quot;__.+$&quot;, &quot;&quot;, x)) +
+  labs(title = &quot;Redacted Mueller Report: top 20 keywords in each LDA topic&quot;,
+       x = NULL, y = NULL,
+       caption = &quot;Author: @eeysirhc&quot;) +
+  facet_wrap(~ topic, ncol = 3, scales = &quot;free&quot;) +
+  theme_light() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.text.x = element_blank())</code></pre>
+<p><img src="/images/mueller-lda.png" /></p>
+<p>With <a href="https://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">latent Dirichlet allocation</a>, or LDA, we now have a sense of the major topics and the associated keywords in the redacted report.</p>
+<p>In other words (no pun intended), we are now speed reading with data science.</p>
+</div>

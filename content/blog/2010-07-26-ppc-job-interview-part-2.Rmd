@@ -1,0 +1,36 @@
+---
+author: Christopher Yee
+date: 2010-07-26 06:22:10+00:00
+layout: post
+slug: ppc-job-interview-part-2
+title: PPC Job Interview, Part 2
+categories:
+- Pay Per Click
+---
+
+Approximately two weeks ago I completed my telephone interview with a search engine marketing company for the position of Pay-Per-Click (PPC) Specialist.  You can read the first part of my series at [SEM/PPC Job Interview, Part 1](http://www.christopheryee.org/ppc-job-interview-part-1/) to get yourself up to speed.
+
+A few days after my initial phone interview, I was notified via e-mail that I had advanced to the next part of the hiring process and they required me to pass yet another telephone job interview with the VP of Marketing.  Scary!  Why?  Because I don't know the first thing about marketing principles and theories.  It's all quantum astrophysics to me!  I was literally shaking in my pants for the entire week and did nothing but read all the marketing 101 guides I could find online.
+
+After my week long cram session though, the VP of Marketing finally called and didn't ask me a single question relating to the industry.  Instead, he asked me questions about my previous work history and what I was doing to better myself as a prospective candidate in [Search Engine Optimization](http://www.christopheryee.org/category/search-engine-optimization/) or Pay-Per-Click advertising.  Below you will find some of his questions along with my answers.
+
+
+
+**Do you work well in a small company?
+**"Absolutely!  I currently work in a company which consists of about 30 people and love the fact that we are a very close-knit, intriguing group of people.  It is to my understanding that your SEM company is a recent start-up as well which makes me the ideal candidate to transition seamlessly into your team."
+_Insight: _This is the interviewer's way of assessing my ability to work in a small, fast-paced environment where completing tasks are imminent.  I'm not trying to bash on larger agencies but they have a tendency to get bogged down in paper work.
+
+**Why should I hire you?
+**"You should hire me because I am not only independently motivated but I love learning which is essential to our ever changing field.  I was motivated enough to buy dozens of books, read countless online blog posts and waste tons of ink and paper to comprehend the fundamentals of becoming a search marketer.  This personal attribute of mine coupled with my extremely competitive nature enhances my long-term goal of becoming one of the best of the best (no, that's not a typo repeat)."
+_Insight: _This question throws a lot of people off guard but you will impress the interviewer if you tailor your answer according to the needs of the company.
+
+**What tools do you use for SEM?
+**Not gonna lie - my all time favorite tool for quantitative analysis work is Microsoft Excel and I told my interviewer so.  "I consider myself a 'master manipulator' because I can easily analyze exorbitant amounts of data and compact it into one small report in which anyone with half a brain could understand" (laughs).
+
+**What do YOU want to get out of position?
+**The VP of Marketing asked me this question three times so I think it's safe to say it was an important question.  I gave him a no BS answer - "I want to be the best in the search marketing industry.  I want people to call our us and say, 'Hey, I want [Christopher Yee](http://www.christopheryee.org) to manage our PPC campaigns.'"
+_Insight: _This question is obviously an assessment of my long-term goals to see whether or not I'll make a solid commitment for one year or one month.
+
+I would like to point out that given the course of time these answers are unfortunately not verbatim.  The first part of the telephone job interview took 15 minutes with an additional 10 minutes of me grilling him about what he does and how their SEM company is doing overall.
+
+I am confident I did fairly well but we'll know the REAL answer tomorrow (7/26) or on Tuesday (7/27) when they give me a call.  Wish me luck!

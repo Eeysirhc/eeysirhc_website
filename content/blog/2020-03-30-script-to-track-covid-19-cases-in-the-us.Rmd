@@ -1,0 +1,89 @@
+---
+title: Script to track COVID-19 cases in the US
+author: Christopher Yee
+date: '2020-03-30'
+slug: script-to-track-covid-19-cases-in-the-us
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+A couple weeks ago I shared an [#rstats](https://twitter.com/search?q=%23rstats) script to track [global coronavirus cases](https://www.christopheryee.org/blog/script-to-track-global-coronavirus-pandemic-cases/) by country.
+
+The [New York Times](https://github.com/nytimes/covid-19-data) also released COVID-19 data for new cases in the United States, both at the state and county level. You can run the code below on a daily basis to get the most up to date figures. 
+
+Feel free to modify for your own needs:
+
+```{r eval=FALSE}
+library(scales)
+library(tidyverse)
+library(gghighlight)
+
+state <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv")
+county <- read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
+```
+
+## State
+
+```{r eval=FALSE}
+state %>%
+  group_by(date, state) %>%
+  mutate(total_cases = cumsum(cases)) %>%
+  ungroup() %>%
+  filter(total_cases >= 100) %>% # MINIMUM 100 CASES
+  group_by(state) %>%
+  mutate(day_index = row_number(),
+         n = n()) %>%
+  ungroup() %>%
+  filter(n >= 12) %>% # MINIMUM 12 DAYS
+  ggplot(aes(day_index, total_cases, color = state, fill = state)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  facet_wrap(~state, ncol = 4) +
+  labs(title = "COVID-19: cumulative daily new cases by US states (log scale)",
+       x = "Days since 100th reported case",
+       y = NULL, fill = NULL, color = NULL, 
+       caption = "by: @eeysirhc\nSource: New York Times") +
+  theme_minimal() +
+  theme(legend.position = 'none') +
+  expand_limits(x = 30)
+```
+
+![](/images/coronavirus-cases-usa.png)
+
+## County
+
+For the county level, we'll focus only on California:
+
+```{r eval=FALSE}
+county %>%
+  filter(state == 'California') %>%
+  group_by(date, county) %>%
+  mutate(total_cases = cumsum(cases)) %>%
+  ungroup() %>%
+  filter(total_cases >= 50) %>% # MINIMUM 50 CASES
+  group_by(county) %>%
+  mutate(day_index = row_number(),
+         n = n()) %>%
+  ungroup() %>%
+  ggplot(aes(day_index, total_cases, color = county, fill = county)) +
+  geom_point() +
+  geom_smooth() +
+  gghighlight() +
+  scale_y_log10(labels = comma_format()) +
+  facet_wrap(~county, ncol = 4) +
+  labs(title = "COVID-19: cumulative daily new cases by California counties (log scale)",
+       x = "Days since 50th reported case",
+       y = NULL, fill = NULL, color = NULL, 
+       caption = "by: @eeysirhc\nSource: New York Times") +  
+  theme_minimal() +
+  theme(legend.position = 'none')
+```
+
+![](/images/coronavirus-cases-california.png)
+
+
+

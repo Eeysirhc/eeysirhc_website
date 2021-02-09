@@ -1,0 +1,104 @@
+---
+title: From deterministic to probabilistic SEM bid optimization
+author: Christopher Yee
+date: '2020-10-01'
+slug: from-deterministic-to-probabilistic-sem-bid-optimization
+categories:
+  - Data Science
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>The goal of every search engine marketing (SEM) advertiser is to maximize their returns at the lowest possible cost.</p>
+<p>Campaign performance is primarily tuned by adjusting the maximum cost per click (CPC) bid for each ad. However, finding the “perfect” CPC bid can be a moving target since the auction is constantly in flux.</p>
+<div id="the-sleeper-problem" class="section level2">
+<h2>The “sleeper” problem</h2>
+<p>Imagine an extreme (but likely) scenario where ad spend is significantly over the allocated budget for the month. The SEM expert can do a few things to quickly get the account back in shape:</p>
+<ul>
+<li>Decrease bids until cost falls to acceptable levels</li>
+<li>Install or lower the budget ceiling for some campaigns</li>
+<li>Pause under performing ad units that contribute to the majority of spend</li>
+</ul>
+<p>The account will eventually stabilize after a week or two but by then the ad auction might operate within a completely new set of parameters. One symptom of this is revenue would be lower than prior time periods.</p>
+<p>In our first example, the original bid could have started at $1.00 but bidding down -15% for 5 consecutive days would result in a final max CPC of $0.44. Although helpful to curb spend, this drastic -56% change has the potential to diminish the ad units efficacy &amp; competitiveness where it no longer shows up in the marketplace.</p>
+<p><img src="/blog/2020-10-01-from-deterministic-to-probabilistic-sem-bid-optimization_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>To complicate matters this behavior might be observed across hundreds of thousands of other ad units as well. More specifically though, we effectively put the account to “sleep”.</p>
+<p>Our goal for this use case: identify and set max CPC bids at scale for criteria which no longer generate any revenue.</p>
+<p>How do we go about solving the above? Before showing the interesting stuff let’s first work through our problem with a typical approach.</p>
+</div>
+<div id="deterministic-optimization" class="section level2">
+<h2>Deterministic optimization</h2>
+<blockquote>
+<p>Note: this is also known as rules-based bidding in the industry</p>
+</blockquote>
+<p>One solution is to complete a YoY gap analysis:</p>
+<ol style="list-style-type: decimal">
+<li>Pull performance data for the last X number of days</li>
+<li>Pull data for the same time period last year</li>
+<li>Highlight ad units which used to drive clicks and/or revenue</li>
+<li>Filter on criteria where CPC is lower than last year</li>
+<li>Set max CPC bids to what it was for the previous year</li>
+</ol>
+<p>Mission accomplished!</p>
+<p>Of course, there are always drawbacks to any solution. Below are some which immediately come to mind:</p>
+<ul>
+<li>The SEM specialist needs to think about the appropriate lookback ranges (14 days? 28 days? 105 days?)</li>
+<li>We consciously neglect information when we hand pick dates</li>
+<li>There is the risk of “waking up” historically under performing ad units</li>
+</ul>
+<p>The above approach can reset our bids to produce conversions again but it may lead to repeated costly mistakes and diminish overall bid optimization efforts.</p>
+</div>
+<div id="probabilistic-optimization" class="section level2">
+<h2>Probabilistic optimization</h2>
+<p>A different method to decipher our “sleeper” problem is with the use of probabilities (also see: <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method">Monte Carlo simulations</a>).</p>
+<p>Let’s suppose we have daily historical data for a single ad unit and its average CPC comes out to $0.85. We can take that information and plot it out as such (assumes a normal distribution):</p>
+<p><img src="/blog/2020-10-01-from-deterministic-to-probabilistic-sem-bid-optimization_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>What this chart tells us is the range of possible CPC values for this ad unit. There are instances where we observe a CPC as low as $0.01, though most of the frequencies fall around the average of $0.85 yet it is unlikely to surpass $10.</p>
+<p>An introduction to probabilities is out of scope for this article but the key takeaway for the next part is to calculate the probability when a given ad unit’s CPC meets or exceeds the target goal (1) versus when it did not (0).</p>
+<p>From that data we can then model the average CPC distribution curve for every ad, their respective segments, and the likelihood of achieving its designated goal. We can use ROAS (short for return on ad spend) for our goal where the chart below visualizes the separate relationships from the previous example.</p>
+<p><img src="/blog/2020-10-01-from-deterministic-to-probabilistic-sem-bid-optimization_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p>This is quite insightful and valuable:</p>
+<ul>
+<li>The range of “Exceeded ROAS” has an average CPC roughly less than $0.50 and a little over $1.00</li>
+<li>The “Missed ROAS” has a much broader average CPC range which can be anywhere from $0.01 to as high as $2.00</li>
+</ul>
+<p>Unlike the latter segment, our “Exceeded ROAS” cohort has a tighter bound on potential CPC values - indicating lower variability but relatively higher confidence in the outcome.</p>
+<p>To set our new max CPC bid for this criteria we then “walk” along both probability curves and calculate the greatest difference between them. In other words, we can be fairly confident by setting our new bid to $0.76 our ad would not only generate revenue again but also offer a positive return on investment.</p>
+<blockquote>
+<p>Note: the bidding system can dial up/down the confidence threshold</p>
+</blockquote>
+<p>What I particularly like about this approach is automatically filtering out ads which have lower confidence thresholds for the “Exceeded ROAS” (image below).</p>
+<p><img src="/blog/2020-10-01-from-deterministic-to-probabilistic-sem-bid-optimization_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>With all that being said and done though this isn’t a silver bullet for a couple reasons:</p>
+<ul>
+<li>We focus only on the exploitation side of the <a href="https://conceptually.org/concepts/explore-or-exploit">explore vs exploit equation</a></li>
+<li>This builds a model on historical data but performance marketing goals change all the time (ex: LY goal of 120% but TY set to 300% which means everything falls under “Missed ROAS”)</li>
+</ul>
+<p>To address these problems we would then need to write a different set of SEM bidding algorithms.</p>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>By leveraging probabilities and simulation methods, we can create a model which understands the range of ROAS certainty for a given max CPC bid per ad unit. Additionally, with this technique we also resolved some of the issues that plagued deterministic bidding:</p>
+<ul>
+<li>Remove the need to set lookback date ranges</li>
+<li>Incorporate the full range of historical performance data</li>
+<li>Minimize the risk of bidding up horrible criteria (again)</li>
+</ul>
+</div>
+<div id="you-may-also-like" class="section level2">
+<h2>You may also like</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/examining-drug-effectiveness-studies-via-simulation/">Examining drug effectiveness studies via simulation</a></li>
+<li><a href="https://www.christopheryee.org/blog/r-functions-for-data-simulation-sampling-and-visualization/">R functions for simulation, sampling &amp; visualization</a></li>
+</ul>
+</div>
+<div id="other-applications" class="section level2">
+<h2>Other applications</h2>
+<ul>
+<li>Significance testing of click-through rate (CTR) changes</li>
+<li>Computing the probabilities of organic search keyword ranking movement</li>
+<li>Estimating the likelihood an onsite change would impact search engine crawler behavior</li>
+</ul>
+</div>

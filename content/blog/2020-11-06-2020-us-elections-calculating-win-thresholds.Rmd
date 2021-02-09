@@ -1,0 +1,84 @@
+---
+title: '2020 US Elections: calculating win thresholds'
+author: Christopher Yee
+date: '2020-11-06'
+slug: 2020-us-elections-calculating-win-thresholds
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+The [2020 US presidential election](https://www.cnn.com/election/2020/results/president) is coming down to the wire and I thought it would be fun to share how I calculate the answer to the following question:
+
+> What is the distribution of the remaining ballots that Biden/Trump needs to win the electoral college votes for a given state?
+
+If we join this data point with Biden vs Trump mail-in ballot rates, or any other information for that matter, then it returns a fairly decent estimate on how thin/wide the margins will be for the US presidential race.
+
+Also, this was helpful for me because it offers an idea when it becomes statistically improbable to beat the other candidate. This is how states like California can make an early call even if 100% of the votes have not been processed.
+
+For the below we'll be using the [R statistical programming language](https://www.r-project.org/).
+
+## Define function
+
+```{r error=FALSE, message=FALSE}
+library(dplyr)
+
+election_threshold <- function(state, biden, trump, pct_count){
+
+  # CURRENT VOTE COUNT DIFFERENCE
+  spread <- biden - trump  
+  
+  # TOTAL VOTES WAITING TO BE PROCESSED
+  remaining <- (biden + trump) * (1 - pct_count)
+  
+  # WIN RATE THRESHOLDS
+  pct_ranges <- seq(0.00, 1.00, 0.01)
+  
+  # BIDEN VOTE DISTRIBUTION
+  biden_distro <- remaining * pct_ranges
+  biden_votes <- biden + biden_distro
+  
+  # TRUMP VOTE DISTRUBTION
+  trump_distro <- remaining * rev(pct_ranges)
+  trump_votes <- trump + trump_distro
+  
+  # JOIN DATA AND IDENTIFY MINIMUM WIN THRESHOLD
+  df <- tibble(pct_ranges, biden_votes, trump_votes) %>% 
+    mutate(diff = biden_votes - trump_votes) %>% 
+    filter(diff > 0) %>% 
+    head(1) %>% 
+    pull(pct_ranges)
+  
+  # FORMAT FROM DECIMAL TO 100%
+  pct_distro_win <- df * 100
+  
+  paste0(state, ": need ", pct_distro_win, 
+         "% win threshold with a current spread of ", 
+         spread, " votes")
+}
+```
+
+## Application
+
+Let's take our California example and plug in the Nov 5th numbers for Biden and Trump respectively at 66% reporting completion:
+
+```{r error=FALSE, message=FALSE}
+election_threshold("CA", 7910112, 3986276, 0.66)
+```
+
+What this means for Biden is he would need 2 out of every 100 votes from the remaining ballots to **barely** win California. That is a very high bar for Trump to surpass (he needs 98 out of 100) and with the state being a Democratic stronghold it would be nearly impossible for Biden to lose.
+
+Now we'll try a battleground state like Pennsylvania.
+
+When I ran this formula on Nov 5th, Pennsylvania was leaning Republican, had a 89% reporting completion, and Biden needed 69% of the votes to win. With news sources claiming the majority being mail-in ballots and skewed more than 80% to Biden, I was fairly confident the state would flip blue overnight - [which it certainly did](https://www.cbsnews.com/live-updates/2020-election-live-updates-2020-11-06/)! 
+
+Here is what that minimum win rate would look like now using Nov 6th data:
+
+```{r error=FALSE, message=FALSE}
+election_threshold("PA", 3316772, 3301849, 0.96)
+```
+
+Thus, Pennsylvania now leans Democratic which means Trump would need *at the absolute minimum* more than half of the leftover count (52 votes for every 100) to win its electoral college votes. Although not statistically improbable, he has an uphill battle when considering the 96% reporting completion for the state so far, mail-in ballot rate, and the counties where the remaining votes were coming in from - historically Democratic suburbs.
+
+

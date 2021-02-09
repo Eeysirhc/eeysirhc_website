@@ -1,0 +1,97 @@
+---
+title: Using R & GSC data to identify stale content
+author: Christopher Yee
+date: '2020-01-21'
+slug: using-r-gsc-data-identify-stale-content
+categories:
+  - Data Science
+---
+
+
+
+<p>My friend <a href="https://twitter.com/JHTScherck">John-Henry Scherck</a> recently tweeted his process on how to refresh stale content:</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Put together a quick video on how to refresh stale content using nothing more than Google Search Console and a word doc. <br><br>Check out the full video here: <a href="https://t.co/Vva4Zm4mNn">https://t.co/Vva4Zm4mNn</a> <a href="https://t.co/74Fm2oIz4c">pic.twitter.com/74Fm2oIz4c</a>
+</p>
+— John-Henry Scherck (<span class="citation">@JHTScherck</span>) <a href="https://twitter.com/JHTScherck/status/1219713918307692544?ref_src=twsrc%5Etfw">January 21, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>I imagine this can be broken down into five distinct parts:</p>
+<ol style="list-style-type: decimal">
+<li>Stale content selection</li>
+<li>Understanding keyword intent</li>
+<li>Actually refreshing the content</li>
+<li>Internal link optimization</li>
+<li>Publish</li>
+</ol>
+<p>This short guide will focus on the first aspect where we’ll use <a href="https://twitter.com/search?q=%23rstats">#rstats</a> to remove the manual work associated with <em>stale candidate selection</em>.</p>
+<blockquote class="twitter-tweet" data-conversation="none">
+<p lang="en" dir="ltr">
+That's it! Fairly manual, but hopefully straightforward. Let me know what you think or if you have any questions.
+</p>
+— John-Henry Scherck (<span class="citation">@JHTScherck</span>) <a href="https://twitter.com/JHTScherck/status/1219715744545439744?ref_src=twsrc%5Etfw">January 21, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(searchConsoleR)
+
+scr_auth()</code></pre>
+</div>
+<div id="download-data" class="section level2">
+<h2>Download data</h2>
+<p>The code below will grab 100K results for the last five full weeks of data but feel free to revise as you see fit.</p>
+<pre class="r"><code>df &lt;- as_tibble(search_analytics(&quot;https://www.christopheryee.org/&quot;,
+                                 Sys.Date() - 35, # START DATE
+                                 Sys.Date() - 3, # END DATE
+                                 c(&quot;page&quot;, &quot;query&quot;),
+                                 searchType = &quot;web&quot;,
+                                 rowLimit = 1e5))</code></pre>
+</div>
+<div id="identify-keywords" class="section level2">
+<h2>Identify keywords</h2>
+<p>This is where we’ll exclude brand terms and filter only on keywords with more than 2K impressions &amp; average position between 5 to 15.</p>
+<pre class="r"><code>keywords &lt;- df %&gt;% 
+  group_by(query) %&gt;% 
+  summarize(impressions = sum(impressions),
+            position = mean(position)) %&gt;% 
+  filter(!grepl(&quot;brand_term&quot;, query)) %&gt;% # EXCLUDE BRAND TERMS HERE
+  arrange(dsec(impressions)) %&gt;% 
+  filter(impressions &gt;= 2000,
+         position &gt;= 5 &amp; position &lt; 15) %&gt;% 
+  select(query)</code></pre>
+</div>
+<div id="dedupe-landing-pages" class="section level2">
+<h2>Dedupe landing pages</h2>
+<p>There may be instances where a page will have multiple keywords.</p>
+<p>We can remove duplicates here by sorting keywords with highest clicks for each page.</p>
+<pre class="r"><code>pages &lt;- df %&gt;% 
+  inner_join(keywords) %&gt;% # JOIN OUR KEYWORDS DATASET
+  group_by(query) %&gt;% 
+  arrange(desc(clicks)) %&gt;% 
+  mutate(candidate = row_number()) %&gt;% 
+  ungroup() %&gt;% 
+  filter(candidate == 1) %&gt;% 
+  select(page)</code></pre>
+<blockquote>
+<p>Fun fact: I often use candidate = row_number() as a quick hack to filter the “top” or “bottom” criteria for a given dataset</p>
+</blockquote>
+</div>
+<div id="final-candidates" class="section level2">
+<h2>Final candidates</h2>
+<pre class="r"><code>df %&gt;% 
+  inner_join(pages) %&gt;% 
+  mutate(ctr = (clicks / impressions) * 100) %&gt;% # STANDARDIZE CTR
+  arrange(desc(page, impressions)) %&gt;% 
+  distinct(.)</code></pre>
+<p>From here you can then take the keywords and move on to the <em>understanding keyword intent</em> phase.</p>
+</div>
+<div id="resources" class="section level2">
+<h2>Resources</h2>
+<ul>
+<li>Full script can be found on <a href="https://github.com/Eeysirhc/random_scripts/blob/master/content_refresh_candidates.R">GitHub</a></li>
+<li>If you enjoyed this post, you may be interested in my <a href="https://www.christopheryee.org/blog/getting-started-with-r-using-google-search-console-data/">getting started with R guide using Google Search Console data</a></li>
+</ul>
+</div>

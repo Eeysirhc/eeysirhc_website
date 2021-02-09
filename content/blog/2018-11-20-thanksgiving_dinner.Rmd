@@ -1,0 +1,94 @@
+---
+title: "TidyTuesday: Thanksgiving Dinner"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+author: Christopher Yee
+date: 2018-11-20
+layout: post
+slug: tidytuesday-thanksgiving-dinner
+categories:
+- TidyTuesday
+---
+
+Analyzing data for #tidytuesday week of 11/20/2018 ([source](https://github.com/rfordatascience/tidytuesday/tree/master/data/2018-11-20))
+
+```{r results='hide', message=FALSE, warning=FALSE}
+# LOAD PACKAGES AND PARSE DATA
+library(tidyverse)
+library(scales)
+library(RColorBrewer)
+library(forcats)
+
+thanksgiving_raw <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2018/2018-11-20/thanksgiving_meals.csv")
+
+thanksgiving <- 
+  thanksgiving_raw %>%
+  filter(celebrate != 'No')
+```
+
+
+### What are the most popular pies for Thanksgiving ?
+```{r}
+thanksgiving %>%
+  select(pie1:pie13) %>% 
+  pivot_longer(pie1:pie13, names_to = "pie_type") %>% 
+  filter(value != 'None') %>% 
+  select(value) %>% 
+  group_by(value) %>% 
+  count() %>% 
+  filter(n > 10) %>% 
+  ungroup() %>% 
+  ggplot(aes(reorder(value, n), n, label = n)) +
+  geom_bar(aes(fill = value),
+           alpha = 0.9,
+           stat='identity') +
+  coord_flip() +
+  theme_classic() + 
+  theme(legend.position = 'none') +
+  labs(title = "Most Popular Pies for Thanksgiving (n=980)",
+        subtitle = "Question: Which type of pie is typically served at your Thanksgiving dinner? \n Please select all that apply",
+       x = "",
+       y = "")
+```
+
+### What is the most popular Thanksgiving pie by US region?
+```{r}
+thanksgiving %>%
+  select(pie1:pie13, us_region) %>%
+  pivot_longer(pie1:pie13, names_to = "pie_type") %>% 
+  filter(!is.na(value), us_region != 'NA') %>%
+  
+  # THIS IS PRETTY NASTY AND I SHOULD REFACTOR IN THE FUTURE
+  mutate(us_region = ifelse(us_region == 'South Atlantic', 'East', 
+                            ifelse(us_region == 'Middle Atlantic', 'North East', 
+                                   ifelse(us_region == 'East North Central', 'Midwest',
+                                          ifelse(us_region == 'East South Central', 'South',
+                                                 ifelse(us_region == 'West North Central', 'Midwest',
+                                                        ifelse(us_region == 'West South Central', 'South',
+                                                               ifelse(us_region == 'New England', 'North East',
+                                                                      ifelse(us_region == 'Pacific', 'West', 
+                                                                             ifelse(us_region == 'Mountain', 'Midwest',
+                                                               us_region)))))))))) %>% 
+  group_by(us_region, value) %>%
+  count(sort = TRUE) %>% 
+  filter(n > 10) %>% 
+  ungroup()  %>% 
+  ggplot(aes(us_region, fct_rev(value), fill = n)) + 
+  geom_tile() +
+  scale_fill_gradient2(
+    name = 'n',
+    low = '#fee6ce',
+    mid = '#fdae6b',
+    high = '#e6550d',
+    midpoint = 100
+  ) +
+  theme_classic() + 
+  labs(x = "",
+       y = "",
+       title = "Most Popular Pies for Thanksgiving by US Region")
+```
+
+
+
+

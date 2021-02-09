@@ -1,0 +1,24 @@
+---
+title: 'Google Ads: digging deeper into target ROAS bidding'
+author: Christopher Yee
+date: '2019-06-07'
+slug: google-ads-digging-deeper-into-target-roas-bidding
+categories:
+  - Pay Per Click
+---
+
+Excerpt from [my original article about Google's tROAS bidding](https://www.ftoptimize.com/articles/2019/5/31/google-ads-digging-deeper-into-target-roas-bidding):
+
+> Google has made a concerted effort to get more advertisers to switch over to their “smart bidding” platform.  This technology uses machine learning to optimize max CPC at auction time by predicting future conversion rate and value based on historical data.  The purpose is to relinquish bidding activities to Google so advertiser’s can divert their attention to other details of account management.
+>
+>This sounds great and with all things digital marketing we should always [test new ideas](https://www.ftoptimize.com/articles/2019/3/5/google-ads-bidding-is-enhanced-cpc-really-working) before accepting it as gospel - Google is no exception.
+>
+>In this article we will review an experiment we conducted last year for an online retailer when we enabled target ROAS “smart bidding” for their account.  Our goal was to determine the efficacy of this bidding strategy and whether or not it would be worth the transition for our client.
+
+
+
+<br> 
+
+## Related
+
+* [10x SEM performance: unlock the power of your own data](https://www.christopheryee.org/blog/10x-sem-performance-unlock-the-power-of-your-own-data/)

@@ -1,0 +1,96 @@
+---
+title: How to interact with Slack from R
+author: Christopher Yee
+date: '2020-03-11'
+slug: how-to-interact-with-slack-from-r
+categories:
+  - Data Science
+---
+
+
+
+<p>I think my tweet speaks for itself:</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+Words can not express how excited I am to use this :D
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1237388132800061440?ref_src=twsrc%5Etfw">March 10, 2020</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>The goal of this article is to document how to send <a href="https://twitter.com/hashtag/rstats">#rstats</a> code and plots directly to Slack.</p>
+<div id="load-packages" class="section level1">
+<h1>Load packages</h1>
+<pre class="r"><code>library(slackr)
+library(slackteams)
+library(slackreprex)</code></pre>
+</div>
+<div id="slack-credentials" class="section level1">
+<h1>Slack credentials</h1>
+<div id="member-id" class="section level2">
+<h2>Member ID</h2>
+<p>You can easily grab that from <a href="https://medium.com/@moshfeu/how-to-find-my-member-id-in-slack-workspace-d4bba942e38c">this guide here</a>.</p>
+</div>
+<div id="slack-key-id" class="section level2">
+<h2>Slack Key ID</h2>
+<p>To retrieve your Slack key ID, <a href="https://slack.com/oauth/authorize?client_id=220157155520.220159943344&amp;scope=incoming-webhook,files:read,files:write:user,chat:write:bot,chat:write:user,mpim:write,mpim:read,mpim:history,im:write,im:read,im:history,groups:write,groups:read,groups:history,channels:write,channels:read,channels:history,emoji:read,usergroups:read,users:read">login here</a> and then follow the prompts.</p>
+</div>
+<div id="api-token-webhook" class="section level2">
+<h2>API token &amp; webhook</h2>
+<p>Last but not least, we can now use our newfound credentials and insert them into the following URL:</p>
+<p><em>https<!-- -->://slackr-auth.herokuapp.com/creds/<strong>MEMBER_ID</strong>/<strong>SLACK_KEY_ID</strong></em></p>
+<p>The end result should provide the last pieces of our puzzle for the API token, webhook and the assigned channel for the Slack key ID.</p>
+</div>
+<div id="authenticate" class="section level2">
+<h2>Authenticate</h2>
+<pre class="r"><code>slackrSetup(channel = &quot;#thinktank&quot;,
+            incoming_webhook_url = &quot;https://hooks.slack.com/services/0123456789&quot;,
+            api_token = &quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;)</code></pre>
+</div>
+</div>
+<div id="interacting-from-r" class="section level1">
+<h1>Interacting from R</h1>
+<p>We’re now ready for a <a href="https://www.youtube.com/watch?v=fq6R39wWXGM">toast</a> test:</p>
+<pre class="r"><code>slackr(&quot;toast test from R&quot;)</code></pre>
+<p>Even though we selected a specific channel we can easily switch to a different one without going through the entire process again:</p>
+<pre class="r"><code>slackr(&quot;toast test from R&quot;, channel = &quot;#warroom&quot;)</code></pre>
+<div id="sending-a-plot" class="section level2">
+<h2>Sending a plot</h2>
+<p>Let’s try to recreate a plot I saw awhile back on <a href="https://www.christopheryee.org/categories/search-engine-optimization/">SEO</a> twitter.</p>
+<pre class="r"><code>library(dplyr)
+library(ggplot2)
+
+technical &lt;- tibble(website_size = seq(0, 100, 1),
+                    importance = seq(0, 100, 1)) %&gt;% 
+  mutate(segment = &quot;technical&quot;)
+
+content &lt;- tibble(website_size = rev(seq(0, 100, 1)),
+                  importance = seq(0, 100, 1)) %&gt;% 
+  mutate(segment = &quot;content&quot;)
+
+df &lt;- rbind(technical, content)
+
+p &lt;- df %&gt;% 
+  ggplot(aes(website_size, importance, color = segment)) +
+  geom_point() +
+  geom_line() +
+  labs(color = NULL) +
+  theme_light() +
+  theme(legend.position = &#39;top&#39;)</code></pre>
+<p>Making sure the plot does what we want…</p>
+<pre class="r"><code>p</code></pre>
+<p><img src="/blog/2020-03-11-how-to-send-r-code-chunks-to-slack_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>…and then beam it up over to Slack:</p>
+<pre class="r"><code>ggslackr(p)</code></pre>
+<p>Too. Easy.</p>
+</div>
+</div>
+<div id="applications" class="section level1">
+<h1>Applications</h1>
+<p>Nearly 85% of my work communications (internal &amp; client-facing) is completed in Slack so I can think of a few “real world” use cases for this:</p>
+<ul>
+<li>Automated daily, weekly, monthly reporting</li>
+<li>Incorporate analyses &amp; insights then publish results directly to Slack</li>
+<li>Ping the appropriate channels when performance surpasses a statistical threshold</li>
+<li>Sharing code or final data output without jumping through hoops</li>
+</ul>
+</div>

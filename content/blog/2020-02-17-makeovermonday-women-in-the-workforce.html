@@ -1,0 +1,73 @@
+---
+title: 'MakeoverMonday: Women in the Workforce'
+author: Christopher Yee
+date: '2020-02-17'
+slug: makeovermonday-women-in-the-workforce
+categories:
+  - TidyTuesday
+---
+
+
+
+<p>Goal of #makeovermonday is to transform some of my <a href="https://twitter.com/search?q=%23rstats">#rstats</a> articles and visualizations to their python equivalent.</p>
+<p>Original plot for this <a href="https://www.christopheryee.org/categories/tidytuesday">#tidytuesday dataset</a> can be <a href="https://www.christopheryee.org/blog/tidytuesday-women-in-the-workforce/">found here</a>.</p>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt</code></pre>
+</div>
+<div id="download-and-parse-data" class="section level2">
+<h2>Download and parse data</h2>
+<pre class="python"><code>df_raw = pd.read_csv(&quot;https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-03-05/jobs_gender.csv&quot;,
+      sep=&#39;,&#39;, error_bad_lines=False, index_col=False, dtype=&#39;unicode&#39;)
+
+# FILTER ONLY FOR 2016
+df_raw = df_raw[df_raw[&#39;year&#39;]==&#39;2016&#39;]
+
+df_raw = df_raw[[&#39;major_category&#39;, &#39;total_earnings_male&#39;, &#39;total_earnings_female&#39;,
+               &#39;total_earnings&#39;, &#39;total_workers&#39;, &#39;workers_male&#39;, &#39;workers_female&#39;]]
+
+# REMOVE NULL VALUES
+df_raw = df_raw.dropna()</code></pre>
+</div>
+<div id="clean-data" class="section level2">
+<h2>Clean data</h2>
+<p>Need to transform our data from objects to numerical values.</p>
+<pre class="python"><code># PULL OUT MAJOR CATEGORIES
+df_categories = pd.DataFrame(df_raw.iloc[:, 0])
+
+# CONVERT EVERYTHING ELSE TO INTEGERS
+df_values = pd.DataFrame(df_raw.iloc[:, 1:7].astype(int))
+
+# COMBINE DATAFRAMES
+df = pd.concat([df_categories, df_values], axis=1)</code></pre>
+</div>
+<div id="calculate-weighted-differences" class="section level2">
+<h2>Calculate weighted differences</h2>
+<pre class="python"><code># MALE AVERAGE DIFF
+df[&#39;male_diff&#39;] = (((df[&#39;total_earnings_male&#39;] / df[&#39;total_earnings&#39;]) - 1) * df[&#39;workers_male&#39;] ) / df[&#39;total_workers&#39;]
+
+# FEMALE AVERAGE DIFF
+df[&#39;female_diff&#39;] = (((df[&#39;total_earnings_female&#39;] / df[&#39;total_earnings&#39;]) - 1) * df[&#39;workers_female&#39;] ) / df[&#39;total_workers&#39;]
+
+# SELECT VARIABLES FOR PLOTTING
+df_final = df[[&#39;major_category&#39;, &#39;total_earnings&#39;, &#39;male_diff&#39;, &#39;female_diff&#39;]]</code></pre>
+</div>
+<div id="visualize-dataset" class="section level2">
+<h2>Visualize dataset</h2>
+<pre class="python"><code>plt.figure(figsize=(20,15))
+
+g = sns.FacetGrid(df_final, col=&#39;major_category&#39;, col_wrap=3, height=5)
+g = g.map(plt.scatter, &#39;total_earnings&#39;, &#39;male_diff&#39;, color=&#39;blue&#39;, edgecolor=&#39;white&#39;)
+g = g.map(plt.scatter, &#39;total_earnings&#39;, &#39;female_diff&#39;, color=&#39;red&#39;, edgecolor=&#39;white&#39;) .set_titles(&quot;{col_name}&quot;).set_xlabels(&quot;Average Median Earnings&quot;).set_ylabels(&quot;Difference from Average&quot;)
+
+plt.subplots_adjust(top = 0.9)
+plt.suptitle(&quot;2016 Earnings Differences (Weighted) by Job Sector&quot;,
+      x=0.1, horizontalalignment=&quot;left&quot;, fontsize=16)
+plt.figtext(0.9, 0.03, &quot;by: @eeysirhc&quot;, horizontalalignment=&quot;right&quot;)
+plt.figtext(0.9, 0.02, &quot;Source: Bureau of Labor Statistics&quot;, horizontalalignment=&quot;right&quot;)
+
+plt.show(g)</code></pre>
+<p><img src="/blog/2020-02-17-makeovermonday-women-in-the-workforce_files/figure-html/unnamed-chunk-5-1.png" width="1440" /></p>
+</div>
