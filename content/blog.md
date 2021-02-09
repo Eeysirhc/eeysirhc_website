@@ -1,9 +1,9 @@
 ---
 title: "blog"
-layout: archives
+layout: "archives"
 hidden: true
 url: "/blog/"
-summary: "blog"
+summary: archives
 ---
 
 

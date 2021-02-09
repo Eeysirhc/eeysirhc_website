@@ -27,8 +27,11 @@ menu:
           
           
 params: 
+    env: production
     description: "Christopher Yee is part of the SEO Intelligence division at Uber. He is a data-driven human all about the #rstats life. Former Director of Optimization @ FT Optimize, SEO @ Square, American Eagle Outfitters, HP Inc., Macys, and CafePress."
     #author: Christopher Yee
+    
+    defaultTheme: auto 
     
     homeInfoParams:
         Title: "![cyee-logo](/images/cyee-logo-edit.png)"
