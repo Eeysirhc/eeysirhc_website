@@ -1,10 +1,11 @@
-+++
-title = "news"
-+++
+---
+title: "news"
+url: "/news/"
+---
 
 ## 2020
 * __Lights Out:__ deployed a fully automated SEM bidding system that changed over 1M bids per day
-* __Nergui:__ established a series of new bidding algorithms which utilized [probabilistic optimization](https://www.christopheryee.org/blog/from-deterministic-to-probabilistic-sem-bid-optimization/) instead of the standard deterministic approach used by the industry
+* __Nergui:__ established a series of new bidding algorithms which utilized probabilistic optimization instead of the standard deterministic approach used by the industry
 * Began new adventure at Uber in the SEO Intelligence division - focused on internal product development with the help of software engineering, data science, and adtech
 
 ## 2019
@@ -14,7 +15,7 @@ title = "news"
 
 ## 2018
 * __Monocle:__ collaborated with Square's Data Science team to launch "related articles" module which recommended content based on the predicted intent funnel of the user
-* Accepted new position as [FT Optimize's](https://www.ftoptimize.com/) Director of Optimization - focusing on data science, paid search marketing and software development
+* Accepted new position as FT Optimize's Director of Optimization - focusing on data science, paid search marketing and software development
 * __Sandstone:__ rewrote core FTO bidding algorithms to significantly improve operational efficiencies
 
 ## 2017
@@ -36,10 +37,10 @@ title = "news"
 * Accepted position at Hewlett-Packard as SEO Marketing Manager, AMS
 
 ## 2013
-* [Joined SEOgadget](https://www.christopheryee.org/blog/joining-seogadget-family/) (now Builtvisible) as Organic Search Strategist for the US office
+* Joined SEOgadget (now Builtvisible) as Organic Search Strategist for the US office
 
 ## 2012
-* [Left CafePress for Macys.com](https://www.christopheryee.org/blog/goodbye-cafepress-hello-macys/) as Assistant Marketing Manager, SEO
+* Left CafePress for Macys.com as Assistant Marketing Manager, SEO
 * Designed and prototyped what is now BrightEdge's "Share of Voice" product for SEO competitive analysis
 
 ## 2011
@@ -48,7 +49,6 @@ title = "news"
 * Led internal project for server log analysis (100gb of data) to optimize and manage search engine crawler budget
 
 ## 2010
-* To document my SEO journey I started [this blog](https://www.christopheryee.org/) 
+* To document my SEO journey I started this website
 * Accepted an internship at CafePress as a Link Builder
-
 
