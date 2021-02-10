@@ -45,8 +45,8 @@ params:
           url: "https://twitter.com/Eeysirhc"
         - name: linkedin
           url: "https://www.linkedin.com/in/seochrisyee/"  
-        # - name: KoFi
-        #   url: "https://ko-fi.com/eeysirhc"          
+        - name: KoFi
+          url: "https://ko-fi.com/eeysirhc"
             
             
     assets:
