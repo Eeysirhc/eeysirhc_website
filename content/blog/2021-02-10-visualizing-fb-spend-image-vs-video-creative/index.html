@@ -75,11 +75,15 @@ for i, text in enumerate(df.brand):
 
 # SIMULATE FOR ABLINE
 abline_plot = np.linspace(0.0, 100, 100)
-plt.plot(abline_plot, abline_plot, color=&#39;gray&#39;, linestyle=&#39;:&#39;)
+plt.plot(abline_plot, abline_plot, color=&#39;gray&#39;, linestyle=&#39;--&#39;)
+plt.plot(abline_plot, abline_plot+50, color=&#39;salmon&#39;, linestyle=&#39;:&#39;)
+plt.plot(abline_plot, abline_plot-50, color=&#39;salmon&#39;, linestyle=&#39;:&#39;)
 
 # GRAPH DETAILS
 plt.xlabel(&#39;Video Spend (%)&#39;)
 plt.ylabel(&#39;Image Spend (%)&#39;)
+plt.xlim(0,100);
+plt.ylim(0,100);
 plt.subplots_adjust(top = 0.94)
 plt.suptitle(&#39;Facebook: spend distribution by asset type (n=14)&#39;
               , x=0.12, horizontalalignment=&#39;left&#39;, fontsize=15)
@@ -87,5 +91,5 @@ plt.figtext(0.9, 0.04, &#39;by: @eeysirhc&#39;, horizontalalignment=&#39;right&#
 
 plt.show()</code></pre>
 <p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="1440" /></p>
-<p>Note: three brands (2,5,8) above the dotted line where the majority of their Facebook spend is focused on Image assets as opposed to Video creatives.</p>
+<p>Note: we have three brands (2,5,8) above the dotted gray line which means the majority of their Facebook spend is focused on Image assets as opposed to Video creatives. Also, Brand #8 is our outlier that over-indexes on Image since it sits past the upper red line in our graph.</p>
 </div>
