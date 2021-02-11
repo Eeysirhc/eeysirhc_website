@@ -1,0 +1,91 @@
+---
+title: 'Visualizing FB spend: image vs video creative'
+author: Christopher Yee
+date: '2021-02-10'
+slug: []
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p><strong>Objective:</strong> plot the comparison of total Facebook spend between image and video creatives for a small sample of DTC brands.</p>
+<p>The original piece without any visualization (e.g. tabulated data) can be found <a href="https://blog.thesistesting.com/distribution-of-fb-spend-for-14-d2c-brands-image-vs-video/">here</a> but the main takeaway:</p>
+<blockquote>
+<p><em>Though it can be tempting to go all in on video assets, I intend to use this data as added inspiration to continue investing in and testing Images.</em></p>
+</blockquote>
+<div id="load-modules" class="section level2">
+<h2>Load modules</h2>
+<pre class="python"><code>import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+sns.set(style=&#39;darkgrid&#39;)</code></pre>
+</div>
+<div id="encode-data" class="section level2">
+<h2>Encode data</h2>
+<pre class="python"><code>labels = [&#39;brand&#39;, &#39;total_spend&#39;, &#39;pct_image_spend&#39;, &#39;image_cpa&#39;, &#39;pct_video_spend&#39;, &#39;video_cpa&#39;]
+
+df = [[&#39;Brand 1&#39;, 1880000, 17, 773, 83, 805],
+  [&#39;Brand 2&#39;, 1630000, 57, 350, 44, 463],
+  [&#39;Brand 3&#39;, 1610000, 34, 179, 66, 188],
+  [&#39;Brand 4&#39;, 1300000, 12, 132, 88, 169],
+  [&#39;Brand 5&#39;, 1230000, 63, 46, 37, 40],
+  [&#39;Brand 6&#39;, 800000, 15, 22, 85, 24],
+  [&#39;Brand 7&#39;, 690000, 7, 120, 93, 127],
+  [&#39;Brand 8&#39;, 590000, 87, 18, 13, 28],
+  [&#39;Brand 9&#39;, 400000, 3, 47, 97, 0.63],
+  [&#39;Brand 10&#39;, 230000, 24, 48, 75, 114],
+  [&#39;Brand 11&#39;, 220000, 20, 25, 80, 21],
+  [&#39;Brand 12&#39;, 180000, 40, 57, 59, 51],
+  [&#39;Brand 13&#39;, 170000, 3, 47, 95, 59],
+  [&#39;Brand 14&#39;, 120000, 13, 17, 90, 13]]
+
+df = pd.DataFrame(df)
+
+df.columns = labels</code></pre>
+</div>
+<div id="define-function" class="section level2">
+<h2>Define function</h2>
+<p>We will use this simple method to categorize the brands and their different ad spend levels on Facebook.</p>
+<pre class="python"><code>def sl_threshold(total_spend):
+    if total_spend &gt;= 1e6:
+        return &#39;More than $1M&#39;
+    elif total_spend &lt; 5e5:
+        return &#39;Less than $500K&#39;
+    else:
+        return &#39;\$500K - \$1M&#39;
+
+df[&#39;Spend Level&#39;] = df[&#39;total_spend&#39;].apply(sl_threshold)</code></pre>
+</div>
+<div id="plot-data" class="section level2">
+<h2>Plot data</h2>
+<pre class="python"><code>plt.figure(figsize=(15,10))
+
+# SCATTERPLOT
+ax = sns.scatterplot(data=df, x=&#39;pct_video_spend&#39;, y=&#39;pct_image_spend&#39;, 
+                      hue=&#39;Spend Level&#39;)
+
+# TEXT LABELS                      
+for i, text in enumerate(df.brand):
+    ax.annotate(text, (df.pct_video_spend[i], df.pct_image_spend[i]))                      
+
+# SIMULATE FOR ABLINE
+abline_plot = np.linspace(0.0, 100, 100)
+plt.plot(abline_plot, abline_plot, color=&#39;gray&#39;, linestyle=&#39;:&#39;)
+
+# GRAPH DETAILS
+plt.xlabel(&#39;Video Spend (%)&#39;)
+plt.ylabel(&#39;Image Spend (%)&#39;)
+plt.subplots_adjust(top = 0.94)
+plt.suptitle(&#39;Facebook: spend distribution by asset type (n=14)&#39;
+              , x=0.12, horizontalalignment=&#39;left&#39;, fontsize=15)
+plt.figtext(0.9, 0.04, &#39;by: @eeysirhc&#39;, horizontalalignment=&#39;right&#39;)
+
+plt.show()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-4-1.png" width="1440" /></p>
+<p>Note: three brands (2,5,8) above the dotted line where the majority of their Facebook spend is focused on Image assets as opposed to Video creatives.</p>
+</div>
