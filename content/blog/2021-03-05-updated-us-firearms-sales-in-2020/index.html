@@ -1,0 +1,67 @@
+---
+title: '[Updated] US firearms sales in 2020'
+author: Christopher Yee
+date: '2021-03-05'
+slug: []
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>My original exploratory analysis on the topic can be found at <a href="https://www.christopheryee.org/blog/firearm-sales-how-are-americans-coping-with-2020/">Firearm Sales: How are Americans coping with 2020?</a></p>
+<p>This post is a quick <a href="https://twitter.com/search?q=%23rstats">#rstats</a> follow-up to visualize the final tally for 2020 data.</p>
+<div id="load-libraries" class="section level2">
+<h2>Load libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(lubridate)
+library(scales)</code></pre>
+</div>
+<div id="download-parse-data" class="section level2">
+<h2>Download &amp; parse data</h2>
+<pre class="r"><code>df_raw &lt;- read_csv(&quot;https://raw.githubusercontent.com/BuzzFeedNews/nics-firearm-background-checks/master/data/nics-firearm-background-checks.csv&quot;)
+
+df &lt;- df_raw
+
+df_clean &lt;- df %&gt;% 
+  filter(month &gt;= &quot;2016-01&quot; &amp; month &lt; &quot;2021-01&quot;) %&gt;% 
+  select(month, state, handgun, long_gun) %&gt;% 
+  arrange((month)) %&gt;% 
+  mutate(month = as.Date(paste0(month, &quot;-01&quot;))) %&gt;% 
+  group_by(month) %&gt;% 
+  summarize(handgun = sum(handgun),
+            long_gun = sum(long_gun)) %&gt;% 
+  mutate(index_month = as.factor(month(month, label = TRUE)),
+         index_year = as.factor(year(month))) %&gt;% 
+  ungroup() </code></pre>
+</div>
+<div id="visualize-data" class="section level2">
+<h2>Visualize data</h2>
+<pre class="r"><code>df_clean %&gt;% 
+  group_by(index_year) %&gt;% 
+  mutate(handgun = cumsum(handgun),
+         long_gun = cumsum(long_gun)) %&gt;% 
+  ungroup() %&gt;% 
+  select(month, index_month, index_year, handgun, long_gun) %&gt;% 
+  pivot_longer(handgun:long_gun, names_to = &quot;type&quot;) %&gt;% 
+  ggplot(aes(index_month, value, color = index_year, group = index_year)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(labels = comma_format()) +
+  scale_color_brewer(palette = &#39;Paired&#39;) +
+  expand_limits(y = 0) +
+  facet_grid(type ~ .) +
+  labs(color = NULL, x = NULL, y = NULL,
+       title = &quot;NICS Firearm Background Checks: monthly cumulative per year by type&quot;, 
+       caption = &quot;by: @eeysirhc\nsource: Federal Bureau of Investigation&quot;) +
+  theme_bw() +
+  theme(legend.position = &#39;top&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>With the above completed we now have a year-over-year summary:</p>
+<ul>
+<li><strong>Handgun</strong>: +75% increase for an incremental 5.1M in circulation compared to +3% and 226K from the previous year</li>
+<li><strong>Long gun</strong>: +50% increase which is an extra 2.4M in the public as opposed to a -4% decline and -172K from the year prior</li>
+</ul>
+</div>
