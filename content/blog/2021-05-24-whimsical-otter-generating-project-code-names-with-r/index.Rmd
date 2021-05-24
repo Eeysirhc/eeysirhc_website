@@ -11,7 +11,9 @@ editor_options:
 
 I love assigning project code names.
 
-However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on. Why spend all that time on something if it would never see the light of day?
+However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on. 
+
+Why spend all that time on something if it would never see the light of day?
 
 There is a nifty [#rstats](https://twitter.com/search?q=%23rstats&src=typed_query) package called [{codename}](https://cran.r-project.org/web/packages/codename/index.html) which I had a lot of fun using.
 
@@ -19,7 +21,9 @@ There is a nifty [#rstats](https://twitter.com/search?q=%23rstats&src=typed_quer
 
 This can get you started but I wanted something more expressive and customizable.
 
-In this article I will provide a quick walkthrough on how you can generate your own project code name by using the [R statistical computing language](https://www.r-project.org/).
+> In hindsight I totally should've named this article "shit brown autumn"...
+
+In this quick walkthrough I will show how you can generate your own project code name by using the [R statistical computing language](https://www.r-project.org/).
 
 ## Load packages
 ```{r warning=FALSE, message=FALSE}
@@ -87,3 +91,4 @@ whimsical_otter(20)
 ```
 
 This looks good to me. :) 
+

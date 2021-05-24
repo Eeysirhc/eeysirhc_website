@@ -12,7 +12,8 @@ editor_options:
 
 
 <p>I love assigning project code names.</p>
-<p>However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on. Why spend all that time on something if it would never see the light of day?</p>
+<p>However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on.</p>
+<p>Why spend all that time on something if it would never see the light of day?</p>
 <p>There is a nifty <a href="https://twitter.com/search?q=%23rstats&amp;src=typed_query">#rstats</a> package called <a href="https://cran.r-project.org/web/packages/codename/index.html">{codename}</a> which I had a lot of fun using.</p>
 <blockquote class="twitter-tweet">
 <p lang="en" dir="ltr">
@@ -22,7 +23,10 @@ The first result from downloading and using the <a href="https://twitter.com/has
 </blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <p>This can get you started but I wanted something more expressive and customizable.</p>
-<p>In this article I will provide a quick walkthrough on how you can generate your own project code name by using the <a href="https://www.r-project.org/">R statistical computing language</a>.</p>
+<blockquote>
+<p>In hindsight I totally should’ve named this article “shit brown autumn”…</p>
+</blockquote>
+<p>In this quick walkthrough I will show how you can generate your own project code name by using the <a href="https://www.r-project.org/">R statistical computing language</a>.</p>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <pre class="r"><code>library(tidyverse)
@@ -86,26 +90,26 @@ animals &lt;- corpora(&quot;animals/common&quot;) %&gt;%
 }</code></pre>
 <p>Now, let’s make sure it works by having it generate 20 project code names:</p>
 <pre class="r"><code>whimsical_otter(20)</code></pre>
-<pre><code>##                              codename
-## 1                 used olivedrab crow
-## 2    absent minded springgreen impala
-## 3            vain darkslategray dingo
-## 4               weary forestgreen ape
-## 5              logical cyan dromedary
-## 6                   charmed pink deer
-## 7          adored seagreen chimpanzee
-## 8       excited darkcyan gila monster
-## 9          incensed deepskyblue camel
-## 10           carefree limegreen mouse
-## 11            censored peru woodchuck
-## 12      innocent darkolivegreen tapir
-## 13       glorious chartreuse capybara
-## 14              flirty powderblue ewe
-## 15       zealous palegoldenrod gopher
-## 16 heartbroken mediumseagreen buffalo
-## 17             merciless magenta frog
-## 18            different black giraffe
-## 19               productive snow oryx
-## 20              overworked linen fish</code></pre>
+<pre><code>##                            codename
+## 1         gullible midnightblue hog
+## 2           apprehensive olive boar
+## 3   energized darkgoldenrod wildcat
+## 4                gentle gold donkey
+## 5           vengeful purple giraffe
+## 6        excluded indigo  wolverine
+## 7   insensitive powderblue elephant
+## 8   welcoming mediumslateblue moose
+## 9         protected rosybrown skunk
+## 10            reassured snow jaguar
+## 11      passionate goldenrod iguana
+## 12            harmonious sienna ape
+## 13 insignificant darkorchid cheetah
+## 14         secure saddlebrown tapir
+## 15   disturbed forestgreen antelope
+## 16           super papayawhip dingo
+## 17             bewildered beige cat
+## 18           accepted cadetblue cow
+## 19        silly lightsalmon opossum
+## 20         guarded chocolate turtle</code></pre>
 <p>This looks good to me. :)</p>
 </div>
