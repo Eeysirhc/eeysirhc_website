@@ -1,0 +1,111 @@
+---
+title: 'Whimsical Otter: generating project code names with R'
+author: Christopher Yee
+date: '2021-05-24'
+slug: []
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>I love assigning project code names.</p>
+<p>However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on. Why spend all that time on something if it would never see the light of day?</p>
+<p>There is a nifty <a href="https://twitter.com/search?q=%23rstats&amp;src=typed_query">#rstats</a> package called <a href="https://cran.r-project.org/web/packages/codename/index.html">{codename}</a> which I had a lot of fun using.</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+The first result from downloading and using the <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> {codename} package: <a href="https://twitter.com/hashtag/shitbrownautumn?src=hash&amp;ref_src=twsrc%5Etfw">#shitbrownautumn</a><br><br>NSFW but now I <em>have</em> to use it for something… <a href="https://t.co/nqtKgZx14I">pic.twitter.com/nqtKgZx14I</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1384934285287772160?ref_src=twsrc%5Etfw">April 21, 2021</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>This can get you started but I wanted something more expressive and customizable.</p>
+<p>In this article I will provide a quick walkthrough on how you can generate your own project code name by using the <a href="https://www.r-project.org/">R statistical computing language</a>.</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(rcorpora)</code></pre>
+<p>We will rely on the <a href="https://cran.r-project.org/web/packages/rcorpora/index.html">{rcorpora}</a> library which is a “collection of small text corpora of interesting data.”</p>
+<p>Below highlights a sample of what is available:</p>
+<pre class="r"><code>corpora() %&gt;% head(30)</code></pre>
+<pre><code>##  [1] &quot;animals/birds_antarctica&quot;      &quot;animals/birds_north_america&quot;  
+##  [3] &quot;animals/cats&quot;                  &quot;animals/collateral_adjectives&quot;
+##  [5] &quot;animals/common&quot;                &quot;animals/dinosaurs&quot;            
+##  [7] &quot;animals/dog_names&quot;             &quot;animals/dogs&quot;                 
+##  [9] &quot;animals/donkeys&quot;               &quot;animals/horses&quot;               
+## [11] &quot;animals/ponies&quot;                &quot;archetypes/artifact&quot;          
+## [13] &quot;archetypes/character&quot;          &quot;archetypes/event&quot;             
+## [15] &quot;archetypes/setting&quot;            &quot;architecture/passages&quot;        
+## [17] &quot;architecture/rooms&quot;            &quot;art/isms&quot;                     
+## [19] &quot;colors/crayola&quot;                &quot;colors/dulux&quot;                 
+## [21] &quot;colors/google_material_colors&quot; &quot;colors/paints&quot;                
+## [23] &quot;colors/palettes&quot;               &quot;colors/web_colors&quot;            
+## [25] &quot;colors/xkcd&quot;                   &quot;corporations/cars&quot;            
+## [27] &quot;corporations/djia&quot;             &quot;corporations/fortune500&quot;      
+## [29] &quot;corporations/industries&quot;       &quot;corporations/nasdaq&quot;</code></pre>
+</div>
+<div id="create-dictionary" class="section level2">
+<h2>Create dictionary</h2>
+<p>The {rcorpora} package has over 290 datasets but we’ll use three of them for this simple guide: <em>moods</em>, <em>colors</em>, and <em>animals</em>.</p>
+<pre class="r"><code>moods &lt;- corpora(&quot;humans/moods&quot;) %&gt;% 
+  as_tibble() %&gt;% 
+  select(mood = moods)
+
+colors &lt;- corpora(&quot;colors/web_colors&quot;)$colors$color %&gt;% 
+  as_tibble() %&gt;% 
+  rename(color = value)
+
+animals &lt;- corpora(&quot;animals/common&quot;) %&gt;% 
+  as_tibble() %&gt;% 
+  rename(animal = animals)</code></pre>
+</div>
+<div id="define-function" class="section level2">
+<h2>Define function</h2>
+<p>What we want to do next is to create a function which:</p>
+<ul>
+<li>Accepts a numerical value on how many code names we want generated</li>
+<li>Pulls out a random value from each one of our dictionaries (moods, colors, animals)</li>
+<li>Merges them together and spits out the final list of code names</li>
+</ul>
+<p>Let’s call our function “whimsical otter” since it was the designated code name for this article when I was first writing it:</p>
+<pre class="r"><code>whimsical_otter &lt;- function(n){
+  
+  m &lt;- moods %&gt;% sample_n(n)
+  c &lt;- colors %&gt;% sample_n(n)
+  a &lt;- animals %&gt;% sample_n(n)
+  
+  df &lt;- cbind(m, c, a) %&gt;% 
+    mutate(codename = paste(mood, color, animal),
+           codename = str_to_lower(codename)) %&gt;% 
+    select(codename)
+  
+  return(df)
+  
+}</code></pre>
+<p>Now, let’s make sure it works by having it generate 20 project code names:</p>
+<pre class="r"><code>whimsical_otter(20)</code></pre>
+<pre><code>##                              codename
+## 1                 used olivedrab crow
+## 2    absent minded springgreen impala
+## 3            vain darkslategray dingo
+## 4               weary forestgreen ape
+## 5              logical cyan dromedary
+## 6                   charmed pink deer
+## 7          adored seagreen chimpanzee
+## 8       excited darkcyan gila monster
+## 9          incensed deepskyblue camel
+## 10           carefree limegreen mouse
+## 11            censored peru woodchuck
+## 12      innocent darkolivegreen tapir
+## 13       glorious chartreuse capybara
+## 14              flirty powderblue ewe
+## 15       zealous palegoldenrod gopher
+## 16 heartbroken mediumseagreen buffalo
+## 17             merciless magenta frog
+## 18            different black giraffe
+## 19               productive snow oryx
+## 20              overworked linen fish</code></pre>
+<p>This looks good to me. :)</p>
+</div>

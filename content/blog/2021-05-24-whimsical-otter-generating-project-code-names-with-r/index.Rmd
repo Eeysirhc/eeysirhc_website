@@ -1,0 +1,89 @@
+---
+title: 'Whimsical Otter: generating project code names with R'
+author: Christopher Yee
+date: '2021-05-24'
+slug: []
+categories:
+  - Miscellaneous
+editor_options: 
+  chunk_output_type: console
+---
+
+I love assigning project code names.
+
+However, after a certain point the increase in projects decrease the amount of time I am able to commit to assigning a meaningful code name to each one. I needed something more scalable that I could quickly use and revisit later if the idea or prototype had any legs to stand on. Why spend all that time on something if it would never see the light of day?
+
+There is a nifty [#rstats](https://twitter.com/search?q=%23rstats&src=typed_query) package called [{codename}](https://cran.r-project.org/web/packages/codename/index.html) which I had a lot of fun using.
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">The first result from downloading and using the <a href="https://twitter.com/hashtag/rstats?src=hash&amp;ref_src=twsrc%5Etfw">#rstats</a> {codename} package: <a href="https://twitter.com/hashtag/shitbrownautumn?src=hash&amp;ref_src=twsrc%5Etfw">#shitbrownautumn</a><br><br>NSFW but now I *have* to use it for something... <a href="https://t.co/nqtKgZx14I">pic.twitter.com/nqtKgZx14I</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1384934285287772160?ref_src=twsrc%5Etfw">April 21, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+This can get you started but I wanted something more expressive and customizable.
+
+In this article I will provide a quick walkthrough on how you can generate your own project code name by using the [R statistical computing language](https://www.r-project.org/).
+
+## Load packages
+```{r warning=FALSE, message=FALSE}
+library(tidyverse)
+library(rcorpora)
+```
+
+We will rely on the [{rcorpora}](https://cran.r-project.org/web/packages/rcorpora/index.html) library which is a "collection of small text corpora of interesting data." 
+
+Below highlights a sample of what is available:
+
+```{r warning=FALSE, message=FALSE}
+corpora() %>% head(30)
+```
+
+## Create dictionary
+
+The {rcorpora} package has over 290 datasets but we'll use three of them for this simple guide: _moods_, _colors_, and _animals_.
+
+```{r warning=FALSE, message=FALSE}
+moods <- corpora("humans/moods") %>% 
+  as_tibble() %>% 
+  select(mood = moods)
+
+colors <- corpora("colors/web_colors")$colors$color %>% 
+  as_tibble() %>% 
+  rename(color = value)
+
+animals <- corpora("animals/common") %>% 
+  as_tibble() %>% 
+  rename(animal = animals)
+```
+
+## Define function
+
+What we want to do next is to create a function which:
+
+* Accepts a numerical value on how many code names we want generated
+* Pulls out a random value from each one of our dictionaries (moods, colors, animals)
+* Merges them together and spits out the final list of code names
+
+Let's call our function "whimsical otter" since it was the designated code name for this article when I was first writing it:
+
+```{r warning=FALSE, message=FALSE}
+whimsical_otter <- function(n){
+  
+  m <- moods %>% sample_n(n)
+  c <- colors %>% sample_n(n)
+  a <- animals %>% sample_n(n)
+  
+  df <- cbind(m, c, a) %>% 
+    mutate(codename = paste(mood, color, animal),
+           codename = str_to_lower(codename)) %>% 
+    select(codename)
+  
+  return(df)
+  
+}
+```
+
+Now, let's make sure it works by having it generate 20 project code names:
+
+```{r warning=FALSE, message=FALSE}
+whimsical_otter(20)
+```
+
+This looks good to me. :) 
