@@ -24,6 +24,10 @@ menu:
           name: archive
           url: /archive/
           weight: 15
+        - identifier: cryptojar
+          name: cryptojar
+          url: /cryptojar/
+          weight: 20          
           
           
 params: 
