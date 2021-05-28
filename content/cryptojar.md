@@ -13,10 +13,6 @@ If you found any of my content remotely useful or entertaining, please do not he
 
 Any amount is highly appreciated and the best part? It is fully anonymous. :)
 
-<br>
-
-
-
 <hr>
 
 __Bitcoin ( $BTC ):__ [34KMERYGubJjutRdv3hMwX4w8gDyNb7T1C](https://mempool.space/address/34KMERYGubJjutRdv3hMwX4w8gDyNb7T1C)
@@ -30,5 +26,4 @@ __Ethereum ( $ETH ):__ [0x84B5F0D0EdC95d564226B6A4907d8467a91dE9eE](https://ethe
 __Cardano ( $ADA ):__ [Ae2tdPwUPEZBoQECcSqavJ5v9w53kd5ANvfcyjoQ8L89cwiVpSi2GukEjbL](https://cardanoscan.io/address/Ae2tdPwUPEZBoQECcSqavJ5v9w53kd5ANvfcyjoQ8L89cwiVpSi2GukEjbL)
 
 <br>
-
 
