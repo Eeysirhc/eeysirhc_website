@@ -2,7 +2,7 @@ theme: "hugo-PaperMod"
 baseURL: https://www.christopheryee.org
 languageCode: en-us
 title: Christopher Yee
-paginate: 5
+paginate: 8
 
 enableRobotsTXT: true
 
@@ -45,8 +45,6 @@ params:
           url: "https://twitter.com/Eeysirhc"
         - name: linkedin
           url: "https://www.linkedin.com/in/seochrisyee/"  
-        - name: KoFi
-          url: "https://ko-fi.com/eeysirhc"
             
             
     assets:
@@ -57,3 +55,5 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+
+
