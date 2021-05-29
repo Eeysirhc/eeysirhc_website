@@ -1,0 +1,49 @@
+---
+title: 'Types of cryptocurrency mining'
+author: Christopher Yee
+date: '2021-05-29'
+slug: types-of-cryptocurrency-mining
+categories:
+- Crypto
+editor_options: 
+  chunk_output_type: console
+---
+
+<p>
+__Context:__ I had a friend email me about cryptocurrency mining and thought my response was helpful enough to share over Instagram. This led to other friends asking me about the crypto space in general. To keep the spirit of it I have posted the same email below (with some edits).
+
+<hr> 
+
+Cryptocurrencies rely on distributed public ledger technology where you need a network of computers (in this case miners) to validate all those transactions. Different cryptocurrencies use different types of consensus algorithms to carry out that validation work by solving complex mathematical puzzles. This ensures the integrity of all past, present, and future records on the blockchain.
+
+[Bitcoin](https://bitcoin.org/), for example, uses a popular consensus algorithm called __Proof of Work__ (PoW) which leverages the raw processing power from your computer hardware to complete these computations. Other notable coins include [Ethereum](https://ethereum.org/en/) and [Dogecoin](https://dogecoin.com/).
+
+In the last few years there have been an explosion of new consensus algorithms to move to greener and more efficient mining processes. Below are a few of them with some examples.
+
+* __Proof of Stake__ (PoS): you "mine" coins based on the amount of crypto that you purchase and hold
+  + [Cardano](https://cardano.org/) and Ethereum 2.0 (ETH is currently PoW but moving to PoS soon)
+* __Proof of Capacity__ (PoC): you "mine" coins based on the amount of hard drive space you provide to the network
+  + [Filecoin](https://filecoin.io/), [Storj](https://www.storj.io/)
+* __Proof of Spacetime__ (PoST): you "mine" coins based on the amount of hard drive space you provide to the network AND how long it has been actively running
+  + [Chia](https://www.chia.net/), [Spacemesh](https://spacemesh.io/)
+* __Proof of Coverage__: you "mine" coins by providing bandwidth to the network
+  + [Helium Network](https://www.helium.com/) uses wifi/radio frequency for coverage
+  + [Mysterium Network](https://mysterium.network/) relies on your IP address for usage
+  + [PlanetWatch](https://planetwatch.us/) is an IoT device where you record the air quality in your region
+* __Proof of Authority__ (PoA): you "mine" coins by having your identify validated
+  + [VeChain](https://www.vechain.org/)
+
+> wow this is awesome, i read it 3 times. so which one do you think is the best mining processes?
+
+They solve different problems because one is trying to give internet to the world while the other is trying to compete against Amazon S3. Yet another is building the infrastructure for Web 3.0 and a fourth is using the the technology for supply chain management.
+
+If I were to pick though? Then Proof of stake or authority - does not require any new hardware to be built which is as green and efficient as you can get.
+
+
+<hr>
+
+__Disclaimer:__ I personally own and mine some, if not all, of the cryptocurrencies mentioned above.
+
+<br>
+
+
