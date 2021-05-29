@@ -5,9 +5,9 @@ url: "/cryptojar/"
 
 <br>
 
-I am very excited about where distributed ledger and blockchain technology can take us in the future.
+I am very excited about where distributed ledger and blockchain technology can take us in the future. However, we have a long way to go before cryptocurrency is fully endorsed by the mainstream.
 
-However, we have a long way to go before cryptocurrency is fully endorsed by the mainstream. I want to change this in my own small way.
+I want to change this in my own small way.
 
 If you found any of my content remotely useful or entertaining, please do not hesitate to toss some tokens into the respective cryptojar.
 
