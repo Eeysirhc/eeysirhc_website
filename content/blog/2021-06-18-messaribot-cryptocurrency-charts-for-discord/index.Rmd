@@ -1,0 +1,214 @@
+---
+title: 'Messaribot: cryptocurrency charts for Discord'
+author: Christopher Yee
+date: '2021-07-01'
+slug: messaribot-cryptocurrency-charts-for-discord
+categories:
+  - Crypto
+editor_options: 
+  chunk_output_type: console
+---
+
+## tl;dr
+
+**Messaribot** ([code](https://github.com/Eeysirhc/messaribot)) is a very simple bot which plots cryptocurrency data to assigned Discord channels. This is written in Python, crytpo data is pulled from the [Messari API](https://messari.io/api), and relies on the [discord.py](https://discordpy.readthedocs.io/en/stable/) API wrapper to publish the finished graphs.
+
+## Overview
+
+Most of the interesting crypto discussions happen on Discord (or Telegram). However, looking up market prices can be a hassle when you need to switch back and forth between different desktop or mobile apps.
+
+Messaribot came as a result of this - a super lightweight tool to retrieve and visualize crypto data over Discord.
+
+Although I am sharing a stripped down version there are three primary layers:
+
+* Fetching data from the Messari API
+* Creating the data visualization
+* Pushing the graphs to Discord
+
+The following is a high-level walkthrough of the main code chunks and general explanation for each.
+
+## Dependencies
+
+### API credentials
+
+First things first: create an account with [Messari](https://messari.io/).
+
+You can access the API without one but your maximum requests per day doubles... and it's FREE... so why not?
+
+### Discord account
+
+We will also need to enable our account to retrieve a secret token for the bot - here is an [easy guide](https://discordpy.readthedocs.io/en/stable/discord.html) to follow along.
+
+### Python modules
+
+Last but not least, below are a few of the libraries we'll need for this to work.
+
+```{python eval=FALSE}
+import os
+import sys
+import requests
+
+from io import StringIO
+from datetime import datetime, timedelta, date 
+
+import pandas as pd 
+import matplotlib.pyplot as plt
+
+import discord
+```
+
+## Fetch data
+
+There are a few variables you can adjust to your liking:
+
+* *Start date*: code defaults to 2020-01-01
+* *End date*: code defaults to system date
+* *API key*: insert your secret key
+
+```{python eval=FALSE}
+# END DATE
+edate = datetime.today().date()
+
+base_url = "https://data.messari.io/api/v1/assets/{coin}/metrics/price/time-series?start=2020-01-01&end={edate}&interval=1d&format=csv".format(coin=coin, edate=edate)
+
+# MESSARI SECRET API KEY
+api_key = "YOUR_MESSARI_API_KEY_HERE"
+headers = {'x-messari-api-key': api_key}
+```
+
+## Create visualizations
+
+### Compute statistics
+
+After we fetch our cryptocurrency data, Messaribot then calculates some statistics:
+
+* *Moving average*: based on the closing price using a 100 day rolling window
+* *Volatility index*: difference between the daily closing price and moving average
+
+```{python eval=FALSE}
+# 100 DAY MOVING AVERAGE
+df['price_ma'] = df.rolling(window=100)['close'].mean()
+
+# VOLATILITY INDEX
+df['price_volatility'] = df['close'] / df['price_ma'] - 1
+```
+
+The above uses my own [Turtle Trader Rules](https://www.turtletrader.com/rules/) so feel free to change to a shorter or longer time frame you are comfortable with.
+
+### Build plots
+
+The code below stacks one chart on top of the other.
+
+* *Daily price*: closing price with a dotted line for the trended moving average
+* *Volatility chart*: index which color codes the different buy/sell thresholds
+
+```{python eval=FALSE}
+# DAILY PRICE CHART
+plt.subplot(2, 1, 1)
+plt.plot(df.date, df.close)
+plt.plot(df.date, df.price_ma, linestyle='--', color='salmon')
+plt.fill_between(df.date.values, df.high, df.low, alpha=0.3)
+plt.axhline(y=dx.close.item(), color='steelblue', linestyle=':')  
+plt.ylabel("Price ($)")
+plt.ylim(0, df.high.max()*1.20)
+plt.title(title, fontsize=15, horizontalalignment='left', x=0.05)
+
+# VOLATILITY INDEX CHART
+plt.subplot(2, 1, 2)
+plt.plot(df.date, df.price_volatility, color='black', alpha=0.5)
+plt.axhline(y=0.40, color='red', linestyle=':')
+plt.axhline(y=0.20, color='orange', linestyle=':')
+plt.axhline(y=0, color='grey', linestyle=':')
+plt.axhline(y=-0.20, color='green', linestyle=':')
+plt.axhline(y=-0.40, color='steelblue', linestyle=':')
+plt.fill_between(df.date.values, 0.20, 0.40, color='red', alpha=0.25)
+plt.fill_between(df.date.values, 0.00, 0.20, color='orange', alpha=0.25)
+plt.fill_between(df.date.values, 0.00, -0.20, color='green', alpha=0.25)
+plt.fill_between(df.date.values, -0.20, -0.40, color='steelblue', alpha=0.25)
+plt.ylabel("Volatility Index (%)")
+plt.ylim(df.price_volatility.min()-0.5, df.price_volatility.max()+0.5)
+
+plt.savefig("/YOUR/FILEPATH/NAME/HERE/toast.png")
+```
+
+Here is an example of what that final chart looks like for Bitcoin:
+
+__NEED TWITTER TWEET EMBED HERE__
+
+*(insert Inception joke here)*
+
+> **Disclaimer**: not financial or investment advice.
+
+The volatility index helps me make (somewhat) rational decisions for crypto trading.
+
+For example, if a specific cryptocurrency price drops into the green region then I buy \$100. If it lands in the blue region then I double down at \$200. If it goes even lower than that? Triple down with \$300.
+
+> **Disclaimer**: not financial or investment advice.
+
+## Publish charts
+
+### Discord interface
+
+You will need to make two edits in this section of the source code.
+
+* *Command prefix*: the default listens to Discord messages which start with **\$** but you can also set it to use periods, colons, exclamation marks, etc.
+* *Token*: insert your super secret token for your Discord bot
+
+```{python eval=FALSE}
+client = commands.Bot(command_prefix = '$')
+TOKEN = 'YOUR_DISCORD_SECRET_TOKEN_HERE'
+```
+
+And finally, the function below pulls everything together and pushes our crypto plots to the designated Discord channel.
+
+```{python eval=FALSE}
+@client.command()
+async def messaribot(ctx, coin):
+    coin = coin.upper()
+    messari_fetch(coin)
+    await ctx.send(file=discord.File(r'/YOUR/FILEPATH/NAME/HERE/toast.png'))
+```
+
+## Launching Messaribot
+
+Fire up your command line and execute the following code:
+
+```{python eval=FALSE}
+python3 messaribot.py
+```
+
+Assuming everything works your Messaribot should now be online.
+
+To have it return our predefined charts just run the function with the cryptocurrency of your choice:
+
+```{python eval=FALSE}
+$messaribot btc
+```
+
+### Bot server
+
+One problem with the above: you can't run any other shell based programs or turn off your computer.
+
+Hosting this on a dedicated server is outside the scope of this article but what I have done is port all files onto a Raspberry Pi. This ensures my Messaribot is running 24/7 so everyone in my Discord server can continue to use this while I am away.
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">TMW you decide it’s easier to build your own <a href="https://twitter.com/hashtag/raspberrypi?src=hash&amp;ref_src=twsrc%5Etfw">#raspberrypi</a> cluster instead of making it a habit to turn off your AWS instances <br><br>cc: <a href="https://twitter.com/johnmurch?ref_src=twsrc%5Etfw">@johnmurch</a> <a href="https://t.co/ob5dSeg0d6">pic.twitter.com/ob5dSeg0d6</a></p>&mdash; Christopher Yee (@Eeysirhc) <a href="https://twitter.com/Eeysirhc/status/1389701831396188160?ref_src=twsrc%5Etfw">May 4, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+## Wrapping up
+
+Check it out and let me know what you think - I am always open to hearing how to make this better.
+
+And if you *really* like it then don't hestitate to drop some coins into my [cryptojar](https://www.christopheryee.org/cryptojar/). 
+
+:)
+
+
+
+## Future work
+
+* Error handling
+* Throttling requests
+* More plotting options
+
+
+
+
