@@ -121,7 +121,7 @@ Want to see a Bitcoin price of \$100K? Then expect it to be valued at a \$1.9 tr
 
 Let's switch gears and apply this formula to other cryptocurrencies.
 
-[Cardano](https://coinmarketcap.com/currencies/cardano/), a popular altcoin, has price predictions all over the place. We'll use the two that I have seen quite frequently: __\$5__ and __\$50__.
+[Cardano](https://coinmarketcap.com/currencies/cardano/), a popular altcoin, has price predictions all over the place. We'll use the two that I have seen quite frequently: \$5 and \$50.
 
 ```{r echo=FALSE, message=FALSE, error=FALSE, warning=FALSE}
 future_cprice("Cardano", 64842202136/1e9, 2.02, 5, 50)
@@ -129,7 +129,7 @@ future_cprice("Cardano", 64842202136/1e9, 2.02, 5, 50)
 
 Which one do you think is more realistic for Cardano? 
 
-__\$5__ where it needs to 2.5x its current market cap? Or __\$50__ where it not only needs to 25x but achieve \$1.6 trillion in market cap value...completely surpassing that of Bitcoin's current \$893 billion at the time of this writing?^[2]^
+\$5 where it needs to 2.5x its current market cap? Or \$50 where it not only needs to 25x but achieve \$1.6 trillion in market cap value...completely surpassing that of Bitcoin's current \$893 billion at the time of this writing?^[2]^
 
 ## Wrapping up
 
@@ -143,7 +143,7 @@ If you found this remotely helpful or entertaining then don't hesitate to drop s
 
 ^[1]^ _The information provided here is for general educational purposes only and is not intended to constitute investment advice. Such information is not, and should not be read as, an offer or recommendation to buy or sell or a solicitation of an offer or recommendation to buy or sell any particular digital asset or to use any particular investment strategy._
 
-^[2]^ _This is not claiming it won't or can't happen in the future but merely stating that chances are very slim based on existing market data._
+^[2]^ _This is not saying it won't or can't happen in the future but merely stating that chances are very slim based on existing market data._
 
 <br>
 
