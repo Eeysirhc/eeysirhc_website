@@ -1,0 +1,79 @@
+---
+title: 'Recreating plots in R: the power of tiny gains'
+author: Christopher Yee
+date: '2021-09-21'
+slug: recreating-plots-in-r-the-power-of-tiny-gains
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+Once in awhile I find some great charts which make me stop and think.
+
+Below is one example of this:
+
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">1% better every day is all it takes to completely change your life. <a href="https://t.co/kYbgGOzzZv">pic.twitter.com/kYbgGOzzZv</a></p>&mdash; Santiago (@svpino) <a href="https://twitter.com/svpino/status/1436404061985812483?ref_src=twsrc%5Etfw">September 10, 2021</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+I really appreciate the inspirational message behind it: being deliberate about the change you wish to see in the world.
+
+With that in mind, I want to recreate that chart below using the [R programming language]((https://twitter.com/search?q=%23rstats)) (regardless if the trajectory path is realistic or not).
+
+
+## Create data
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+
+df <- seq(1, 365, 1) %>% 
+  as_tibble() %>% 
+  rename(time = value) %>% 
+  mutate(
+    
+    # 1% better every day
+    better = 1.01^time,
+    
+    # 1% worse every day
+    worse = 0.99^time
+    
+    ) %>% 
+  pivot_longer(cols = 2:3)
+```
+
+## Visualize data
+```{r message=FALSE, warning=FALSE}
+cpalette <- c("seagreen", "salmon")
+
+df %>% 
+  ggplot(aes(time, value, color = name)) +
+  geom_line(size = 1, arrow=arrow()) +
+  
+  # dotted line at 1
+  geom_hline(yintercept = 1, lty = 2) +
+  
+  # side and bottom grid lines
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = -2) +
+  
+  labs(x = "Time", 
+       y = str_wrap("Improvement or Decline", width = 10),
+       title = "The Power of Tiny Gains") +
+  scale_color_manual(values = cpalette) +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.title.y = element_text(angle = 0, vjust = 0.5),
+        legend.position = 'none')
+```
+
+<br>
+
+
+## Related
+
+* [Recreating plots in R: intro to bootstrapping](https://www.christopheryee.org/blog/recreating-plots-in-r-intro-to-bootstrapping/)
+
+<br>
+
+
