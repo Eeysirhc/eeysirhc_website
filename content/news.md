@@ -4,7 +4,7 @@ url: "/news/"
 ---
 
 ## 2021
-* __uTRAQ:__ launched web intelligence platform which centralized data, emphasized speed, maintained a bias for action, and placed a premium on UX functionality
+* __uTRAQ:__ launched web intelligence platform which centralizes data, emphasizes insight speed, maintain a bias for action, and places a premium on UX functionality
 
 ## 2020
 * __Lights Out:__ deployed a fully automated SEM bidding system that changed over 1M bids per day
