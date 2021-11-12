@@ -3,6 +3,9 @@ title: "news"
 url: "/news/"
 ---
 
+## 2021
+* __uTRAQ:__ launched web intelligence platform which centralized data, emphasized speed, maintained a bias for action, and placed a premium on UX functionality
+
 ## 2020
 * __Lights Out:__ deployed a fully automated SEM bidding system that changed over 1M bids per day
 * __Nergui:__ established a series of new bidding algorithms which utilized probabilistic optimization instead of the standard deterministic approach used by the industry
@@ -51,4 +54,6 @@ url: "/news/"
 ## 2010
 * To document my SEO journey I started this website
 * Accepted an internship at CafePress as a Link Builder
+
+
 
