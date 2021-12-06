@@ -1,0 +1,90 @@
+---
+title: 'ERGO: how to setup blockchain analytics on Raspberry Pi'
+author: Christopher Yee
+date: '2021-12-05'
+slug: ergo-how-to-setup-blockchain-analytics-on-raspberry-pi
+categories:
+  - Blockchain Analytics
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>This is a quick “copy &amp; paste guide” for data scientists and developers who are interested in storing the <a href="https://ergoplatform.org/en/">Ergo</a> blockchain to a standardized database format using a Raspberry Pi 4.</p>
+<p>We will be using the <a href="https://github.com/ergoplatform/explorer-backend">Ergo Blockchain Explorer (backend)</a> but focus our efforts specifically on the Chain Grabber module.</p>
+<p>A few prerequisites before we get started…</p>
+<ul>
+<li>Clean install of Raspberry Pi 4+</li>
+<li>Root file system mounted to SSD (60GB+)</li>
+<li>SSH enabled with stable internet connection</li>
+</ul>
+<p><br></p>
+<div id="preparing-the-rpi" class="section level3">
+<h3>Preparing the RPi</h3>
+<pre class="r"><code>sudo apt update
+sudo apt full-upgrade</code></pre>
+</div>
+<div id="download-latest-java-version" class="section level3">
+<h3>Download latest Java version</h3>
+<pre class="r"><code>sudo apt install default-jdk</code></pre>
+</div>
+<div id="download-sbt" class="section level3">
+<h3>Download sbt</h3>
+<pre class="r"><code>echo &quot;deb https://repo.scala-sbt.org/scalasbt/debian /&quot; | sudo tee -a /etc/apt/sources.list.d/sbt.list
+curl -sL &quot;https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823&quot; | sudo apt-key add
+sudo apt update
+sudo apt install sbt</code></pre>
+</div>
+<div id="download-and-unzip-precompiled-jar" class="section level3">
+<h3>Download and unzip precompiled JAR</h3>
+<p>If you are reading this from the future please visit the <a href="https://github.com/ergoplatform/explorer-backend/releases">code repo</a> and replace with the appropriate versions.</p>
+<pre class="r"><code>wget https://github.com/ergoplatform/explorer-backend/archive/refs/tags/9.4.3.zip
+
+unzip explorer-backend-9.4.3</code></pre>
+</div>
+<div id="install-postgresql" class="section level3">
+<h3>Install PostgreSQL</h3>
+<p>In the code snippet below we created “ergo” as the username.</p>
+<pre class="r"><code>sudo apt install postgresql
+sudo su postgres
+createuser ergo -P --interactive</code></pre>
+</div>
+<div id="setup-and-load-database-schema" class="section level3">
+<h3>Setup and load database schema</h3>
+<pre class="r"><code>psql
+create database explorer;
+\c explorer;
+/i /explorer-backend-9.4.3/modules/explorer-core/src/main/resources/db/V9__Schema.sql</code></pre>
+<p>The final line of code above executes a SQL script that creates a bunch of tables and indices to be populated later by the Chain Grabber.</p>
+</div>
+<div id="update-app-config" class="section level3">
+<h3>Update app config</h3>
+<p>This is where you need to edit the database username and password you set up earlier.</p>
+<pre class="r"><code>sudo nano explorer-backend-9.4.3/modules/chain-grabber/src/main/resources/application.conf</code></pre>
+</div>
+<div id="launch-chain-grabber" class="section level3">
+<h3>Launch chain-grabber</h3>
+<pre class="r"><code>sbt chain-grabber/run</code></pre>
+</div>
+<div id="validate" class="section level3">
+<h3>Validate</h3>
+<p>If all goes well the code below returns the latest block height that was stored to the database.</p>
+<pre class="r"><code>select max(height) from node_headers;</code></pre>
+<p><br></p>
+<p>If you found this tutorial remotely helpful, any $ERG sent my way to <a href="https://explorer.ergoplatform.com/en/search?query=9hoco9Y8bXseiWB2gH5m5gb9bKemeyXhrQuhFdDNtu2ipdDUsTv">9hoco9Y8bXseiWB2gH5m5gb9bKemeyXhrQuhFdDNtu2ipdDUsTv</a> is always appreciated.</p>
+<p>If that’s not your jam then I also have a <a href="https://www.christopheryee.org/cryptojar/">cryptojar</a> for other virtual currencies. :)</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li>Discord help: abchris &amp; Glasgow</li>
+<li><a href="https://phoenixnap.com/kb/install-java-raspberry-pi">How to Install Java on Raspberry Pi</a></li>
+<li><a href="https://github.com/sbt/sbt/issues/6445#issuecomment-824491782">Installing sbt on debian</a></li>
+<li><a href="https://github.com/ergoplatform/explorer-backend/releases">Releases - Ergo Explorer Backend</a></li>
+<li><a href="https://pimylifeup.com/raspberry-pi-postgresql/">Setting up a PostgreSQL Database on a Raspberry Pi</a></li>
+<li><a href="https://kb.objectrocket.com/postgresql/how-to-run-an-sql-file-in-postgres-846">How to run an SQL file in Postgres</a></li>
+<li><a href="https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/">Move the Raspberry PI root file system to a USB drive</a></li>
+</ul>
+<p><br></p>
+</div>

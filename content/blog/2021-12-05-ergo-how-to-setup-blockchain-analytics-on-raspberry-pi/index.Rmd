@@ -1,0 +1,110 @@
+---
+title: 'ERGO: how to setup blockchain analytics on Raspberry Pi'
+author: Christopher Yee
+date: '2021-12-05'
+slug: ergo-how-to-setup-blockchain-analytics-on-raspberry-pi
+categories:
+  - Blockchain Analytics
+editor_options: 
+  chunk_output_type: console
+---
+
+This is a quick "copy & paste guide" for data scientists and developers who are interested in storing the [Ergo](https://ergoplatform.org/en/) blockchain to a standardized database format using a Raspberry Pi 4.
+
+We will be using the [Ergo Blockchain Explorer (backend)](https://github.com/ergoplatform/explorer-backend) but focus our efforts specifically on the Chain Grabber module.
+
+A few prerequisites before we get started...
+
+* Clean install of Raspberry Pi 4+
+* Root file system mounted to SSD (60GB+) 
+* SSH enabled with stable internet connection
+
+<br>
+
+### Preparing the RPi
+```{r eval=FALSE}
+sudo apt update
+sudo apt full-upgrade
+```
+
+### Download latest Java version
+```{r eval=FALSE}
+sudo apt install default-jdk
+```
+
+### Download sbt
+```{r eval=FALSE}
+echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee -a /etc/apt/sources.list.d/sbt.list
+curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
+sudo apt update
+sudo apt install sbt
+```
+
+### Download and unzip precompiled JAR
+
+If you are reading this from the future please visit the [code repo](https://github.com/ergoplatform/explorer-backend/releases) and replace with the appropriate versions.
+
+```{r eval=FALSE}
+wget https://github.com/ergoplatform/explorer-backend/archive/refs/tags/9.4.3.zip
+
+unzip explorer-backend-9.4.3
+```
+
+### Install PostgreSQL
+
+In the code snippet below we created "ergo" as the username.
+
+```{r eval=FALSE}
+sudo apt install postgresql
+sudo su postgres
+createuser ergo -P --interactive
+```
+
+### Setup and load database schema
+```{r eval=FALSE}
+psql
+create database explorer;
+\c explorer;
+/i /explorer-backend-9.4.3/modules/explorer-core/src/main/resources/db/V9__Schema.sql
+```
+
+The final line of code above executes a SQL script that creates a bunch of tables and indices to be populated later by the Chain Grabber.
+
+### Update app config
+
+This is where you need to edit the database username and password you set up earlier. 
+
+```{r eval=FALSE}
+sudo nano explorer-backend-9.4.3/modules/chain-grabber/src/main/resources/application.conf
+```
+
+### Launch chain-grabber
+```{r eval=FALSE}
+sbt chain-grabber/run
+```
+
+### Validate
+
+If all goes well the code below returns the latest block height that was stored to the database.
+
+```{r eval=FALSE}
+select max(height) from node_headers;
+```
+
+<br>
+
+If you found this tutorial remotely helpful, any $ERG sent my way to [9hoco9Y8bXseiWB2gH5m5gb9bKemeyXhrQuhFdDNtu2ipdDUsTv](https://explorer.ergoplatform.com/en/search?query=9hoco9Y8bXseiWB2gH5m5gb9bKemeyXhrQuhFdDNtu2ipdDUsTv) is always appreciated.
+
+If that's not your jam then I also have a [cryptojar](https://www.christopheryee.org/cryptojar/) for other virtual currencies. :)
+
+## References
+* Discord help: abchris & Glasgow
+* [How to Install Java on Raspberry Pi](https://phoenixnap.com/kb/install-java-raspberry-pi)
+* [Installing sbt on debian](https://github.com/sbt/sbt/issues/6445#issuecomment-824491782)
+* [Releases - Ergo Explorer Backend](https://github.com/ergoplatform/explorer-backend/releases)
+* [Setting up a PostgreSQL Database on a Raspberry Pi](https://pimylifeup.com/raspberry-pi-postgresql/)
+* [How to run an SQL file in Postgres](https://kb.objectrocket.com/postgresql/how-to-run-an-sql-file-in-postgres-846)
+* [Move the Raspberry PI root file system to a USB drive](https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/)
+
+
+<br>
