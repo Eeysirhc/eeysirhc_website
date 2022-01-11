@@ -3,6 +3,10 @@ title: "news"
 url: "/news/"
 ---
 
+## 2022
+* __Titan:__ [in progress]
+
+
 ## 2021
 * __uTRAQ:__ launched a custom web intelligence platform which centralizes data, emphasizes insight speed, maintains a bias for action, and places a premium on UX functionality
 
@@ -54,6 +58,7 @@ url: "/news/"
 ## 2010
 * To document my SEO journey I started this website
 * Accepted an internship at CafePress as a Link Builder
+
 
 
 
