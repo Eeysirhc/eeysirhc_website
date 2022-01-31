@@ -9,6 +9,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+**Last updated: 2022-01-31**
+
 This is a quick "copy & paste guide" for data scientists and developers who are interested in storing the [Ergo](https://ergoplatform.org/en/) blockchain to a standardized database format using a Raspberry Pi 4.
 
 We will be using the [Ergo Blockchain Explorer (backend)](https://github.com/ergoplatform/explorer-backend) but focus our efforts specifically on the Chain Grabber module.
@@ -60,7 +62,9 @@ sudo su postgres
 createuser ergo -P --interactive
 ```
 
-### Setup and load database schema
+As of this writing update on 2022-01-31, the Chain Grabber begins to stall at block height 350K or so if you use option a) below. Ideally, this is fixed in the future but until then I have listed a few other workarounds.
+
+### a) Setup and load database schema
 ```{r eval=FALSE}
 psql
 create database explorer;
@@ -69,6 +73,14 @@ create database explorer;
 ```
 
 The final line of code above executes a SQL script that creates a bunch of tables and indices to be populated later by the Chain Grabber.
+
+### b) Load ErgoWatch DB dump
+
+You can download the database dump [here](https://ergo.watch/downloads/grabberdb.dmp) (13GB file) and it will put you on the fast track to block height 600K or higher. The module will pick up subsequent blocks after that.
+
+### c) Delete SQL index code
+
+If you are comfortable with reading Scala, then another method is to delete all SQL code references to creating the database indices. This approach can work if the dump file is no longer available from option b).
 
 ### Update app config
 
@@ -104,7 +116,9 @@ If that's not your jam then I also have a [cryptojar](https://www.christopheryee
 * [Releases - Ergo Explorer Backend](https://github.com/ergoplatform/explorer-backend/releases)
 * [Setting up a PostgreSQL Database on a Raspberry Pi](https://pimylifeup.com/raspberry-pi-postgresql/)
 * [How to run an SQL file in Postgres](https://kb.objectrocket.com/postgresql/how-to-run-an-sql-file-in-postgres-846)
-* [Move the Raspberry PI root file system to a USB drive](https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/)
+* [Move the Raspberry Pi root file system to a USB drive](https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/)
 
 
 <br>
+
+

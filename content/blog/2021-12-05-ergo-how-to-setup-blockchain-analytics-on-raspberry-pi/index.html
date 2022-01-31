@@ -11,6 +11,7 @@ editor_options:
 
 
 
+<p><strong>Last updated: 2022-01-31</strong></p>
 <p>This is a quick “copy &amp; paste guide” for data scientists and developers who are interested in storing the <a href="https://ergoplatform.org/en/">Ergo</a> blockchain to a standardized database format using a Raspberry Pi 4.</p>
 <p>We will be using the <a href="https://github.com/ergoplatform/explorer-backend">Ergo Blockchain Explorer (backend)</a> but focus our efforts specifically on the Chain Grabber module.</p>
 <p>A few prerequisites before we get started…</p>
@@ -49,14 +50,23 @@ unzip explorer-backend-9.4.3</code></pre>
 <pre class="r"><code>sudo apt install postgresql
 sudo su postgres
 createuser ergo -P --interactive</code></pre>
+<p>As of this writing update on 2022-01-31, the Chain Grabber begins to stall at block height 350K or so if you use option a) below. Ideally, this is fixed in the future but until then I have listed a few other workarounds.</p>
 </div>
-<div id="setup-and-load-database-schema" class="section level3">
-<h3>Setup and load database schema</h3>
+<div id="a-setup-and-load-database-schema" class="section level3">
+<h3>a) Setup and load database schema</h3>
 <pre class="r"><code>psql
 create database explorer;
 \c explorer;
 /i /explorer-backend-9.4.3/modules/explorer-core/src/main/resources/db/V9__Schema.sql</code></pre>
 <p>The final line of code above executes a SQL script that creates a bunch of tables and indices to be populated later by the Chain Grabber.</p>
+</div>
+<div id="b-load-ergowatch-db-dump" class="section level3">
+<h3>b) Load ErgoWatch DB dump</h3>
+<p>You can download the database dump <a href="https://ergo.watch/downloads/grabberdb.dmp">here</a> (13GB file) and it will put you on the fast track to block height 600K or higher. The module will pick up subsequent blocks after that.</p>
+</div>
+<div id="c-delete-sql-index-code" class="section level3">
+<h3>c) Delete SQL index code</h3>
+<p>If you are comfortable with reading Scala, then another method is to delete all SQL code references to creating the database indices. This approach can work if the dump file is no longer available from option b).</p>
 </div>
 <div id="update-app-config" class="section level3">
 <h3>Update app config</h3>
@@ -84,7 +94,7 @@ create database explorer;
 <li><a href="https://github.com/ergoplatform/explorer-backend/releases">Releases - Ergo Explorer Backend</a></li>
 <li><a href="https://pimylifeup.com/raspberry-pi-postgresql/">Setting up a PostgreSQL Database on a Raspberry Pi</a></li>
 <li><a href="https://kb.objectrocket.com/postgresql/how-to-run-an-sql-file-in-postgres-846">How to run an SQL file in Postgres</a></li>
-<li><a href="https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/">Move the Raspberry PI root file system to a USB drive</a></li>
+<li><a href="https://www.pragmaticlinux.com/2020/08/move-the-raspberry-pi-root-file-system-to-a-usb-drive/">Move the Raspberry Pi root file system to a USB drive</a></li>
 </ul>
 <p><br></p>
 </div>
