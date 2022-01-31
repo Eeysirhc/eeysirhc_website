@@ -78,6 +78,14 @@ The final line of code above executes a SQL script that creates a bunch of table
 
 You can download the database dump [here](https://ergo.watch/downloads/grabberdb.dmp) (13GB file) and it will put you on the fast track to block height 600K or higher. The module will pick up subsequent blocks after that.
 
+```{r eval=FALSE}
+pg_restore
+  --dbname=explorer
+  --create
+  --verbose /path/to/data_dump/grabberdb.dmp
+```
+
+
 ### c) Delete SQL index code
 
 If you are comfortable with reading Scala, then another method is to delete all SQL code references to creating the database indices. This approach can work if the dump file is no longer available from option b).
@@ -120,5 +128,7 @@ If that's not your jam then I also have a [cryptojar](https://www.christopheryee
 
 
 <br>
+
+
 
 

@@ -63,6 +63,10 @@ create database explorer;
 <div id="b-load-ergowatch-db-dump" class="section level3">
 <h3>b) Load ErgoWatch DB dump</h3>
 <p>You can download the database dump <a href="https://ergo.watch/downloads/grabberdb.dmp">here</a> (13GB file) and it will put you on the fast track to block height 600K or higher. The module will pick up subsequent blocks after that.</p>
+<pre class="r"><code>pg_restore
+  --dbname=explorer
+  --create
+  --verbose /path/to/data_dump/grabberdb.dmp</code></pre>
 </div>
 <div id="c-delete-sql-index-code" class="section level3">
 <h3>c) Delete SQL index code</h3>
