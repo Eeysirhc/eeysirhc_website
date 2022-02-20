@@ -5,8 +5,8 @@ url: "/news/"
 
 ## 2022
 * __Titan:__ [in progress]
-* [Open sourced](https://github.com/Eeysirhc/ergodex-price-app) a minimalist web application that retrieves and display [token price action](https://twitter.com/Eeysirhc/status/1491541406233489411?s=20&t=i_MKAJUXr100IIs_B4eW9w) from the respecitve ErgoDEX liquidity pools
-* __[Delphi](https://github.com/thedelphiproject):__ blockchain analytics developer where we make oracle pools easier to discover, observe, and interact with on the Ergo network
+* [Open sourced](https://github.com/Eeysirhc/ergodex-price-app) a minimalist web application that retrieves and displays [token price action](https://twitter.com/Eeysirhc/status/1491541406233489411?s=20&t=i_MKAJUXr100IIs_B4eW9w) from the respecitve ErgoDEX liquidity pools
+* __[Delphi](https://github.com/thedelphiproject):__ blockchain analytics community developer where we make oracle pools easier to discover, observe, and interact with on the Ergo network
 
 
 ## 2021
