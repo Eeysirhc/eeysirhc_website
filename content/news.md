@@ -5,6 +5,8 @@ url: "/news/"
 
 ## 2022
 * __Titan:__ [in progress]
+* [Open sourced](https://github.com/Eeysirhc/ergodex-price-app) a minimalist web application that retrieves and display [token price action](https://twitter.com/Eeysirhc/status/1491541406233489411?s=20&t=i_MKAJUXr100IIs_B4eW9w) from the respecitve ErgoDEX liquidity pools
+* __[Delphi](https://github.com/thedelphiproject):__ blockchain analytics developer where we make oracle pools easier to discover, observe, and interact with on the Ergo network
 
 
 ## 2021
@@ -12,7 +14,7 @@ url: "/news/"
 
 ## 2020
 * __Lights Out:__ deployed a fully automated SEM bidding system that changed over 1M bids per day
-* __Nergui:__ established a series of new bidding algorithms which utilized probabilistic optimization instead of the standard deterministic approach used by the industry
+* __Nergui:__ established a series of [new bidding algorithms which utilized probabilistic optimization](https://www.christopheryee.org/blog/from-deterministic-to-probabilistic-sem-bid-optimization/) instead of the standard deterministic approach used by the industry
 * Began new adventure at Uber in the SEO Intelligence division - focused on internal product development with the help of software engineering, data science, and adtech
 
 ## 2019
@@ -47,18 +49,16 @@ url: "/news/"
 * Joined SEOgadget (now Builtvisible) as Organic Search Strategist for the US office
 
 ## 2012
-* Left CafePress for Macys.com as Assistant Marketing Manager, SEO
+* Left CafePress for [Macys.com as Assistant Marketing Manager, SEO](https://www.christopheryee.org/blog/goodbye-cafepress-hello-macys/)
 * Designed and prototyped what is now BrightEdge's "Share of Voice" product for SEO competitive analysis
 
 ## 2011
-* Promoted to SEO Analyst at CafePress
+* Promoted to [SEO Analyst at CafePress](https://www.christopheryee.org/blog/job-obtained-seo-analyst-intern/)
 * Built a data pipeline to analyze 600M+ backlinks to support a critical M&A decision
 * Led internal project for server log analysis (100gb of data) to optimize and manage search engine crawler budget
 
 ## 2010
-* To document my SEO journey I started this website
-* Accepted an internship at CafePress as a Link Builder
-
-
+* To document my [SEO journey](https://www.christopheryee.org/blog/let-my-seo-journey-begin/) I started this website
+* Accepted an [internship at CafePress as a Link Builder](https://www.christopheryee.org/blog/job-obtained-link-builder-intern/)
 
 
