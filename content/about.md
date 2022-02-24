@@ -11,7 +11,7 @@ Prior to this I was the Director of Optimization at FT Optimize where we wrote c
 
 Before agency life I built and led SEO teams for enterprise companies. We always had one goal in mind: change the internal perspective on what SEO is, what SEO can do, and where the future of SEO is headed. From this our team was able to inspire others, drive company direction, and positively impact the bottom line.
 
-[For as long as I can remember](https://www.christopheryee.org/news/), I have been passionate about using data, storytelling, and programming to solve unique online acquisition problems. These days I am particularly interested in taking advantage of data science to support making more informed decisions in daily life.
+[For as long as I can remember](https://www.christopheryee.org/news/), I have been passionate about using data, storytelling, and programming to solve unique online acquisition problems. These days I am particularly interested in developing blockchain analytics software products with a core focus on the [Ergo platform](https://ergoplatform.org/en/).
 
 I am always open to hearing about new opportunities so please get in touch, I would love to hear from you!
 
