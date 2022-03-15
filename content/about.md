@@ -56,4 +56,9 @@ I am always open to hearing about new opportunities so please get in touch, I wo
 #### [Christal Tossany](https://www.linkedin.com/in/christaltossany/), Optimization Product Manager at Sephora
 > Chris Yee taught me everything I know about digital marketing. The combination of his expertise in the space and friendly patient demeanor make him an excellent consultant. Chris can explain basic and advanced concepts while sharing both tactical and strategic initiatives to get your company’s digital marketing program up and running. He has a sharp mind, thinks out of the box, and is a real pleasure to work with.  
 
+<br>
+
+[ERGO Seed Phrase #14](https://www.reddit.com/r/ergonauts/comments/t2n8yj/the_15_days_of_ergo_seed_phrases/): You could wait 27 days or you could see it everyday...what is it?
+
+<br>
 
