@@ -1,0 +1,87 @@
+---
+title: 'Ergo block rewards: five year outlook'
+author: Christopher Yee
+date: '2022-03-24'
+slug: ergo-block-rewards-five-year-outlook
+categories:
+  - Blockchain Analytics
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>I came across a tweet about the potential price of <a href="https://ergoplatform.org/en/">Ergo</a> five years from now when the mining block rewards are gradually reduced from 66 to 3:</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+I don't know who needs to hear this:<br><br>Currently block reward for <a href="https://twitter.com/hashtag/Ergo?src=hash&amp;ref_src=twsrc%5Etfw">#Ergo</a> miners is 66 <a href="https://twitter.com/search?q=%24ERG&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ERG</a> per block mined, that is approx. <span class="math inline">\(154,440 a day&lt;br&gt;In about 5 years block reward will be 3 &lt;a href=&quot;https://twitter.com/search?q=%24ERG&amp;amp;src=ctag&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;\)</span>ERG</a> per block mined, to maintain <span class="math inline">\(154,440 a day in rewards that brings the price of &lt;a href=&quot;https://twitter.com/search?q=%24ERG&amp;amp;src=ctag&amp;amp;ref_src=twsrc%5Etfw&quot;&gt;\)</span>ERG</a> to $71.5 🐂
+</p>
+— Chris Ray (<span class="citation">@Haskell_plus</span>) <a href="https://twitter.com/Haskell_plus/status/1503116738405154817?ref_src=twsrc%5Etfw">March 13, 2022</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>The <a href="https://twitter.com/Haskell_plus">author</a> suggests that the price of Ergo will more than 20x within the decade if nothing else changes.</p>
+<p>Although interesting, I find it even more fascinating to visualize how that price curve would look over time with each phase of the reduction in block rewards.</p>
+<p>Below is the <a href="https://www.r-project.org/">R code</a> I used to generate the graph in response to that tweet.</p>
+<blockquote class="twitter-tweet">
+<p lang="en" dir="ltr">
+There were some Discord discussions about your tweet so thought this visualization would help others understand what that price curve would look like if nothing changed :) <a href="https://twitter.com/hashtag/ergo?src=hash&amp;ref_src=twsrc%5Etfw">#ergo</a> <a href="https://twitter.com/hashtag/ergonauts?src=hash&amp;ref_src=twsrc%5Etfw">#ergonauts</a> <a href="https://twitter.com/search?q=%24erg&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$erg</a> <a href="https://t.co/f5k30qiLRY">pic.twitter.com/f5k30qiLRY</a>
+</p>
+— Christopher Yee (<span class="citation">@Eeysirhc</span>) <a href="https://twitter.com/Eeysirhc/status/1504237038903595012?ref_src=twsrc%5Etfw">March 16, 2022</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p><br></p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(scales)</code></pre>
+</div>
+<div id="define-function" class="section level2">
+<h2>Define function</h2>
+<p>The <em>154440</em> is derived from total blocks mined for the day in USD value priced at $3.25.
+Ergo’s average block time is 2 minutes so we get <em>30</em> blocks per hour and multiply that by <em>24</em> hours in a day.</p>
+<pre class="r"><code>ergo &lt;- function(ergo_blocks){
+  
+  df = 154440 / (ergo_blocks * 30 * 24)
+  
+  return(df)
+}
+
+df &lt;- seq(0.01, 66, 3) %&gt;% 
+  as_tibble()</code></pre>
+<p><em>Note: we start with 0.01 as an offset for multiplying values by 0.</em></p>
+</div>
+<div id="visualize-data" class="section level2">
+<h2>Visualize data</h2>
+<pre class="r"><code>df %&gt;% 
+  mutate(price = ergo(value)) %&gt;% 
+  ggplot(aes(value, price)) +
+  geom_line(size = 0.5, color = &#39;#D55E00&#39;) +
+  geom_point(size = 3, color = &#39;#D55E00&#39;) +
+  geom_text(aes(label = round(price ,2)),
+            hjust = 0.5, vjust = -1) +
+  scale_x_reverse() +
+  scale_y_continuous(limits = c(0, 80),
+                     labels = dollar_format()) +
+  labs(x = &quot;$ERG per block&quot;, 
+       y = &quot;Price&quot;, 
+       title = &quot;Ergo: price per $ERG to maintain daily rewards&quot;,
+       subtitle = &quot;Assumes demand remains the same and based on current price of $3.25&quot;) +
+  theme_bw()</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>From the graph above, we can speculate the price of Ergo would see a linear increase over time with a sharp parabolic rise at the end within five years when block rewards are reduced down to 3 from 66.</p>
+</div>
+<div id="wrapping-up" class="section level2">
+<h2>Wrapping up</h2>
+<p>It should go without saying that change is the only constant here so we can’t accurately predict what the price will be in the future let alone tomorrow. However, by visualizing that price curve from current market conditions and assuming all else remains equal, we get a decent idea of what it could potentially look like and manage our expectations accordingly.</p>
+<p>If you found this remotely helpful or entertaining then don’t hesitate to drop some cryptocurrencies into my <a href="https://www.christopheryee.org/cryptojar/">cryptojar</a>.</p>
+<p>:)</p>
+<p><br></p>
+</div>
+<div id="related" class="section level2">
+<h2>Related</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/ergo-how-to-setup-blockchain-analytics-on-raspberry-pi/">ERGO: how to setup blockchain analytics on Raspberry Pi</a></li>
+<li><a href="https://www.christopheryee.org/blog/crypto-market-cap-evaluating-realistic-price-points/">Crypto market cap: evaluating realistic price points</a></li>
+</ul>
+<p><br></p>
+</div>
