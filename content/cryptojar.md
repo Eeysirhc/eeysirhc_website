@@ -20,15 +20,10 @@ __Ergo ( $ERG ):__
 
 <br>
 
-__Cardano ( $ADA ):__ [Ae2tdPwUPEZBoQECcSqavJ5v9w53kd5ANvfcyjoQ8L89cwiVpSi2GukEjbL](https://cardanoscan.io/address/Ae2tdPwUPEZBoQECcSqavJ5v9w53kd5ANvfcyjoQ8L89cwiVpSi2GukEjbL)
+__Cardano ( $ADA ):__ [addr1q9dy3s4v85wqxpw7z0jutjeptahs4kuvusqjyj3zm3pqd5wqkshlyawevypvxuc9nvgjjcul5e4q0ymrshyxvgpm38vqpfzfvp](https://cardanoscan.io/address/addr1q9dy3s4v85wqxpw7z0jutjeptahs4kuvusqjyj3zm3pqd5wqkshlyawevypvxuc9nvgjjcul5e4q0ymrshyxvgpm38vqpfzfvp)
 
 <br>
 
-__Bitcoin ( $BTC ):__ [1KDCgNSMA4w7kSSBCkWhMCfwBMbvNddvRh](https://mempool.space/address/1KDCgNSMA4w7kSSBCkWhMCfwBMbvNddvRh)
+__Bitcoin ( $BTC ):__ [3EratSDiEoJtbFvDMym8SSkRR9YJMjNzC4](https://mempool.space/address/3EratSDiEoJtbFvDMym8SSkRR9YJMjNzC4)
 
 <br>
-
-__Ethereum ( $ETH ):__ [0x84B5F0D0EdC95d564226B6A4907d8467a91dE9eE](https://etherscan.io/address/0x84b5f0d0edc95d564226b6a4907d8467a91de9ee)
-
-<br>
-
