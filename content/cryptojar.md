@@ -24,6 +24,6 @@ __Cardano ( $ADA ):__ [addr1q9dy3s4v85wqxpw7z0jutjeptahs4kuvusqjyj3zm3pqd5wqkshl
 
 <br>
 
-__Bitcoin ( $BTC ):__ [3EratSDiEoJtbFvDMym8SSkRR9YJMjNzC4](https://mempool.space/address/3EratSDiEoJtbFvDMym8SSkRR9YJMjNzC4)
+__Bitcoin ( $BTC ):__ [bc1q06l0m9lm34677n7agu5xn336kegrvana0w6fys](https://mempool.space/address/bc1q06l0m9lm34677n7agu5xn336kegrvana0w6fys)
 
 <br>
