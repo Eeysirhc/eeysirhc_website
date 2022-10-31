@@ -16,7 +16,7 @@ Any amount is highly appreciated and the best part? It is fully anonymous. :)
 <hr>
 
 __Ergo ( $ERG ):__
-[9fsNArvL5VqZ4hJ6K8HVCatnWzgAwMd9Av7LTZZR8tVmbcL4a2S](https://explorer.ergoplatform.com/en/addresses/9fsNArvL5VqZ4hJ6K8HVCatnWzgAwMd9Av7LTZZR8tVmbcL4a2S)
+[9hybc7yGpHfR8hapd3YeRc96FDR4hGFkQG1DTKCxnYxFmvoK1KN](https://explorer.ergoplatform.com/en/addresses/9hybc7yGpHfR8hapd3YeRc96FDR4hGFkQG1DTKCxnYxFmvoK1KN)
 
 <br>
 
