@@ -5,7 +5,7 @@ layout: post
 slug: on-innovation-mini-rant
 title: On Innovation (Mini-Rant)
 categories:
-- Miscellaneous
+- Philosophy
 ---
 
 **TL;DR implementing a system to "drive" (e.g. creating a team or process) and "celebrate" (e.g. recognition awards because let's be real those are just popularity contests) innovation is counter-productive to progress and I firmly believe this can only be fostered via company culture, environment, public forum, mind share, etc.**

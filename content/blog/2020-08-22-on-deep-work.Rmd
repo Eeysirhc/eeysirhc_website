@@ -4,7 +4,7 @@ author: Christopher Yee
 date: '2020-08-22'
 slug: on-deep-work
 categories:
-  - Miscellaneous
+  - Philosophy
 editor_options: 
   chunk_output_type: console
 ---

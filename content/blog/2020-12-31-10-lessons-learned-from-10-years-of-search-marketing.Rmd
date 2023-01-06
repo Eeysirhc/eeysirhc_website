@@ -4,7 +4,7 @@ author: Christopher Yee
 date: '2020-12-31'
 slug: 10-lessons-learned-from-10-years-of-search-marketing
 categories:
-  - Miscellaneous
+  - Philosophy
 editor_options: 
   chunk_output_type: console
 ---
