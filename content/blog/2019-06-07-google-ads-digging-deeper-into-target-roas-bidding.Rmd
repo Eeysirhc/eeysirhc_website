@@ -1,24 +1,64 @@
 ---
 title: 'Google Ads: digging deeper into target ROAS bidding'
 author: Christopher Yee
-date: '2019-06-07'
+date: '2023-02-22'
 slug: google-ads-digging-deeper-into-target-roas-bidding
 categories:
   - Pay Per Click
+editor_options: 
+  chunk_output_type: console
 ---
 
-Excerpt from [my original article about Google's tROAS bidding](https://www.ftoptimize.com/articles/2019/5/31/google-ads-digging-deeper-into-target-roas-bidding):
+> This piece originally appeared in [FT Optimize](https://www.ftoptimize.com/2021/11/08/google-ads-digging-deeper-into-target-roas-bidding/) on June 7th, 2019.
 
-> Google has made a concerted effort to get more advertisers to switch over to their “smart bidding” platform.  This technology uses machine learning to optimize max CPC at auction time by predicting future conversion rate and value based on historical data.  The purpose is to relinquish bidding activities to Google so advertiser’s can divert their attention to other details of account management.
->
->This sounds great and with all things digital marketing we should always [test new ideas](https://www.ftoptimize.com/articles/2019/3/5/google-ads-bidding-is-enhanced-cpc-really-working) before accepting it as gospel - Google is no exception.
->
->In this article we will review an experiment we conducted last year for an online retailer when we enabled target ROAS “smart bidding” for their account.  Our goal was to determine the efficacy of this bidding strategy and whether or not it would be worth the transition for our client.
+Google has made a concerted effort to get more advertisers to switch over to their “smart bidding” platform.  This technology uses machine learning to optimize max CPC at auction time by predicting future conversion rate and value based on historical data.  The purpose is to relinquish bidding activities to Google so advertiser’s can divert their attention to other details of account management.
 
+This sounds great and with all things digital marketing we should always test new ideas before accepting it as gospel – Google is no exception.
 
+In this article we will review an experiment we conducted last year for an online retailer when we enabled target ROAS “smart bidding” for their account.  Our goal was to determine the efficacy of this bidding strategy and whether or not it would be worth the transition for our client.
 
-<br> 
+## Setup
+
+We chose this particular online retailer because 1) the account had nearly seven years of historical data and 2) it was already under performing before we launched the test.
+
+Our hypothesis was that with Google’s tROAS bidding enabled, we would expect account performance to turn around because the system would know which keywords to bid up or down and by how much.
+
+For this test we monitored daily performance using FT Optimize’s internal A/B testing platform which tracks a suite of business critical metrics such as cost, clicks, revenue or conversions to name a few.
+
+## Results
+The moment our test went live the average cost per click for the experiment group increased +97%.  This was significantly higher than average CPCs during the busy holiday season!
+
+![](/images/troas1.png)
+
+Although average CPCs increased, the expectation for this test was that ROAS would improve as well.  Instead, performance suffered as a consequence of this change where ROAS went from 241% to 80% – well below the designated 300% target.
+
+We wanted to figure out why this was happening so we took a closer look at individual keyword performance.  What we found was highly volatile average CPCs across the board for all keywords regardless if they were performing well or not at the time.
+
+For example, the image below shows the distribution of average CPC for a keyword which had a ROAS of 258% before test launch.  One would expect the system to bid down but instead the average CPC for the keyword increased +65% which ultimately dropped ROAS to 23%.
+
+![](/images/troas2.png)
+
+Google warns advertisers in advance about CPC volatility negatively impacting performance because their system needs a minimum of four weeks for the learning period.  However, when we compared this keyword’s holiday vs non-holiday historical average, the tROAS experiment group still operated at a +48% higher average CPC.
+
+Diving deeper into the keyword’s historical performance we also wanted to know at what average CPC was needed to meet the target ROAS.  We discovered this is centered around \$0.82 which is -37% less than the average CPC of our experiment group of $1.31.
+
+![](/images/troas3.png)
+
+This collection of insights is for a single keyword but extrapolating across hundreds of thousands of keywords mean we would quickly eat away at client budget with just this one change.
+
+## Conclusions
+
+Without proper experimentation we do not recommend advertiser’s to enable Google’s target ROAS “smart bidding” settings at this time.
+
+Based on our data we were able to illustrate this configuration would rapidly increase costs the moment it is flipped on.  Perhaps it is the learning phase required by their machine learning algorithms as stated by Google. However, if that were the case, it is questionable why the platform would need to increase a given keywords CPC footprint if 1) it has seven years of historical data and 2) recent performance of the keyword was underperforming anyway.
+
+<br>
 
 ## Related
 
 * [10x SEM performance: unlock the power of your own data](https://www.christopheryee.org/blog/10x-sem-performance-unlock-the-power-of-your-own-data/)
+* [From deterministic to probabilistic SEM bid optimization](https://www.christopheryee.org/blog/from-deterministic-to-probabilistic-sem-bid-optimization/)
+
+
+
+

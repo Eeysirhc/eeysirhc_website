@@ -1,7 +1,7 @@
 ---
 title: '10x SEM performance: unlock the power of your own data'
 author: Christopher Yee
-date: '2020-06-25'
+date: '2023-02-23'
 slug: 10x-sem-performance-unlock-the-power-of-your-own-data
 categories:
   - Pay Per Click
@@ -9,21 +9,61 @@ editor_options:
   chunk_output_type: console
 ---
 
+> This piece originally appeared in [FT Optimize](https://www.ftoptimize.com/2021/11/08/10x-sem-performance-unlock-the-power-of-your-own-data/) on June 25th, 2020.
 
+With each passing year the utility of third-party cookies continues to decline as it faces barriers from web browsers and government regulation. The current system still works and there will be alternatives but it is always best to start preparing for the new status quo.
 
-Excerpt from [my original article about using first-party data for custom SEM bidding](https://www.ftoptimize.com/articles/2020/6/25/10x-sem-performance-unlock-the-power-of-your-own-data):
+FT Optimize believes that the best way to maximize SEM ad revenue is to use first-party data.
 
-> With each passing year the utility of third-party cookies continues to decline as it faces barriers from web browsers and government regulation. The current system still works and there will be alternatives but it is always best to start preparing for the new status quo.
-> 
-> FT Optimize believes that the best way to maximize SEM ad revenue is to use first-party data.
-> 
-> This is because companies gain a competitive advantage when (a) they leverage their own data (b) have tight control over data quality and (c) focus marketing channels to solve their unique business challenges.
-> 
-> We are not the only ones who believe first-party data is essential. The 2018 survey by [eMarketer](https://www.emarketer.com/content/what-is-the-future-of-third-party-data) highlighted that 85% of US respondents selected the option: “increasing our use of first-party data is a high or critical priority.”
+This is because companies gain a competitive advantage when (a) they leverage their own data (b) have tight control over data quality and (c) focus marketing channels to solve their unique business challenges. 
+
+We are not the only ones who believe first-party data is essential. The 2018 survey by [eMarketer](https://www.insiderintelligence.com/content/what-is-the-future-of-third-party-data) highlighted that 85% of US respondents selected the option: “increasing our use of first-party data is a high or critical priority.”
+
+## First, Second, and Third-Party Data
+
+To understand the benefit of first-party data we need to define and highlight the differences between each source.
+
+*First-Party* data is collected by the business and includes metrics such as e-mail subscriptions, app downloads, visits, conversions, form submissions, and internal database information like LTV. 
+
+*Second-Party* data is collected by a partner corporation on your behalf such as campaign cost, impressions, clicks, or customer journey behavior.
+
+*Third-Party* is data that is available for purchase to predict customer intent or audience demographics (ex: age, location, marital status, etc.).
+
+## Data Comparison
+
+First-party data ensures marketing decisions are integrated closely with the realities of the business to positively impact the bottom line. 
+
+Even to this day, the search engine marketing community consensus is split on Google’s “smart bidding” platform: one side claims it is highly effective with the other drawing the opposite conclusion. In fact, we have tested and written about this in the past regarding Google’s [enhanced CPC settings](https://www.ftoptimize.com/2021/11/08/google-ads-bidding-is-enhanced-cpc-really-working/) and [target ROAS bidding](https://www.ftoptimize.com/2021/11/08/google-ads-digging-deeper-into-target-roas-bidding/).
+
+Automated hands-off bidding sounds promising but that ultimately leaves decisions to black box technology using second-party (or third-party) data that is a few steps removed from actual business context.
+
+At FT Optimize we work with clients on due diligence to determine what “source of truth” that bidding activities should read from: the data provided by Google (as recommended by their account manager) or the client’s internal metrics (used across the entire organization).
+
+Using a baseline, the chart below illustrates one of our clients running on Google’s data for both reporting and bidding purposes.
+
+![](/images/gtog.png)
+
+As expected, there is a 1:1 match between what the client reports (x-axis) and what Google is providing back (y-axis).
+
+What about companies who tag and attribute revenue differently? What if it’s an eCommerce client and they operate on gross merchandise value instead? This is where the data sources begin to drift apart as the graph below indicates Google over valuing one of our clients revenue by +140%.
+
+![](/images/gtointernal.png)
+
+And what about organizations who care about viewing internal customer LTV and need to make bidding decisions on that? The difference will depend on how LTV is calculated for each company but for this FT Optimize client Google’s data over indexed by +654%.
+
+![](/images/gtoltv.png)
+
+The implication here is that there is a very likely possibility Google’s hands-off solution may be bidding up on high performing ad units when in actuality that may not be the case. Conversely, it could even suppress ads because the data being used does not understand its future LTV potential.
+
+## Conclusion
+
+Every business faces their own unique challenges when it comes to measuring account performance and then acting on that information.
+
+At FT Optimize we advocate SEM bidding operations to rely on first-party data which aligns with business metrics that our clients care about. Additionally, this provides marketing teams with greater confidence the data they report is high quality. With our distinct approach we have seen businesses maximize their ad revenue while improving their understanding of customer purchasing behavior in a short amount of time.
 
 <br> 
 
 ## Related
 
 * [Google Ads: digging deeper into target ROAS bidding](https://www.christopheryee.org/blog/google-ads-digging-deeper-into-target-roas-bidding/)
-
+* [From deterministic to probabilistic SEM bid optimization](https://www.christopheryee.org/blog/from-deterministic-to-probabilistic-sem-bid-optimization/)

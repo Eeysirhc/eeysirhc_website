@@ -143,17 +143,17 @@ By leveraging probabilities and simulation methods, we can create a model which 
 * Incorporate the full range of historical performance data
 * Minimize the risk of bidding up horrible criteria (again)
 
-## You may also like
-
-* [Examining drug effectiveness studies via simulation](https://www.christopheryee.org/blog/examining-drug-effectiveness-studies-via-simulation/)
-* [R functions for simulation, sampling & visualization](https://www.christopheryee.org/blog/r-functions-for-data-simulation-sampling-and-visualization/)
-
 ## Other applications
 
 * Significance testing of click-through rate (CTR) changes
 * Computing the probabilities of organic search keyword ranking movement
 * Estimating the likelihood an onsite change would impact search engine crawler behavior
 
+## Related
 
+
+* [Google Ads: digging deeper into target ROAS bidding](https://www.christopheryee.org/blog/google-ads-digging-deeper-into-target-roas-bidding/)
+* [10x SEM performance: unlock the power of your own data](https://www.christopheryee.org/blog/10x-sem-performance-unlock-the-power-of-your-own-data/)
+* [Examining drug effectiveness studies via simulation](https://www.christopheryee.org/blog/examining-drug-effectiveness-studies-via-simulation/)
 
 

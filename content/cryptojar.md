@@ -20,10 +20,10 @@ __Ergo ( $ERG ):__
 
 <br>
 
-__Cardano ( $ADA ):__ [addr1q9dy3s4v85wqxpw7z0jutjeptahs4kuvusqjyj3zm3pqd5wqkshlyawevypvxuc9nvgjjcul5e4q0ymrshyxvgpm38vqpfzfvp](https://cardanoscan.io/address/addr1q9dy3s4v85wqxpw7z0jutjeptahs4kuvusqjyj3zm3pqd5wqkshlyawevypvxuc9nvgjjcul5e4q0ymrshyxvgpm38vqpfzfvp)
-
-<br>
-
 __Bitcoin ( $BTC ):__ [bc1q06l0m9lm34677n7agu5xn336kegrvana0w6fys](https://mempool.space/address/bc1q06l0m9lm34677n7agu5xn336kegrvana0w6fys)
 
 <br>
+
+
+
+
