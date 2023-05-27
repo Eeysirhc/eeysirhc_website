@@ -4,7 +4,7 @@ url: "/news/"
 ---
 
 ## 2023
-* __TBD:__ [in progress]
+* __Merlin:__ [in progress]
 
 ## 2022
 * __Titan:__ released internal URL-level analytics platform that synthesized internal & external data for performance marketing reporting, diagnostics, optimization, and insights
