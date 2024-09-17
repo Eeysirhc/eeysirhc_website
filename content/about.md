@@ -21,6 +21,7 @@ I am always open to hearing about new opportunities so please get in touch, I wo
 ## **Past Life** 
 
 * FT Optimize: Director of Optimization
+  * Google, LinkedIn, Codecademy, Airtable, Lyft
 * Square: SEO & CRO Lead
 * American Eagle Outfitters: Sr. Marketing Manager, SEO
 * HP Inc: SEO Marketing Manager, WW & AMS
@@ -28,37 +29,6 @@ I am always open to hearing about new opportunities so please get in touch, I wo
 * Macys.com: Assistant Marketing Manager, SEO 
 * CafePress: SEO Analyst
 
-<br>
 
-### **Companies I've Worked With**
 
-* Google
-* LinkedIn
-* Codecademy
-* Airtable
-* Lyft
-* Caviar
-
-<br>
-
-### **People I've Worked With**
-
-#### [Erin Renzas](http://www.linkedin.com/in/erinrenzas), SVP of Marketing at Checkout.com
-> Sometimes you work with people who fundamentally change how you think about your work. Chris did that for me -- helping me to understand how our team could better leverage a technical approach to marketing to make our business better and move the bottom line. He's innovative, thoughtful, always evolving, and always curious.  
-
-<br>
-  
-#### [Jackie Chu](https://www.jackiecchu.com/), Global SEO Lead at Uber
-> Chris is a great friend of mine but also a truly phenomenal SEO. I had long heard of Chris through friends and mentors alike, but we finally had a chance to work together when he was the SEO lead at Square where he led the program and drove all of our data science collaborations. During our time at Square the SEO team turned from mostly a brand play to being the largest generator of upmarket revenue for the company (which was > 90% of all GPV). He left such an impression on the Data Science team that after he left and they moved on to Stitch Fix, the Data Science lead insisted they must have a FTE data scientist to support SEO alone.  
-
-<br>
-
-#### [Christal Tossany](https://www.linkedin.com/in/christaltossany/), Optimization Product Manager at Sephora
-> Chris Yee taught me everything I know about digital marketing. The combination of his expertise in the space and friendly patient demeanor make him an excellent consultant. Chris can explain basic and advanced concepts while sharing both tactical and strategic initiatives to get your company’s digital marketing program up and running. He has a sharp mind, thinks out of the box, and is a real pleasure to work with.  
-
-<br>
-
-[ERGO Seed Phrase #14](https://www.reddit.com/r/ergonauts/comments/t2n8yj/the_15_days_of_ergo_seed_phrases/): You could wait 27 days or you could see it everyday...what is it?
-
-<br>
 

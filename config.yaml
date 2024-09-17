@@ -6,28 +6,29 @@ paginate: 8
 
 enableRobotsTXT: true
 
-googleAnalytics: UA-25419882-1
+
 
 ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]
 
 menu:
     main:
-        - identifier: about
-          name: about
-          url: /about/
-          weight: 5      
         - identifier: news
           name: news
           url: /news/
+          weight: 5
+        - identifier: about
+          name: about
+          url: /about/
           weight: 10
+        - identifier: testimonials
+          name: testimonials
+          url: /testimonials/
+          weight: 15
         - identifier: archive
           name: archive
           url: /archive/
-          weight: 15
-        - identifier: cryptojar
-          name: cryptojar
-          url: /cryptojar/
-          weight: 20          
+          weight: 20
+
           
           
 params: 
@@ -43,12 +44,13 @@ params:
             SEO Skunkworks @ Uber
             
     socialIcons:
-        - name: github
+        - name: "github"
           url: "https://github.com/Eeysirhc"
-        - name: mastodon
-          url: "https://ohai.social/@eeysirhc"
-        - name: linkedin
-          url: "https://www.linkedin.com/in/seochrisyee/"  
+        - name: "bitcoin" 
+          url: "https://mempool.space/address/bc1q06l0m9lm34677n7agu5xn336kegrvana0w6fys"
+        - name: "x"
+          url: "https://x.com/eeysirhc"
+
             
             
     assets:
@@ -59,6 +61,4 @@ markup:
   goldmark:
     renderer:
       unsafe: true
-
-
 
