@@ -9,14 +9,25 @@ url: "/testimonials/"
 > Chris is a great friend of mine but also a truly phenomenal SEO. I had long heard of Chris through friends and mentors alike, but we finally had a chance to work together when he was the SEO lead at Square where he led the program and drove all of our data science collaborations. During our time at Square the SEO team turned from mostly a brand play to being the largest generator of upmarket revenue for the company (which was > 90% of all GPV). He left such an impression on the Data Science team that after he left and they moved on to Stitch Fix, the Data Science lead insisted they must have a FTE data scientist to support SEO alone.  
 
 <br>
-
-### [Manasa Danda](https://www.facebook.com/manasa.danda/), Engineering Manager at Uber
-> Chris has been at the center of all Web Intelligence team's deliverables either leading, strategizing, analyzing data or writing business requirements with clear impact statements and milestones to reach there. He has been an integral part of every PRD review and the team feels confident when there is guidance and clarification from Chris while building a feature, or a UX change. Chris is equal parts a thinker and a listener. He has many times elevated my concerns or suggestions to larger groups and challenges approaches that he may see unfitting. The best part of working with Chris is his positive attitude which combined with his stellar business development skills and SEO knowledge makes him a great asset to the team.
+  
+### [Jonathan Landy](https://www.linkedin.com/in/jslandy), Staff Data Scientist at Stitch Fix
+> Chris has pushed hard to advocate for the early adoption of machine learning methods in SEO, arguing that it could have a substantial impact throughout that team's work. He's identified a number of key areas where we can begin to collaborate: (i) identifying appropriate related content recommendations to place on our blog pages, (ii) automating the process of identifying important topics to highlight in a given piece of content, through automated summarization of high ranking results for a given keyword, and (iii) scoping the opportunity size associated with a given keyword. I agree with Chris that this is an exciting line of work and very promising. Bringing modern ML to bear here will help us to maximally take advantage of that lever arm. Chris has been a great, creative partner this past year, and I'm excited to work with him to bring some of our ideas to fruition in 2018. 
 
 <br>
   
 ### [Kunal Anand](https://in.linkedin.com/in/akunalanand), Product at Ethos
 > #buildwithheart is the first value that pops into my head when I think about Chris and his growth as an SEO professional. I have worked with multiple SEO teams across different industries and haven't seen anyone as obsessed with quantitative SEO data as Chris. The focus on building towards higher efficiency for his team and all the teams using uTRAQ is an excellent example of serving everyone at Uber.
+
+<br>
+
+### [Erin Renzas](http://www.linkedin.com/in/erinrenzas), SVP of Marketing at Checkout.com
+> Sometimes you work with people who fundamentally change how you think about your work. Chris did that for me -- helping me to understand how our team could better leverage a technical approach to marketing to make our business better and move the bottom line. He's innovative, thoughtful, always evolving, and always curious. 
+
+
+<br>
+
+### [Manasa Danda](https://www.facebook.com/manasa.danda/), Engineering Manager at Uber
+> Chris has been at the center of all Web Intelligence team's deliverables either leading, strategizing, analyzing data or writing business requirements with clear impact statements and milestones to reach there. He has been an integral part of every PRD review and the team feels confident when there is guidance and clarification from Chris while building a feature, or a UX change. Chris is equal parts a thinker and a listener. He has many times elevated my concerns or suggestions to larger groups and challenges approaches that he may see unfitting. The best part of working with Chris is his positive attitude which combined with his stellar business development skills and SEO knowledge makes him a great asset to the team.
 
 <br>
   
@@ -28,17 +39,11 @@ url: "/testimonials/"
 ### [Wells Yu](https://www.linkedin.com/in/wellsyu), Staff SEO Strategist at Uber
 > Chris is an impressive problem solver, SQL expert, and has made an immense impact on not just our team but the entire business when he landed uTRAQ. The tool is amazing, and faster than any Tableau dashboard. He has done a great job in figuring out the problem areas from the team, doing user research, and working to improve what is available in uTRAQ. I am constantly learning new things from Chris, and he is my go-to person for the most complex problems.
 
-<br>
-
-### [Erin Renzas](http://www.linkedin.com/in/erinrenzas), SVP of Marketing at Checkout.com
-> Sometimes you work with people who fundamentally change how you think about your work. Chris did that for me -- helping me to understand how our team could better leverage a technical approach to marketing to make our business better and move the bottom line. He's innovative, thoughtful, always evolving, and always curious.  
+ 
 
 <br>
 
 ### [Christal Tossany](https://www.linkedin.com/in/christaltossany/), Optimization Product Manager at Sephora
-> Chris Yee taught me everything I know about digital marketing. The combination of his expertise in the space and friendly patient demeanor make him an excellent consultant. Chris can explain basic and advanced concepts while sharing both tactical and strategic initiatives to get your company’s digital marketing program up and running. He has a sharp mind, thinks out of the box, and is a real pleasure to work with.  
-
-
-
+> Chris Yee taught me everything I know about digital marketing. The combination of his expertise in the space and friendly patient demeanor make him an excellent consultant. Chris can explain basic and advanced concepts while sharing both tactical and strategic initiatives to get your company’s digital marketing program up and running. He has a sharp mind, thinks out of the box, and is a real pleasure to work with. 
 
 
