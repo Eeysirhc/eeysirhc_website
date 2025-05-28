@@ -31,7 +31,7 @@ This makes the concept harder to grasp — not easier.
 
 ## Generative Search Optimization: Significantly Better
 
-Here's what we *should* be calling this revolution: Generative Search Optimization (GSO).
+Here's what we *should* be calling it: Generative Search Optimization (GSO).
 
 It’s the natural evolution of SEO in a world where users are getting answers from tools like ChatGPT, Perplexity, Gemini, Claude, and others, instead of scrolling through search results. These models still respond to search-like prompts. They still pull information from the web. But instead of pointing to links, they generate answers — often directly quoting or summarizing someone’s content.
 
