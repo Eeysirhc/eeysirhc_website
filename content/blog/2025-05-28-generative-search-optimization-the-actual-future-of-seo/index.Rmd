@@ -1,0 +1,59 @@
+---
+title: 'Why GEO Misses the Mark in the Age of AI Search'
+author: Christopher Yee
+date: '2025-05-28'
+slug: why-geo-misses-the-mark-in-age-of-ai-search
+categories:
+  - Generative Search Optimization
+editor_options: 
+  chunk_output_type: console
+---
+
+**Hot take:** The term "Generative Engine Optimization" (GEO) feels like a phrase invented by a committee who couldn't agree on what the future actually looks like — and needed to justify their jobs.
+
+In the age of AI search, clinging to outdated or unclear terminology like GEO only muddles the waters. It’s trying to ride the coattails of [Search Engine Optimization](https://www.christopheryee.org/categories/search-engine-optimization/) (SEO), but it fumbles the landing with language that just doesn’t track.
+
+## Generative Engine Optimization: Horrible Name
+
+First off, what even is a *generative engine*?
+
+The whole thing sounds like someone threw "generative AI" and "search engine optimization" together in a blender just so they could charge their clients more.
+
+No one says that. We don’t call ChatGPT a generative engine. We don’t call Perplexity, Gemini, or Claude generative engines. These are AI models, language models, and AI assistants — not engines.
+
+This isn’t just semantics. SEO works as a term because it describes optimizing for *search engines* (Google, Bing, etc.). But "generative engine" isn’t a real category.
+
+It’s a retrofit.
+
+Unlike search engines, these AI models aren’t indexing pages and ranking them. They’re predicting responses based on learned patterns. So when it’s dubbed "engine optimization," it implies there’s something we feed into a machine with gears and logic. In reality, we’re trying to influence what a probabilistic language model chooses to do or say.
+
+This makes the concept harder to grasp — not easier.
+
+## Generative Search Optimization: Significantly Better
+
+Here's what we *should* be calling this revolution: Generative Search Optimization (GSO).
+
+It’s the natural evolution of SEO in a world where users are getting answers from tools like ChatGPT, Perplexity, Gemini, Claude, and others, instead of scrolling through search results. These models still respond to search-like prompts. They still pull information from the web. But instead of pointing to links, they generate answers — often directly quoting or summarizing someone’s content.
+
+If your content is clear, structured, and authoritative, it becomes the response output for LLM applications. That's the goal now. We're no longer just trying to rank. We're trying to be included - to show up in the answer box, the summary, the citation.
+
+And the rules? They are changing fast.
+
+### Why It Matters
+
+- **Clicks are disappearing.** Users get what they need from the GenAI/LLM responses. If you're not in it, you're invisible. 
+- **GenAI is the new front end.** People still search - but now they just do it through language models.
+- **Attribution is fickle.** Sometimes you get a link, sometimes just a mention, sometimes nothing. That makes GSO less measurable — but no less real.
+
+## Final Thoughts
+
+We’re not just optimizing for search engines anymore. We’re optimizing for language models — for AI assistants that don’t just crawl the web, but speak from it.
+
+If we want to keep up in the age of AI search, we need language—and strategies—that actually fit the new reality.
+
+Generative Engine Optimization (GEO) might be floating around right now, but it’s clunky, misleading, and too narrow of a label.
+
+The real future of SEO is Generative Search Optimization (GSO), and the sooner we call it what it is, the better we can start building for it.
+
+
+
