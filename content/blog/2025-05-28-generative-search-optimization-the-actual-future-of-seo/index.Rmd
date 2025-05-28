@@ -9,7 +9,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-**Hot take:** The term "Generative Engine Optimization" (GEO) feels like a phrase invented by a committee who couldn't agree on what the future actually looks like — and needed to justify their jobs.
+**Hot take:** The term "Generative Engine Optimization" (GEO) feels like a phrase invented by a committee who couldn't agree on what the future actually looks like. The whole thing sounds like someone threw "generative AI" and "search engine optimization" together in a blender just so they could charge their clients more.
 
 In the age of AI search, clinging to outdated or unclear terminology like GEO only muddles the waters. It’s trying to ride the coattails of [Search Engine Optimization](https://www.christopheryee.org/categories/search-engine-optimization/) (SEO), but it fumbles the landing with language that just doesn’t track.
 
@@ -17,9 +17,7 @@ In the age of AI search, clinging to outdated or unclear terminology like GEO on
 
 First off, what even is a *generative engine*?
 
-The whole thing sounds like someone threw "generative AI" and "search engine optimization" together in a blender just so they could charge their clients more.
-
-No one says that. We don’t call ChatGPT a generative engine. We don’t call Perplexity, Gemini, or Claude generative engines. These are AI models, language models, and AI assistants — not engines.
+No one says that. We don’t call ChatGPT a generative engine. We don’t call Perplexity, Gemini, or Claude generative engines. These are interfaces for language models and AI assistants — not engines.
 
 This isn’t just semantics. SEO works as a term because it describes optimizing for *search engines* (Google, Bing, etc.). But "generative engine" isn’t a real category.
 
@@ -54,6 +52,8 @@ If we want to keep up in the age of AI search, we need terminology that actually
 Generative Engine Optimization (GEO) might be floating around right now, but it’s clunky, silly, and too narrow of a label.
 
 The real future of SEO is Generative Search Optimization (GSO), and the sooner we call it what it is, the better we can start building for it.
+
+
 
 
 
