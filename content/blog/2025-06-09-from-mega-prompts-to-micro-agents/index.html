@@ -12,13 +12,13 @@ categories:
 <p>A few months ago, I found myself trying to wrangle a large language model (LLM) into doing my bidding with what can only be described as a “mega-prompt.” If you’ve ever tried to fit an entire workflow, context, and all possible edge cases into a single AI prompt, you’ll know the feeling: somewhere between optimism and mild dread.</p>
 <p>The results were…mixed. Sometimes the model would spit out something useful. Other times, it would get lost, hallucinate details, or just run out of steam halfway through. The more I tried to stuff into the prompt, the less reliable things became.</p>
 <p>Lately, there’s been talk of agentic AI - the idea that instead of treating your AI like a one-shot oracle, you break work into a series of smaller, specialized agents that each do one thing well. It’s a shift from monolithic prompts to modular, step-by-step workflows…similar to how software architecture moved from monoliths to microservices a few decades ago.</p>
-<div id="why-we-love-mega-prompts" class="section level3">
-<h3>Why We Love Mega-Prompts</h3>
+<div id="why-we-love-mega-prompts" class="section level2">
+<h2>Why We Love Mega-Prompts</h2>
 <p>There’s a certain appeal to the idea of a single, all-knowing prompt. It feels efficient—just tell the AI everything up front, and let it handle the rest. But in practice, it’s a bit like writing a master SQL query to handle all your analytics needs. Technically possible, but you probably won’t like the maintenance.</p>
 <p>The more complex the task, the more brittle the mega-prompt becomes. If something goes wrong, it’s hard to debug. If you want to tweak just one part, you’re back to editing a massive wall of text.</p>
 </div>
-<div id="the-micro-agent-approach" class="section level3">
-<h3>The Micro-Agent Approach</h3>
+<div id="the-micro-agent-approach" class="section level2">
+<h2>The Micro-Agent Approach</h2>
 <p>After too many disappointing outputs, I started breaking my workflows into smaller, focused steps. This is at the heart of what the industry calls agentic AI - setting up a chain of “micro-agents,” each responsible for a single, well-defined job.</p>
 <p>Using a product management example:</p>
 <ul>
@@ -29,13 +29,13 @@ categories:
 </ul>
 <p>Each micro-agent gets a clear input and produces a specific output. If something goes sideways, I know exactly where to look. If I want to swap out the analytics step for a different approach, I can do that without reworking the whole chain.</p>
 </div>
-<div id="what-changed" class="section level3">
-<h3>What Changed</h3>
+<div id="what-changed" class="section level2">
+<h2>What Changed</h2>
 <p>The biggest shift was in reliability. Smaller prompts are easier for the model to handle, and chaining them together gives me more control. It also feels closer to how I tackle things with my team: parse the problem, assign ownership, execute, review the results, and iterate.</p>
 <p>There’s also a nice side effect - this modular approach makes it easier to experiment. If I want to try a new method for clustering feedback, I can do that in isolation. If I want to automate just the analytics summary, I don’t need to rewrite everything else.</p>
 </div>
-<div id="lessons-learned" class="section level3">
-<h3>Lessons Learned</h3>
+<div id="lessons-learned" class="section level2">
+<h2>Lessons Learned</h2>
 <ul>
 <li><strong>Start with the workflow, not the prompt.</strong> Map out the steps you’d take manually, then assign each to a micro-agent.</li>
 <li><strong>Keep prompts focused and specific.</strong> The less ambiguity, the better the results.</li>
@@ -43,7 +43,7 @@ categories:
 <li><strong>Expect surprises.</strong> Sometimes the AI will connect dots you didn’t see. Sometimes it’ll just get confused. Both are useful feedback.</li>
 </ul>
 </div>
-<div id="final-thoughts" class="section level3">
-<h3>Final Thoughts</h3>
+<div id="final-thoughts" class="section level2">
+<h2>Final Thoughts</h2>
 <p>Moving from mega-prompts to micro-agents isn’t revolutionary, but it’s made my experiments with LLMs a lot more productive — and a little less mysterious. If you’re finding your agentic AI workflows getting unwieldy, try dividing and conquering. It’s not as flashy as the “one prompt to rule them all” method, but it’s a lot easier to live with.</p>
 </div>
