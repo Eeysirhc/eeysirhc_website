@@ -40,11 +40,11 @@ There’s also a nice side effect - this modular approach makes it easier to exp
 
 ## Lessons Learned
 
-- **Start with the workflow, not the prompt.** Map out the steps you’d take manually, then assign each to a micro-agent.
-- **Keep prompts focused and specific.** The less ambiguity, the better the results.
-- **Iterate on each step.** Don’t be afraid to tweak and test individual agents before chaining them together.
-- **Expect surprises.** Sometimes the AI will connect dots you didn’t see. Sometimes it’ll just get confused. Both are useful feedback.
+- Start with the workflow, not the prompt: map out the steps you’d take manually, then assign each to a micro-agent.
+- Keep prompts focused and specific: the less ambiguity, the better the results.
+- Iterate on each step: don't be afraid to tweak and test individual agents before chaining them together.
+- Expect surprises: sometimes the AI will connect dots you didn’t see. Sometimes it’ll just get confused. Both are useful feedback.
 
 ## Final Thoughts
 
-Moving from mega-prompts to micro-agents isn’t revolutionary, but it’s made my experiments with LLMs a lot more productive — and a little less mysterious. If you’re finding your agentic AI workflows getting unwieldy, try dividing and conquering. It’s not as flashy as the “one prompt to rule them all” method, but it’s a lot easier to live with.
+Moving from mega-prompts to micro-agents isn’t revolutionary, but its made my experiments with LLMs a lot more productive — and a little less mysterious. If you’re finding your agentic AI workflows getting unwieldy, try dividing and conquering. It’s not as flashy as the “one prompt to rule them all” approach, but it’s a lot easier to live with.
