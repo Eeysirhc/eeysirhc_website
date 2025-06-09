@@ -15,7 +15,7 @@ Lately, there’s been talk of agentic AI - the idea that instead of treating yo
 
 ## Why We Love Mega-Prompts
 
-There’s a certain appeal to the idea of a single, all-knowing prompt. It feels efficient—just tell the AI everything up front, and let it handle the rest. But in practice, it’s a bit like writing a master SQL query to handle all your analytics needs. Technically possible, but you probably won’t like the maintenance.
+There’s a certain appeal to the idea of a single, all-knowing prompt. It feels efficient - just tell the AI everything up front, and let it handle the rest. But in practice, it’s a bit like writing a master SQL query to handle all your analytics needs. Technically possible, but you probably won’t like the maintenance.
 
 The more complex the task, the more brittle the mega-prompt becomes. If something goes wrong, it’s hard to debug. If you want to tweak just one part, you’re back to editing a massive wall of text.
 
