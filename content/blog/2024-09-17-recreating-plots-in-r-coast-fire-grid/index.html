@@ -1,0 +1,103 @@
+---
+title: 'Recreating plots in R: Coast FIRE Grid'
+author: Christopher Yee
+date: '2025-06-10'
+slug: recreating-plots-in-r-coast-fire-grid
+categories:
+  - Data Visualization
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<p>The tl;dr about <a href="https://walletburst.com/coast-fire/">Coast FIRE</a>…</p>
+<blockquote>
+<p>Coast FIRE is when you have enough in your retirement accounts that without any additional contributions, your net worth will grow to support retirement at a traditional retirement age.</p>
+</blockquote>
+<p>I encourage everyone to read up on this very interesting personal finance concept!</p>
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<pre class="r"><code>library(tidyverse)
+library(scales)</code></pre>
+</div>
+<div id="coastfire-function" class="section level2">
+<h2>CoastFIRE function</h2>
+<pre class="r"><code>coastfire_calculator &lt;- function(retirement_spend, 
+                                 withdraw_rate, 
+                                 growth_rate, 
+                                 inflation_rate, 
+                                 retire_age, 
+                                 current_age){
+  df &lt;- (retirement_spend) / (withdraw_rate * (1+(growth_rate - inflation_rate))^(retire_age - current_age))
+  df
+}</code></pre>
+</div>
+<div id="formula-parameters" class="section level2">
+<h2>Formula parameters</h2>
+<p>Assumes 3.5% safe withdrawal rate, 8% growth, 3% inflation and retired at 67 years old.</p>
+<pre class="r"><code>coast_withdraw &lt;- 0.035
+coast_growth &lt;- 0.08
+coast_inflation &lt;- 0.03
+retire_age &lt;- 67</code></pre>
+</div>
+<div id="generate-dataset" class="section level2">
+<h2>Generate dataset</h2>
+<pre class="r"><code>coast_data &lt;- expand.grid(retirement_spending = seq(20000, 100000, 5000),
+            age = seq(20, 60, 2)) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(coast_fire = round(coastfire_calculator(retirement_spending, 
+                                                 coast_withdraw, 
+                                                 coast_growth, 
+                                                 coast_inflation, 
+                                                 retire_age, age) / 1000, digits = 0)) </code></pre>
+</div>
+<div id="label-data" class="section level2">
+<h2>Label data</h2>
+<pre class="r"><code>coast_final &lt;- coast_data %&gt;% 
+  mutate(segment = case_when(coast_fire &lt; 250 ~ &#39;0 to $250k&#39;, 
+                             coast_fire &gt;= 250 &amp; coast_fire &lt; 500 ~ &#39;$250k - $500k&#39;, 
+                             coast_fire &gt;= 500 &amp; coast_fire &lt; 750 ~ &#39;$500k - $750k&#39;,
+                             coast_fire &gt;= 750 &amp; coast_fire &lt; 1000 ~ &#39;$750k - $1M&#39;,
+                             coast_fire &gt;= 1000 &amp; coast_fire &lt; 1250 ~ &#39;$1M - $1.25M&#39;, 
+                             coast_fire &gt;= 1250 &amp; coast_fire &lt; 1500 ~ &#39;$1.25M - $1.5M&#39;, 
+                             coast_fire &gt;= 1500 ~ &#39;$1.5M+&#39;)) %&gt;% 
+  mutate(segment = as.factor(segment))</code></pre>
+</div>
+<div id="rearrange-factor-levels" class="section level2">
+<h2>Rearrange factor levels</h2>
+<pre class="r"><code>coast_final$segment &lt;- factor(coast_final$segment, 
+                              levels = c(&quot;0 to $250k&quot;, &quot;$250k - $500k&quot;, 
+                                         &quot;$500k - $750k&quot;, &quot;$750k - $1M&quot;, 
+                                         &quot;$1M - $1.25M&quot;, &quot;$1.25M - $1.5M&quot;, 
+                                         &quot;$1.5M+&quot;))</code></pre>
+</div>
+<div id="visualize-data" class="section level2">
+<h2>Visualize data</h2>
+<pre class="r"><code>coast_final %&gt;% 
+  ggplot(aes(age, retirement_spending, fill = segment, label = coast_fire)) + 
+  geom_tile(color = &#39;gray55&#39;) +
+  geom_text(color = &#39;black&#39;) + 
+  theme_bw() +
+  scale_fill_manual(values = c(&quot;darkolivegreen3&quot;, &quot;darkolivegreen2&quot;, &quot;yellow1&quot;, 
+                               &quot;orange1&quot;, &quot;darkorange1&quot;, &quot;tomato2&quot;, &quot;red3&quot;)) +
+  scale_x_continuous(breaks = coast_final$age) + 
+  scale_y_continuous(labels = dollar_format(),
+                     breaks = coast_final$retirement_spending) + 
+  labs(x = &quot;Age&quot;, y = &quot;Annual Spending in Retirement&quot;, fill = NULL) + 
+  theme_bw(base_size = 15) + 
+  theme(legend.position = &#39;none&#39;)</code></pre>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-7-1.png" width="1152" /></p>
+</div>
+<div id="alternative" class="section level2">
+<h2>Alternative</h2>
+<p>The original is a little more on the conservative side so let’s modify slightly with 4% safe withdrawl rate, 10% growth, 3% inflation and retire at 62 instead.</p>
+<p><img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-8-1.png" width="1152" /></p>
+</div>
+<div id="related" class="section level2">
+<h2>Related</h2>
+<ul>
+<li><a href="https://www.christopheryee.org/blog/recreating-plots-in-r-the-power-of-tiny-gains/">Recreating plots in R: the power of tiny gains</a></li>
+<li><a href="https://www.christopheryee.org/blog/recreating-plots-in-r-intro-to-bootstrapping/">Recreating plots in R: intro to bootstrapping</a></li>
+</ul>
+</div>
